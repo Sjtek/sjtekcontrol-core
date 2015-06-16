@@ -1,5 +1,6 @@
 package nl.sjtek.sjtekcontrol.data;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Response {
@@ -25,6 +26,10 @@ public class Response {
     }
 
     public void put(String key, JSONObject response) {
+        this.response.put(key, response);
+    }
+
+    public void put(String key, JSONArray response) {
         this.response.put(key, response);
     }
 

@@ -1,7 +1,5 @@
 package nl.sjtek.sjtekcontrol.handlers;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import nl.sjtek.sjtekcontrol.data.Response;
 import nl.sjtek.sjtekcontrol.utils.Speech;
 import org.bff.javampd.MPD;
@@ -11,11 +9,9 @@ import org.bff.javampd.exception.MPDPlaylistException;
 import org.bff.javampd.objects.MPDSong;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.UnknownHostException;
 
-public class MusicHandler implements HttpHandler {
+public class MusicHandler extends SjtekHandler {
 
     public static final String CONTEXT = "/api/music";
 
@@ -146,22 +142,5 @@ public class MusicHandler implements HttpHandler {
 
     private void volumeNeutral(boolean useVoice) throws MPDPlayerException {
         setVolume(20);
-    }
-
-    @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
-        String path[] = httpExchange.getRequestURI().getPath().split("/");
-        String query = httpExchange.getRequestURI().getQuery();
-        boolean useVoice = query != null && query.contains("voice");
-        System.out.println(httpExchange.getRemoteAddress().toString() + " | " +
-                httpExchange.getRequestURI().getPath() + " | Voice: " + useVoice);
-        System.out.print("    ");
-        execute(path, useVoice);
-        System.out.println(response.toString());
-        httpExchange.sendResponseHeaders(response.getCode(), response.toString().length());
-        OutputStream outputStream = httpExchange.getResponseBody();
-        outputStream.write(response.toString().getBytes());
-        outputStream.close();
-        System.out.println();
     }
 }
