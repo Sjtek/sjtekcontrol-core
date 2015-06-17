@@ -3,6 +3,8 @@ package nl.sjtek.sjtekcontrol.handlers;
 import nl.sjtek.sjtekcontrol.data.Response;
 import nl.sjtek.sjtekcontrol.utils.Speech;
 import org.bff.javampd.MPD;
+import org.bff.javampd.MPDPlayer;
+import org.bff.javampd.Player;
 import org.bff.javampd.exception.MPDConnectionException;
 import org.bff.javampd.exception.MPDPlayerException;
 import org.bff.javampd.exception.MPDPlaylistException;
@@ -63,43 +65,46 @@ public class MusicHandler extends SjtekHandler {
 
     private void play(boolean useVoice) throws MPDPlayerException {
         mpd.getPlayer().play();
+        addCurrentSong();
     }
 
     private void pause(boolean useVoice) throws MPDPlayerException {
         mpd.getPlayer().pause();
+        addCurrentSong();
     }
 
     private void stop(boolean useVoice) throws MPDPlayerException {
         mpd.getPlayer().stop();
+        addCurrentSong();
     }
 
     private void next(boolean useVoice) throws MPDPlayerException {
         mpd.getPlayer().playNext();
+        addCurrentSong();
     }
 
     private void previous(boolean useVoice) throws MPDPlayerException {
         mpd.getPlayer().playPrev();
+        addCurrentSong();
     }
 
     private void rewind(boolean useVoice) {
         response.setCode(404);
     }
 
-    private void shuffle(boolean useVoice) throws MPDPlaylistException {
+    private void shuffle(boolean useVoice) throws MPDPlaylistException, MPDPlayerException {
         mpd.getPlaylist().shuffle();
+        addCurrentSong();
     }
 
-    private void clear(boolean useVoice) throws MPDPlaylistException {
+    private void clear(boolean useVoice) throws MPDPlaylistException, MPDPlayerException {
         mpd.getPlaylist().clearPlaylist();
+        addCurrentSong();
     }
 
     private void current(boolean useVoice) throws MPDPlayerException {
-        JSONObject jsonObject = new JSONObject();
+        addCurrentSong();
         MPDSong song = mpd.getPlayer().getCurrentSong();
-        jsonObject.put("artist", song.getArtistName());
-        jsonObject.put("title", song.getTitle());
-        jsonObject.put("album", song.getAlbumName());
-        response.put("song", jsonObject);
         if (useVoice)
             Speech.speechAsync("The current playing song is " + song.getTitle() + " by " + song.getArtistName() + ".");
     }
@@ -111,13 +116,12 @@ public class MusicHandler extends SjtekHandler {
 
     private void setVolume(int value) throws MPDPlayerException {
         mpd.getPlayer().setVolume(value);
+        addVolume();
     }
 
     private int getVolume(boolean useVoice) throws MPDPlayerException {
         int volume = mpd.getPlayer().getVolume();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("music", volume);
-        response.put("volume", jsonObject);
+        addVolume();
         if (useVoice) Speech.speechAsync("The volume of the music is" + volume + "%.");
         return volume;
     }
@@ -126,21 +130,32 @@ public class MusicHandler extends SjtekHandler {
         int newVolume = mpd.getPlayer().getVolume() - 3;
         if (newVolume < 0) newVolume = 0;
         setVolume(newVolume);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("music", newVolume);
-        response.put("volume", jsonObject);
     }
 
     private void volumeRaise(boolean useVoice) throws MPDPlayerException {
         int newVolume = mpd.getPlayer().getVolume() + 3;
         if (newVolume > 100) newVolume = 100;
         setVolume(newVolume);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("music", newVolume);
-        response.put("volume", jsonObject);
     }
 
     private void volumeNeutral(boolean useVoice) throws MPDPlayerException {
         setVolume(20);
+    }
+
+    private void addCurrentSong() throws MPDPlayerException {
+        JSONObject jsonObject = new JSONObject();
+        Player player = mpd.getPlayer();
+        MPDSong song = player.getCurrentSong();
+        jsonObject.put("artist", song.getArtistName());
+        jsonObject.put("title", song.getTitle());
+        jsonObject.put("album", song.getAlbumName());
+        response.put("song", jsonObject);
+    }
+
+    private void addVolume() throws MPDPlayerException {
+        int volume = mpd.getPlayer().getVolume();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("music", volume);
+        response.put("volume", jsonObject);
     }
 }

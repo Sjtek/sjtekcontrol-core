@@ -90,15 +90,12 @@ public class LightsHandler extends SjtekHandler {
     }
 
     private void addStates() {
-        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
 
-        for (int i = 1; i < 3; i++) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("unit", i);
-            jsonObject.put("state", states[i]);
-            jsonArray.put(jsonObject);
+        for (int i = 1; i <= 3; i++) {
+            jsonObject.put(String.valueOf(i), states[i]);
         }
 
-        response.put("lights", jsonArray);
+        response.put("lights", jsonObject);
     }
 }

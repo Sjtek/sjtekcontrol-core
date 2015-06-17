@@ -5,7 +5,7 @@ import org.json.JSONObject;
 
 public class Response {
 
-    private int code;
+    private int code = 200;
     private JSONObject response;
 
     public Response() {

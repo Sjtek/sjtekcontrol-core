@@ -28,7 +28,7 @@ public class SjtekHandler implements HttpHandler {
         System.out.print("    ");
         Response response = execute(path, useVoice);
         System.out.println(response.toString());
-        httpExchange.sendResponseHeaders(response.getCode(), response.toString().length());
+        httpExchange.sendResponseHeaders(response.getCode(), response.toString().getBytes().length);
         OutputStream outputStream = httpExchange.getResponseBody();
         outputStream.write(response.toString().getBytes());
         outputStream.close();
