@@ -16,7 +16,7 @@ public class LightsHandler extends SjtekHandler {
 
     private Response response;
 
-    private boolean[] states = {false, false, false, false};
+    private static boolean[] states = {false, false, false, false};
 
     public LightsHandler() {
     }
@@ -34,7 +34,9 @@ public class LightsHandler extends SjtekHandler {
             } else if ("on".equals(path[3])) {
                 parse("on", 1, useVoice);
                 parse("on", 2, useVoice);
-            } else {
+            } else if ("info".equals(path[3])) {
+                addStates();
+            }  else {
                 response.setCode(404);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -80,11 +82,11 @@ public class LightsHandler extends SjtekHandler {
                 String piResponse = stringBuffer.toString();
             } else {
                 response.setCode(500);
-                response.put("error", "Error while communicating with the Pi. It's response code was: " + responseCode);
+                response.setError("Error while communicating with the Pi. It's response code was: " + responseCode);
             }
         } catch (IOException e) {
             response.setCode(500);
-            response.put("error", e.getMessage());
+            response.setError(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -96,6 +98,10 @@ public class LightsHandler extends SjtekHandler {
             jsonObject.put(String.valueOf(i), states[i]);
         }
 
-        response.put("lights", jsonObject);
+        response.setLights(jsonObject);
+    }
+
+    public static boolean[] getStates() {
+        return states;
     }
 }
