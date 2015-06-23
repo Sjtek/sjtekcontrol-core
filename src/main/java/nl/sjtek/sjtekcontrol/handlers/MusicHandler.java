@@ -112,7 +112,6 @@ public class MusicHandler extends SjtekHandler {
     }
 
     private void start(boolean useVoice) throws MPDPlaylistException, MPDPlayerException {
-        if (useVoice) Speech.speechAsync("Starting the best playlist in the world.");
         clear(false);
         volumeNeutral(false);
         try {
