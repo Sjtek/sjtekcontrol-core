@@ -8,9 +8,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-/**
- * Created by wouter on 13-6-15.
- */
 public class Speech {
 
     private static final String TEXT_TO_SPEECH_SERVICE =
@@ -18,6 +15,8 @@ public class Speech {
     private static final String USER_AGENT =
             "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:11.0) " +
                     "Gecko/20100101 Firefox/11.0";
+
+    private Speech() { }
 
     public static void main(String[] args) throws Exception {
         speech("How do you do Samantha?");
