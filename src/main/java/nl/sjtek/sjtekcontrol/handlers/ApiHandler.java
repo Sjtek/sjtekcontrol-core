@@ -29,15 +29,25 @@ public class ApiHandler implements HttpHandler {
     private int responseCode = 0;
 
     public ApiHandler() {
+        System.out.print("Loading module");
+        System.out.print(" music");
         try {
             this.music = new Music();
         } catch (UnknownHostException | MPDConnectionException e) {
             e.printStackTrace();
             this.music = null;
         }
+        System.out.print(", lights");
         this.lights = new Lights();
+        System.out.print(", temperature");
         this.temperature = new Temperature();
+        System.out.print(",  tv");
         this.tv = new TV();
+
+        if (music == null) {
+            System.out.println("\nIn error state: music");
+        }
+        System.out.println();
     }
 
     @Override
