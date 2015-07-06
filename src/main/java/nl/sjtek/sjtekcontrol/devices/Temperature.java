@@ -1,33 +1,33 @@
 package nl.sjtek.sjtekcontrol.devices;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
 
 public class Temperature {
 
+    private static final int DELAY = 300000;
+    private static final String WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?id=2747010";
+
     private Thread updateThread;
-    private Date lastUpdate = new Date();
-    private int temperature = 0;
+    private int tempInside = 0;
+    private int tempOutside = 0;
 
     public Temperature() {
         this.updateThread = new Thread(new UpdateThread());
         this.updateThread.start();
     }
 
-    public int getTemperature() {
-        return temperature;
-    }
-
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
-
     @Override
     public String toString() {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("temperature", temperature);
-        jsonObject.put("lastUpdate", lastUpdate.toString());
+        jsonObject.put("inside", tempInside);
+        jsonObject.put("outside", tempOutside);
         return jsonObject.toString();
     }
 
@@ -35,13 +35,50 @@ public class Temperature {
 
         @Override
         public void run() {
-            //TODO Update
-            try {
-                Thread.sleep(30000);
-            } catch (InterruptedException ignored) { }
+            while (true) {
+                try {
+                    Thread.sleep(DELAY);
+                } catch (InterruptedException ignored) { }
 
-            lastUpdate = new Date();
-            temperature = 0;
+                String response = download();
+                if (!response.isEmpty()) {
+                    try {
+                        tempOutside = parseTemp(response);
+                        continue;
+                    } catch (JSONException ignored) { }
+                }
+                tempInside = -100;
+                tempOutside = -100;
+            }
         }
+    }
+
+    private String download() {
+        try {
+            URL url = new URL(WEATHER_URL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                InputStream inputStream = connection.getInputStream();
+                StringBuilder stringBuffer = new StringBuilder();
+                int character;
+                while ((character = inputStream.read()) != -1) {
+                    stringBuffer.append((char)character);
+                }
+
+               return new String(stringBuffer);
+            } else {
+                return "";
+            }
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
+    private int parseTemp(String response) throws JSONException {
+        float temp = new JSONObject(response).getJSONObject("main").getLong("temp");
+        return (int) (temp - 273);
     }
 }
