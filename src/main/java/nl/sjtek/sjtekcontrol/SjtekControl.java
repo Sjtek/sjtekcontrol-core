@@ -13,17 +13,20 @@ public class SjtekControl {
     private ApiHandler apiHandler;
 
     public SjtekControl() {
-        System.out.println("Starting SjtekControl.");
+        System.out.println("Starting SjtekControl");
+        System.out.println("Starting SjtekServe");
         this.rootHandler = new RootHandler();
+        System.out.println("Starting SjtekAPI");
         this.apiHandler = new ApiHandler();
     }
 
     public void start() throws IOException {
+        System.out.print("Starting server... ");
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
         server.createContext(ApiHandler.CONTEXT, apiHandler);
         server.createContext(RootHandler.CONTEXT, rootHandler);
         server.setExecutor(null);
-        System.out.println("Listening on port 8000.");
+        System.out.println("on port 8000");
         server.start();
     }
 
