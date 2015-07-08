@@ -279,6 +279,8 @@ public class Music {
             jsonSong.put("artist", "");
             jsonSong.put("title", "");
             jsonSong.put("album", "");
+            jsonSong.put("total", 0);
+            jsonSong.put("elapsed", 0);
         }
 
         return jsonSong;
