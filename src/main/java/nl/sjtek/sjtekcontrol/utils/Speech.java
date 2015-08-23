@@ -11,7 +11,7 @@ import java.net.URLEncoder;
 public class Speech {
 
     private static final String TEXT_TO_SPEECH_SERVICE =
-            "http://translate.google.com/translate_tts";
+            "https://api.voicerss.org/?key=6ae73efdcce24344acc26e157f526bea?hl=en-gb?src=";
     private static final String USER_AGENT =
             "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:11.0) " +
                     "Gecko/20100101 Firefox/11.0";
@@ -19,12 +19,11 @@ public class Speech {
     private Speech() { }
 
     public static void main(String[] args) throws Exception {
-        speech("How do you do Samantha?");
+        speech("Tijn. You just lost the game.");
     }
 
     private static void download(String text, File output) throws IOException {
-        String strUrl = TEXT_TO_SPEECH_SERVICE + "?" +
-                "tl=" + "EN" + "&q=" + text;
+        String strUrl = TEXT_TO_SPEECH_SERVICE + text;
         URL url = new URL(strUrl);
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
