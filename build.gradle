@@ -31,6 +31,7 @@ dependencies {
     compile 'com.googlecode.soundlibs:jlayer:1.0.1-1'
     compile 'net.thejavashop:javampd:5.0.3'
     compile 'org.json:json:20141113'
+    compile 'org.apache.httpcomponents:httpclient:4.5'
 }
 
 mainClassName = 'nl.sjtek.sjtekcontrol.SjtekControl'
