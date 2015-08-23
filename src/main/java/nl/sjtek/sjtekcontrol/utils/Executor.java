@@ -3,6 +3,7 @@ package nl.sjtek.sjtekcontrol.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 
 public class Executor {
 
@@ -13,7 +14,8 @@ public class Executor {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static String execute(String command) throws IOException, InterruptedException {
+    public static String execute(String[] command) throws IOException, InterruptedException {
+        System.out.println("Executing: " + Arrays.toString(command));
         StringBuffer output = new StringBuffer();
 
         Process process;
@@ -29,5 +31,9 @@ public class Executor {
         }
 
         return output.toString();
+    }
+
+    public static String execute(String command) throws IOException, InterruptedException {
+        return execute(new String[]{command});
     }
 }

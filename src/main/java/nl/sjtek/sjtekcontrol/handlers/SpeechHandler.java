@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import nl.sjtek.sjtekcontrol.data.Arguments;
 import nl.sjtek.sjtekcontrol.utils.Page;
+import nl.sjtek.sjtekcontrol.utils.Speech;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,7 +29,7 @@ public class SpeechHandler implements HttpHandler {
         String response = "{ }";
 
         if (fullPath.equals(CONTEXT) && arguments.getText() != null && !arguments.getText().isEmpty()) {
-//            Speech.speech(arguments.getText());
+            Speech.speek(arguments.getText());
         } else {
             responseCode = 404;
             response = Page.getPage(responseCode);
