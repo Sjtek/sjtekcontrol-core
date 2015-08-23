@@ -20,8 +20,8 @@ public class Music {
     public static final String MPD_HOST = "192.168.0.64";
     public static final int MPD_PORT = 6600;
     public static final int VOLUME_STEP_UP = 3;
-    public static final int VOLUME_STEP_DOWN = -3;
-    public static final int VOLUME_NEUTRAL = 20;
+    public static final int VOLUME_STEP_DOWN = 3;
+    public static final int VOLUME_NEUTRAL = 10;
     public static final String MPC_COMMAND = "/usr/bin/mpc -h " + MPD_HOST + " ";
 
     private MPD mpd = null;
