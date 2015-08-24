@@ -108,7 +108,11 @@ public class Music {
      */
     public void stop(Arguments arguments) {
         try {
-            mpd.getPlayer().stop();
+            if (mpd.getPlayer().getStatus() != Player.Status.STATUS_STOPPED) {
+                mpd.getPlayer().stop();
+            } else {
+                clear(new Arguments());
+            }
         } catch (MPDPlayerException ignored) {
         }
     }
