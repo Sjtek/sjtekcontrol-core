@@ -29,11 +29,28 @@ public class Executor {
         while ((line = reader.readLine()) != null) {
             output.append(line + "\n");
         }
-
+        System.out.println("Exit code: " + exitValue);
+        System.out.println(output.toString());
         return output.toString();
     }
 
     public static String execute(String command) throws IOException, InterruptedException {
-        return execute(new String[]{command});
+        System.out.println("Executing: " + command);
+        StringBuffer output = new StringBuffer();
+
+        Process process;
+        process = Runtime.getRuntime().exec(command);
+        process.waitFor();
+        int exitValue = process.exitValue();
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+        String line = "";
+        while ((line = reader.readLine()) != null) {
+            output.append(line + "\n");
+        }
+        System.out.println("Exit code: " + exitValue);
+        System.out.println(output.toString());
+        return output.toString();
     }
 }

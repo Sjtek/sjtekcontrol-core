@@ -22,7 +22,7 @@ public class Music {
     public static final int VOLUME_STEP_UP = 3;
     public static final int VOLUME_STEP_DOWN = 3;
     public static final int VOLUME_NEUTRAL = 10;
-    public static final String MPC_COMMAND = "/usr/bin/mpc -h " + MPD_HOST + " ";
+    public static final String MPC_COMMAND = "/usr/bin/mpc";
 
     private MPD mpd = null;
 
@@ -58,6 +58,10 @@ public class Music {
         }
     }
 
+    public void rave(Arguments arguments) {
+        play(new Arguments("url=spotify:track:3QKv87XsylJWvTCzssDvnr"));
+    }
+
     /**
      * Toggle player to PLAY.<br>
      * If an URL is specified it will insert this after the current playing song and start it.
@@ -68,7 +72,10 @@ public class Music {
         String url = arguments.getUrl();
         if (url != null) {
             try {
-                Executor.execute(MPC_COMMAND + "insert " + (arguments.getStreamType() == Arguments.StreamType.YouTube ? "yt:" : "") + url);
+                String command =
+                        MPC_COMMAND + " -h " + MPD_HOST + " insert " +
+                                (arguments.getStreamType() == Arguments.StreamType.YouTube ? "yt:" : "") + url;
+                Executor.execute(command);
                 mpd.getPlayer().playNext();
                 mpd.getPlayer().play();
             } catch (IOException | InterruptedException | MPDPlayerException e) {
