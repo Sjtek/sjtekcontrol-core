@@ -3,11 +3,8 @@ package nl.sjtek.sjtekcontrol.handlers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import nl.sjtek.sjtekcontrol.data.Arguments;
-import nl.sjtek.sjtekcontrol.devices.Lights;
-import nl.sjtek.sjtekcontrol.devices.Music;
-import nl.sjtek.sjtekcontrol.devices.TV;
-import nl.sjtek.sjtekcontrol.devices.Temperature;
 import nl.sjtek.sjtekcontrol.data.JsonResponse;
+import nl.sjtek.sjtekcontrol.devices.*;
 import nl.sjtek.sjtekcontrol.utils.Page;
 import org.bff.javampd.exception.MPDConnectionException;
 
@@ -17,7 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.UnknownHostException;
 
-public class ApiHandler implements HttpHandler {
+public class ApiHandler implements HttpHandler, ArduinoEvent {
 
     public static final String CONTEXT = "/api";
 
@@ -25,6 +22,7 @@ public class ApiHandler implements HttpHandler {
     private Lights lights;
     private Temperature temperature;
     private TV tv;
+    private Arduino arduino;
 
     private int responseCode = 0;
 
@@ -43,6 +41,9 @@ public class ApiHandler implements HttpHandler {
         this.temperature = new Temperature();
         System.out.print(",  tv");
         this.tv = new TV();
+        System.out.print(", arduino");
+        this.arduino = new Arduino(this);
+        this.arduino.initialize();
 
         if (music == null) {
             System.out.println("\nIn error state: music");
@@ -68,16 +69,7 @@ public class ApiHandler implements HttpHandler {
                 if (classString.equals("info")) {
                     responseCode = 200;
                 } else if (classString.equals("switch")) {
-                    Arguments dummyArguments = new Arguments();
-                    if (!music.isPlaying() && !lights.isOn()) {
-//                        music.start(dummyArguments);
-                        lights.toggle1on(dummyArguments);
-                        lights.toggle2on(dummyArguments);
-                    } else {
-                        music.pause(dummyArguments);
-                        lights.toggle1off(dummyArguments);
-                        lights.toggle2off(dummyArguments);
-                    }
+                    masterToggle(arguments);
                     responseCode = 200;
                 } else {
                     String methodString = splittedPath[3];
@@ -143,6 +135,34 @@ public class ApiHandler implements HttpHandler {
             } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
                 responseCode = 404;
             }
+        }
+    }
+
+    private synchronized void masterToggle(Arguments arguments) {
+        Arguments dummyArguments = new Arguments();
+        if (!music.isPlaying() && !lights.isOn()) {
+//            music.start(dummyArguments);
+            lights.toggle1on(dummyArguments);
+            lights.toggle2on(dummyArguments);
+        } else {
+            music.pause(dummyArguments);
+            lights.toggle1off(dummyArguments);
+            lights.toggle2off(dummyArguments);
+        }
+    }
+
+    @Override
+    public synchronized void temperatureUpdate(float temperature) {
+        this.temperature.setTempInside(temperature);
+    }
+
+    @Override
+    public synchronized void buttonUpdate(Arduino.Button button) {
+        System.out.println("Pressed button: " + button);
+        if (button == Arduino.Button.Button1) {
+            masterToggle(new Arguments());
+        } else if (button == Arduino.Button.Button2) {
+            masterToggle(new Arguments());
         }
     }
 }

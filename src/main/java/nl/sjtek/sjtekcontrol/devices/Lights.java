@@ -99,7 +99,7 @@ public class Lights {
         }
     }
 
-    private int action(String action) {
+    private synchronized int action(String action) {
         try {
             URL url = new URL(ROOT_URL + action);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();

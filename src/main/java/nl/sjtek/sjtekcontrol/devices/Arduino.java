@@ -11,8 +11,18 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Enumeration;
 
-
 public class Arduino implements SerialPortEventListener {
+    private ArduinoEvent arduinoEventListener;
+    private long previousButtonTime = 0;
+
+    public Arduino() {
+        this.arduinoEventListener = null;
+    }
+
+    public Arduino(ArduinoEvent arduinoEventListener) {
+        this.arduinoEventListener = arduinoEventListener;
+    }
+
     SerialPort serialPort;
     /**
      * The port we're normally going to use.
@@ -115,12 +125,27 @@ public class Arduino implements SerialPortEventListener {
         if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
             try {
                 String inputLine = input.readLine();
-                System.out.println(inputLine);
+                parseInput(inputLine);
             } catch (Exception e) {
                 System.err.println(e.toString());
             }
         }
         // Ignore all the other eventTypes, but you should consider the other ones.
+    }
+
+
+    private void parseInput(String input) {
+        if (arduinoEventListener != null) {
+            if (input.startsWith("T:")) {
+                arduinoEventListener.temperatureUpdate(Float.parseFloat(input.substring(2)));
+            } else if (input.startsWith("R:")) {
+                int button = Integer.parseInt(input.substring(2));
+                if (button == 1) arduinoEventListener.buttonUpdate(Button.Button1);
+                if (button == 2) arduinoEventListener.buttonUpdate(Button.Button2);
+            }
+        } else {
+            System.out.println(input);
+        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -141,5 +166,10 @@ public class Arduino implements SerialPortEventListener {
         };
         t.start();
         System.out.println("Started");
+    }
+
+    public enum Button {
+        Button1,
+        Button2
     }
 }

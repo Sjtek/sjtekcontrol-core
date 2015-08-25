@@ -15,12 +15,16 @@ public class Temperature {
     private static final String WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?id=2747010";
 
     private Thread updateThread;
-    private int tempInside = 0;
+    private float tempInside = 0;
     private int tempOutside = 0;
 
     public Temperature() {
         this.updateThread = new Thread(new UpdateThread());
         this.updateThread.start();
+    }
+
+    public void setTempInside(float tempInside) {
+        this.tempInside = tempInside;
     }
 
     @Override
@@ -36,10 +40,6 @@ public class Temperature {
         @Override
         public void run() {
             while (true) {
-                try {
-                    Thread.sleep(DELAY);
-                } catch (InterruptedException ignored) { }
-
                 String response = download();
                 if (!response.isEmpty()) {
                     try {
@@ -47,8 +47,11 @@ public class Temperature {
                         continue;
                     } catch (JSONException ignored) { }
                 }
-                tempInside = -100;
                 tempOutside = -100;
+
+                try {
+                    Thread.sleep(DELAY);
+                } catch (InterruptedException ignored) { }
             }
         }
     }
