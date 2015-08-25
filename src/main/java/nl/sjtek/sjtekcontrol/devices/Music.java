@@ -1,6 +1,7 @@
 package nl.sjtek.sjtekcontrol.devices;
 
 import nl.sjtek.sjtekcontrol.data.Arguments;
+import nl.sjtek.sjtekcontrol.utils.Executor;
 import org.bff.javampd.MPD;
 import org.bff.javampd.MPDFile;
 import org.bff.javampd.Player;
@@ -10,6 +11,7 @@ import org.bff.javampd.exception.MPDPlaylistException;
 import org.bff.javampd.objects.MPDSong;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 
 
@@ -18,8 +20,9 @@ public class Music {
     public static final String MPD_HOST = "192.168.0.64";
     public static final int MPD_PORT = 6600;
     public static final int VOLUME_STEP_UP = 3;
-    public static final int VOLUME_STEP_DOWN = -3;
-    public static final int VOLUME_NEUTRAL = 20;
+    public static final int VOLUME_STEP_DOWN = 3;
+    public static final int VOLUME_NEUTRAL = 10;
+    public static final String MPC_COMMAND = "/usr/bin/mpc -h " + MPD_HOST + " ";
 
     private MPD mpd = null;
 
@@ -56,15 +59,28 @@ public class Music {
     }
 
     /**
-     * Toggle player to PLAY.
+     * Toggle player to PLAY.<br>
+     * If an URL is specified it will insert this after the current playing song and start it.
      *
-     * @param arguments
+     * @param arguments Uses URL
      */
     public void play(Arguments arguments) {
-        try {
-            mpd.getPlayer().play();
-        } catch (MPDPlayerException ignored) {
+        String url = arguments.getUrl();
+        if (url != null) {
+            try {
+                Executor.execute(MPC_COMMAND + "insert " + (arguments.getStreamType() == Arguments.StreamType.YouTube ? "yt:" : "") + url);
+                mpd.getPlayer().playNext();
+                mpd.getPlayer().play();
+            } catch (IOException | InterruptedException | MPDPlayerException e) {
+                e.printStackTrace();
+            }
+        } else {
 
+            try {
+                mpd.getPlayer().play();
+            } catch (MPDPlayerException ignored) {
+
+            }
         }
     }
 
@@ -92,7 +108,11 @@ public class Music {
      */
     public void stop(Arguments arguments) {
         try {
-            mpd.getPlayer().stop();
+            if (mpd.getPlayer().getStatus() != Player.Status.STATUS_STOPPED) {
+                mpd.getPlayer().stop();
+            } else {
+                clear(new Arguments());
+            }
         } catch (MPDPlayerException ignored) {
         }
     }
@@ -247,6 +267,7 @@ public class Music {
             return false;
         }
     }
+
     private Player.Status getPlayerState() {
         try {
             return mpd.getPlayer().getStatus();

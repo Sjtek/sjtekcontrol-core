@@ -80,7 +80,7 @@ public class Lights {
     }
 
     public void toggle3(Arguments arguments) {
-        if (states[2]) {
+        if (states[3]) {
             toggle3off(arguments);
         } else {
             toggle3on(arguments);

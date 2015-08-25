@@ -70,7 +70,7 @@ public class ApiHandler implements HttpHandler {
                 } else if (classString.equals("switch")) {
                     Arguments dummyArguments = new Arguments();
                     if (!music.isPlaying() && !lights.isOn()) {
-                        music.start(dummyArguments);
+//                        music.start(dummyArguments);
                         lights.toggle1on(dummyArguments);
                         lights.toggle2on(dummyArguments);
                     } else {
