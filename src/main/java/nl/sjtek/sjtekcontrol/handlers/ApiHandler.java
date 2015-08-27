@@ -158,11 +158,14 @@ public class ApiHandler implements HttpHandler, ArduinoEvent {
 
     @Override
     public synchronized void buttonUpdate(Arduino.Button button) {
-        System.out.println("Pressed button: " + button);
-        if (button == Arduino.Button.Button1) {
-            masterToggle(new Arguments());
-        } else if (button == Arduino.Button.Button2) {
-            masterToggle(new Arguments());
-        }
+        new Thread(() -> {
+            System.out.println("Pressed button: " + button);
+            if (button == Arduino.Button.Button1) {
+                masterToggle(new Arguments());
+            } else if (button == Arduino.Button.Button2) {
+                music.volumeneutral(new Arguments());
+                music.play(new Arguments("url=spotify:user:1133212423:playlist:5SVPJUsErNknfYqlQHAQU0"));
+            }
+        }).start();
     }
 }
