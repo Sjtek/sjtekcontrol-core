@@ -5,6 +5,7 @@ import nl.sjtek.sjtekcontrol.utils.Executor;
 import org.bff.javampd.MPD;
 import org.bff.javampd.MPDFile;
 import org.bff.javampd.Player;
+import org.bff.javampd.events.*;
 import org.bff.javampd.exception.MPDConnectionException;
 import org.bff.javampd.exception.MPDPlayerException;
 import org.bff.javampd.exception.MPDPlaylistException;
@@ -15,7 +16,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 
-public class Music {
+public class Music implements TrackPositionChangeListener, PlayerChangeListener, VolumeChangeListener {
 
     public static final String MPD_HOST = "192.168.0.64";
     public static final int MPD_PORT = 6600;
@@ -25,6 +26,7 @@ public class Music {
     public static final String MPC_COMMAND = "/usr/bin/mpc";
 
     private MPD mpd = null;
+    private MusicState musicState;
 
     /**
      * Connect to an MPD server on {@link #MPD_HOST} with port {@link #MPD_PORT}.
@@ -283,51 +285,101 @@ public class Music {
         }
     }
 
-    private JSONObject getCurrentSong() {
-        JSONObject jsonSong = new JSONObject();
-
-        if (getPlayerState() != Player.Status.STATUS_PLAYING && getPlayerState() != Player.Status.STATUS_PAUSED) {
-            jsonSong = null;
-        } else {
-            try {
-                Player player = mpd.getPlayer();
-                MPDSong song = player.getCurrentSong();
-                jsonSong.put("artist", song.getArtistName());
-                jsonSong.put("album", song.getAlbumName());
-                jsonSong.put("title", song.getName());
-                jsonSong.put("total", player.getTotalTime());
-                jsonSong.put("elapsed", player.getElapsedTime());
-            } catch (MPDPlayerException e) {
-                jsonSong = null;
-            }
-        }
-
-        if (jsonSong == null) {
-            jsonSong = new JSONObject();
-            jsonSong.put("artist", "");
-            jsonSong.put("title", "");
-            jsonSong.put("album", "");
-            jsonSong.put("total", 0);
-            jsonSong.put("elapsed", 0);
-        }
-
-        return jsonSong;
+    @Override
+    public String toString() {
+        return musicState.toString();
     }
 
-    private int getVolume() {
+    @Override
+    public void playerChanged(PlayerChangeEvent event) {
         try {
-            return mpd.getPlayer().getVolume();
+            Player player = mpd.getPlayer();
+            MPDSong song = player.getCurrentSong();
+            Player.Status status = player.getStatus();
+            if (status != Player.Status.STATUS_PLAYING || status != Player.Status.STATUS_PAUSED) {
+                song = null;
+            }
+            if (song != null) {
+                musicState.setArtist(song.getArtistName());
+                musicState.setAlbum(song.getAlbumName());
+                musicState.setTitle(song.getName());
+                musicState.setTimeTotal(player.getTotalTime());
+                musicState.setStatus(status);
+            } else {
+                musicState.setArtist("");
+                musicState.setAlbum("");
+                musicState.setTitle("");
+                musicState.setTimeTotal(0);
+                musicState.setStatus(status);
+            }
         } catch (MPDPlayerException e) {
-            return 0;
+            e.printStackTrace();
         }
     }
 
     @Override
-    public String toString() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("state", (getPlayerState() == null ? "ERROR" : getPlayerState().toString()));
-        jsonObject.put("song", getCurrentSong());
-        jsonObject.put("volume", getVolume());
-        return jsonObject.toString();
+    public void trackPositionChanged(TrackPositionChangeEvent event) {
+        musicState.setTimeElapsed(event.getElapsedTime());
+    }
+
+    @Override
+    public void volumeChanged(VolumeChangeEvent event) {
+        musicState.setVolume(event.getVolume());
+    }
+
+    public MusicState getMusicState() {
+        return musicState;
+    }
+
+    public class MusicState {
+        private String artist, title, album;
+        private long timeTotal, timeElapsed;
+        private int volume;
+        private Player.Status status;
+
+        public void setArtist(String artist) {
+            this.artist = artist;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public void setAlbum(String album) {
+            this.album = album;
+        }
+
+        public void setTimeTotal(long timeTotal) {
+            this.timeTotal = timeTotal;
+        }
+
+        public void setTimeElapsed(long timeElapsed) {
+            this.timeElapsed = timeElapsed;
+        }
+
+        public void setVolume(int volume) {
+            this.volume = volume;
+        }
+
+        public void setStatus(Player.Status status) {
+            this.status = status;
+        }
+
+        @Override
+        public String toString() {
+            JSONObject jsonSong = new JSONObject();
+            jsonSong.put("artist", artist);
+            jsonSong.put("title", title);
+            jsonSong.put("album", album);
+            jsonSong.put("total", timeTotal);
+            jsonSong.put("elapsed", timeElapsed);
+
+            JSONObject jsonMusic = new JSONObject();
+            jsonMusic.put("song", jsonMusic);
+            jsonMusic.put("volume", volume);
+            jsonMusic.put("state", (status == null ? "ERROR" : status.toString()));
+
+            return jsonMusic.toString();
+        }
     }
 }
