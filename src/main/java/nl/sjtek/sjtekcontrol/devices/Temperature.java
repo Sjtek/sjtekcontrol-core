@@ -16,7 +16,7 @@ public class Temperature {
 
     private Thread updateThread;
     private float tempInside = 0;
-    private int tempOutside = 0;
+    private int tempOutside = -100;
 
     public Temperature() {
         this.updateThread = new Thread(new UpdateThread());
@@ -44,10 +44,12 @@ public class Temperature {
                 if (!response.isEmpty()) {
                     try {
                         tempOutside = parseTemp(response);
-                        continue;
-                    } catch (JSONException ignored) { }
+                    } catch (JSONException e) {
+                        tempOutside = -101;
+                    }
+                } else {
+                    tempOutside = -102;
                 }
-                tempOutside = -100;
 
                 try {
                     Thread.sleep(DELAY);
