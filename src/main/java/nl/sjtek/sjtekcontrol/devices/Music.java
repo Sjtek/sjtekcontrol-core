@@ -1,10 +1,11 @@
 package nl.sjtek.sjtekcontrol.devices;
 
 import nl.sjtek.sjtekcontrol.data.Arguments;
-import nl.sjtek.sjtekcontrol.utils.Executor;
+import nl.sjtek.sjtekcontrol.data.Settings;
 import org.bff.javampd.MPD;
 import org.bff.javampd.MPDFile;
 import org.bff.javampd.Player;
+import org.bff.javampd.StandAloneMonitor;
 import org.bff.javampd.events.*;
 import org.bff.javampd.exception.MPDConnectionException;
 import org.bff.javampd.exception.MPDPlayerException;
@@ -12,39 +13,38 @@ import org.bff.javampd.exception.MPDPlaylistException;
 import org.bff.javampd.objects.MPDSong;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 
 
-public class Music implements TrackPositionChangeListener, PlayerChangeListener, VolumeChangeListener {
-
-    public static final String MPD_HOST = "192.168.0.64";
-    public static final int MPD_PORT = 6600;
-    public static final int VOLUME_STEP_UP = 3;
-    public static final int VOLUME_STEP_DOWN = 3;
-    public static final int VOLUME_NEUTRAL = 10;
-    public static final String MPC_COMMAND = "/usr/bin/mpc";
+@SuppressWarnings({"UnusedParameters", "unused"})
+public class Music implements TrackPositionChangeListener, VolumeChangeListener, PlayerBasicChangeListener {
 
     private MPD mpd = null;
-    private MusicState musicState;
+    private MusicState musicState = new MusicState();
 
     /**
-     * Connect to an MPD server on {@link #MPD_HOST} with port {@link #MPD_PORT}.
+     * Connect to an MPD server on an host with port port.
      *
      * @throws UnknownHostException
      * @throws MPDConnectionException
      */
     public Music() throws UnknownHostException, MPDConnectionException {
         MPD.Builder builder = new MPD.Builder();
-        builder.server(MPD_HOST);
-        builder.port(MPD_PORT);
+        builder.server(Settings.getInstance().getMpdHost());
+        builder.port(Settings.getInstance().getMpdPort());
         mpd = builder.build();
+
+        StandAloneMonitor monitor = mpd.getMonitor();
+        monitor.addVolumeChangeListener(this);
+        monitor.addPlayerChangeListener(this);
+        monitor.addTrackPositionChangeListener(this);
+        monitor.start();
     }
 
     /**
      * Toggle player from PLAY to PAUSE or PAUSE to PLAY or STOPPED to PLAY.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void toggle(Arguments arguments) {
         try {
@@ -60,10 +60,6 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
         }
     }
 
-    public void rave(Arguments arguments) {
-        play(new Arguments("url=spotify:track:3QKv87XsylJWvTCzssDvnr"));
-    }
-
     /**
      * Toggle player to PLAY.<br>
      * If an URL is specified it will insert this after the current playing song and start it.
@@ -71,32 +67,17 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
      * @param arguments Uses URL
      */
     public void play(Arguments arguments) {
-        String url = arguments.getUrl();
-        if (url != null) {
-            try {
-                String command =
-                        MPC_COMMAND + " -h " + MPD_HOST + " insert " +
-                                (arguments.getStreamType() == Arguments.StreamType.YouTube ? "yt:" : "") + url;
-                Executor.execute(command);
-                mpd.getPlayer().playNext();
-                mpd.getPlayer().play();
-            } catch (IOException | InterruptedException | MPDPlayerException e) {
-                e.printStackTrace();
-            }
-        } else {
+        try {
+            mpd.getPlayer().play();
+        } catch (MPDPlayerException ignored) {
 
-            try {
-                mpd.getPlayer().play();
-            } catch (MPDPlayerException ignored) {
-
-            }
         }
     }
 
     /**
      * Toggle player to PAUSE if it is PLAY.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void pause(Arguments arguments) {
         try {
@@ -113,7 +94,7 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     /**
      * Toggle player to STOP.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void stop(Arguments arguments) {
         try {
@@ -129,20 +110,31 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     /**
      * Go to the next song in the queue.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void next(Arguments arguments) {
-        try {
-            mpd.getPlayer().playNext();
-        } catch (MPDPlayerException ignored) {
+        if (arguments.getUrl() == null) {
+            try {
+                mpd.getPlayer().playNext();
+            } catch (MPDPlayerException ignored) {
 
+            }
+        } else {
+            try {
+                MPDFile mpdFile = new MPDFile();
+                mpdFile.setPath(arguments.getUrl());
+                mpd.getPlaylist().addFileOrDirectory(mpdFile);
+                mpd.getPlayer().playNext();
+            } catch (MPDPlaylistException | MPDPlayerException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     /**
      * Go to the previous song in the queue.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void previous(Arguments arguments) {
         try {
@@ -155,7 +147,7 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     /**
      * Shuffle the queue. This will not stop playback.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void shuffle(Arguments arguments) {
         try {
@@ -168,7 +160,7 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     /**
      * Clear the queue. This wil set the player to STOP.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void clear(Arguments arguments) {
         try {
@@ -180,7 +172,7 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     /**
      * Empty.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void current(Arguments arguments) {
 
@@ -189,7 +181,7 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     /**
      * Empty.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void info(Arguments arguments) {
 
@@ -198,25 +190,40 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     /**
      * Clear queue and stop player. Then add SjtekSjpeellijst and Taylor Swift, shuffle it and start playback.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void start(Arguments arguments) {
         Arguments dummyArguments = new Arguments();
         clear(dummyArguments);
         volumeneutral(dummyArguments);
 
+        String path;
+        boolean injectTaylorSwift;
+
+        if (arguments.getUrl() != null) {
+            path = arguments.getUrl();
+            injectTaylorSwift = false;
+        } else {
+            path = Settings.getInstance().getMusicDefaultPlaylist();
+            injectTaylorSwift = Settings.getInstance().getMusicInjectTaylorSwift();
+        }
+
         try {
-            mpd.getPlaylist().loadPlaylist("StjekSjpeellijst");
+            MPDFile mpdFile = new MPDFile();
+            mpdFile.setPath(path);
+            mpd.getPlaylist().addFileOrDirectory(mpdFile);
         } catch (MPDPlaylistException e) {
             e.printStackTrace();
         }
 
-        MPDFile tt = new MPDFile();
-        tt.setPath("Local media/Taylor Swift");
-        try {
-            mpd.getPlaylist().addFileOrDirectory(tt);
-        } catch (MPDPlaylistException e) {
-            e.printStackTrace();
+        if (injectTaylorSwift) {
+            MPDFile tt = new MPDFile();
+            tt.setPath(Settings.getInstance().getMusicTaylorSwiftPath());
+            try {
+                mpd.getPlaylist().addFileOrDirectory(tt);
+            } catch (MPDPlaylistException e) {
+                e.printStackTrace();
+            }
         }
 
         shuffle(dummyArguments);
@@ -224,13 +231,13 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     }
 
     /**
-     * Lower the volume with {@link #VOLUME_STEP_DOWN}.
+     * Lower the volume.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void volumelower(Arguments arguments) {
         try {
-            int newVolume = mpd.getPlayer().getVolume() - VOLUME_STEP_DOWN;
+            int newVolume = mpd.getPlayer().getVolume() - Settings.getInstance().getMusicVolumeDownStep();
             if (newVolume < 0) newVolume = 0;
             mpd.getPlayer().setVolume(newVolume);
         } catch (MPDPlayerException ignored) {
@@ -238,13 +245,13 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     }
 
     /**
-     * Raise the volume with {@link #VOLUME_STEP_UP}.
+     * Raise the volume.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void volumeraise(Arguments arguments) {
         try {
-            int newVolume = mpd.getPlayer().getVolume() + VOLUME_STEP_UP;
+            int newVolume = mpd.getPlayer().getVolume() + Settings.getInstance().getMusicVolumeUpStep();
             if (newVolume > 100) newVolume = 100;
             mpd.getPlayer().setVolume(newVolume);
         } catch (MPDPlayerException ignored) {
@@ -253,13 +260,13 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     }
 
     /**
-     * Set the volume to {@link #VOLUME_NEUTRAL}.
+     * Set the volume.
      *
-     * @param arguments
+     * @param arguments Arguments
      */
     public void volumeneutral(Arguments arguments) {
         try {
-            mpd.getPlayer().setVolume(VOLUME_NEUTRAL);
+            mpd.getPlayer().setVolume(Settings.getInstance().getMusicVolumeNeutral());
         } catch (MPDPlayerException ignored) {
 
         }
@@ -267,23 +274,12 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
 
     public boolean isPlaying() {
         try {
-            if (mpd.getPlayer().getStatus() == Player.Status.STATUS_PLAYING) {
-                return true;
-            } else {
-                return false;
-            }
+            return mpd.getPlayer().getStatus() == Player.Status.STATUS_PLAYING;
         } catch (MPDPlayerException e) {
             return false;
         }
     }
 
-    private Player.Status getPlayerState() {
-        try {
-            return mpd.getPlayer().getStatus();
-        } catch (MPDPlayerException e) {
-            return null;
-        }
-    }
 
     @Override
     public String toString() {
@@ -291,13 +287,25 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
     }
 
     @Override
-    public void playerChanged(PlayerChangeEvent event) {
+    public void trackPositionChanged(TrackPositionChangeEvent event) {
+        musicState.setTimeElapsed(event.getElapsedTime());
+    }
+
+    @Override
+    public void volumeChanged(VolumeChangeEvent event) {
+        musicState.setVolume(event.getVolume());
+    }
+
+    @Override
+    public void playerBasicChange(PlayerBasicChangeEvent event) {
         try {
             Player player = mpd.getPlayer();
             MPDSong song = player.getCurrentSong();
             Player.Status status = player.getStatus();
-            if (status != Player.Status.STATUS_PLAYING || status != Player.Status.STATUS_PAUSED) {
+            System.out.println("New player status: " + status.toString());
+            if (status != Player.Status.STATUS_PLAYING && status != Player.Status.STATUS_PAUSED) {
                 song = null;
+                System.out.println("Song is null");
             }
             if (song != null) {
                 musicState.setArtist(song.getArtistName());
@@ -317,25 +325,14 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
         }
     }
 
-    @Override
-    public void trackPositionChanged(TrackPositionChangeEvent event) {
-        musicState.setTimeElapsed(event.getElapsedTime());
-    }
-
-    @Override
-    public void volumeChanged(VolumeChangeEvent event) {
-        musicState.setVolume(event.getVolume());
-    }
-
-    public MusicState getMusicState() {
-        return musicState;
-    }
-
     public class MusicState {
-        private String artist, title, album;
-        private long timeTotal, timeElapsed;
-        private int volume;
-        private Player.Status status;
+        private String artist = "";
+        private String title = "";
+        private String album = "";
+        private long timeTotal = 0;
+        private long timeElapsed = 0;
+        private int volume = -1;
+        private String status = "ERROR";
 
         public void setArtist(String artist) {
             this.artist = artist;
@@ -362,7 +359,7 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
         }
 
         public void setStatus(Player.Status status) {
-            this.status = status;
+            this.status = (status != null ? status.toString() : "ERROR");
         }
 
         @Override
@@ -375,9 +372,9 @@ public class Music implements TrackPositionChangeListener, PlayerChangeListener,
             jsonSong.put("elapsed", timeElapsed);
 
             JSONObject jsonMusic = new JSONObject();
-            jsonMusic.put("song", jsonMusic);
+            jsonMusic.put("song", jsonSong);
             jsonMusic.put("volume", volume);
-            jsonMusic.put("state", (status == null ? "ERROR" : status.toString()));
+            jsonMusic.put("state", status);
 
             return jsonMusic.toString();
         }

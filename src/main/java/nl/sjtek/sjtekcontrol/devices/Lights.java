@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+@SuppressWarnings({"UnusedParameters", "unused"})
 public class Lights {
 
     private static final String SWITCH1ON  = "switch-1-on";

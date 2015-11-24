@@ -1,5 +1,7 @@
 package nl.sjtek.sjtekcontrol.utils;
 
+import nl.sjtek.sjtekcontrol.data.Settings;
+
 import java.io.*;
 
 public class Speech {
@@ -59,7 +61,7 @@ public class Speech {
 
     public static synchronized void speek(String text) {
         try {
-            Executor.execute(new String[]{"/usr/bin/espeak", "-a 50", "\"" + text + "\""});
+            Executor.execute(new String[]{"/usr/bin/espeak", "-a " + Settings.getInstance().getSpeechVolume(), "\"" + text + "\""});
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

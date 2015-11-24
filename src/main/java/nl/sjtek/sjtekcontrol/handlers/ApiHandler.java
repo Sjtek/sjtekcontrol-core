@@ -6,6 +6,7 @@ import nl.sjtek.sjtekcontrol.data.Arguments;
 import nl.sjtek.sjtekcontrol.data.JsonResponse;
 import nl.sjtek.sjtekcontrol.devices.*;
 import nl.sjtek.sjtekcontrol.utils.Page;
+import nl.sjtek.sjtekcontrol.utils.Speech;
 import org.bff.javampd.exception.MPDConnectionException;
 
 import java.io.IOException;
@@ -14,15 +15,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.UnknownHostException;
 
-public class ApiHandler implements HttpHandler, ArduinoEvent {
+@SuppressWarnings("UnusedParameters")
+public class ApiHandler implements HttpHandler {
 
     public static final String CONTEXT = "/api";
 
-    private Music music;
+    private Music musicLivingRoom;
     private Lights lights;
     private Temperature temperature;
     private TV tv;
-    private Arduino arduino;
+    private Sonarr sonarr;
+    private Minecraft minecraft;
 
     private int responseCode = 0;
 
@@ -30,10 +33,10 @@ public class ApiHandler implements HttpHandler, ArduinoEvent {
         System.out.print("Loading module");
         System.out.print(" music");
         try {
-            this.music = new Music();
+            this.musicLivingRoom = new Music();
         } catch (UnknownHostException | MPDConnectionException e) {
             e.printStackTrace();
-            this.music = null;
+            this.musicLivingRoom = null;
         }
         System.out.print(", lights");
         this.lights = new Lights();
@@ -41,11 +44,12 @@ public class ApiHandler implements HttpHandler, ArduinoEvent {
         this.temperature = new Temperature();
         System.out.print(",  tv");
         this.tv = new TV();
-        System.out.print(", arduino");
-        this.arduino = new Arduino(this);
-        this.arduino.initialize();
+        System.out.print(", sonarr");
+        this.sonarr = new Sonarr();
+        System.out.print(", minecraft");
+        this.minecraft = new Minecraft();
 
-        if (music == null) {
+        if (musicLivingRoom == null) {
             System.out.println("\nIn error state: music");
         }
         System.out.println();
@@ -66,23 +70,33 @@ public class ApiHandler implements HttpHandler, ArduinoEvent {
 
             try {
                 String classString = splittedPath[2];
-                if (classString.equals("info")) {
-                    responseCode = 200;
-                } else if (classString.equals("switch")) {
-                    masterToggle(arguments);
-                    responseCode = 200;
-                } else {
-                    String methodString = splittedPath[3];
+                switch (classString) {
+                    case "info":
+                        responseCode = 200;
+                        break;
+                    case "switch":
+                        masterToggle(arguments);
+                        responseCode = 200;
+                        break;
+                    case "speech":
+                        Speech.speek("" + arguments.getText());
+                        responseCode = 200;
+                        break;
+                    default:
+                        String methodString = splittedPath[3];
 
-                    if (classString.equals(Music.class.getSimpleName().toLowerCase())) {
-                        execMusic(arguments, methodString);
-                    } else if (classString.equals(Lights.class.getSimpleName().toLowerCase())) {
-                        execLights(arguments, methodString);
-                    } else if (classString.equals(Temperature.class.getSimpleName().toLowerCase())) {
-                        responseCode = 404;
-                    } else if (classString.equals(TV.class.getSimpleName().toLowerCase())) {
-                        responseCode = 404;
-                    }
+                        if (classString.equals("music")) {
+                            execMusic(arguments, methodString, musicLivingRoom);
+                        } else if (classString.equals(Lights.class.getSimpleName().toLowerCase())) {
+                            execLights(arguments, methodString);
+                        } else if (classString.equals(Temperature.class.getSimpleName().toLowerCase())) {
+                            responseCode = 404;
+                        } else if (classString.equals(TV.class.getSimpleName().toLowerCase())) {
+                            execTV(arguments, methodString);
+                        } else if (classString.equals(Minecraft.class.getSimpleName().toLowerCase())) {
+                            execMinecraft(arguments, methodString);
+                        }
+                        break;
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
                 responseCode = 404;
@@ -91,7 +105,14 @@ public class ApiHandler implements HttpHandler, ArduinoEvent {
 
         String response;
         if (responseCode == 200) {
-            response = JsonResponse.generate(music.toString(), lights.toString(), temperature.toString(), tv.toString());
+            String stringMusic = musicLivingRoom.toString();
+            String stringLights = lights.toString();
+            String stringTemperature = temperature.toString();
+            String stringTv = tv.toString();
+            String stringSonarr = sonarr.toString();
+            String stringMinecraft = minecraft.toString();
+
+            response = JsonResponse.generate(stringMusic, stringLights, stringTemperature, stringTv, stringSonarr, stringMinecraft);
         } else {
             response = Page.getPage(responseCode);
         }
@@ -102,17 +123,17 @@ public class ApiHandler implements HttpHandler, ArduinoEvent {
         outputStream.close();
     }
 
-    private void execMusic(Arguments arguments, String methodString) {
+    private void execMusic(Arguments arguments, String methodString, Music musicInstance) {
         Method method = null;
         try {
-            method = music.getClass().getDeclaredMethod(methodString, arguments.getClass());
+            method = Music.class.getDeclaredMethod(methodString, arguments.getClass());
         } catch (NoSuchMethodException | SecurityException e) {
             responseCode = 404;
         }
 
         if (method != null) {
             try {
-                method.invoke(music, arguments);
+                method.invoke(musicInstance, arguments);
                 responseCode = 200;
             } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
                 responseCode = 404;
@@ -138,34 +159,51 @@ public class ApiHandler implements HttpHandler, ArduinoEvent {
         }
     }
 
-    private synchronized void masterToggle(Arguments arguments) {
-        Arguments dummyArguments = new Arguments();
-        if (!music.isPlaying() && !lights.isOn()) {
-//            music.start(dummyArguments);
-            lights.toggle1on(dummyArguments);
-            lights.toggle2on(dummyArguments);
-        } else {
-            music.pause(dummyArguments);
-            lights.toggle1off(dummyArguments);
-            lights.toggle2off(dummyArguments);
+    private void execTV(Arguments arguments, String methodString) {
+        Method method = null;
+        try {
+            method = tv.getClass().getDeclaredMethod(methodString, arguments.getClass());
+        } catch (NoSuchMethodException | SecurityException e) {
+            responseCode = 404;
+        }
+
+        if (method != null) {
+            try {
+                method.invoke(tv, arguments);
+                responseCode = 200;
+            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+                responseCode = 404;
+            }
         }
     }
 
-    @Override
-    public synchronized void temperatureUpdate(float temperature) {
-        this.temperature.setTempInside(temperature);
+    private void execMinecraft(Arguments arguments, String methodString) {
+        Method method = null;
+        try {
+            method = minecraft.getClass().getDeclaredMethod(methodString, arguments.getClass());
+        } catch (NoSuchMethodException | SecurityException e) {
+            responseCode = 404;
+        }
+
+        if (method != null) {
+            try {
+                method.invoke(minecraft, arguments);
+                responseCode = 200;
+            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+                responseCode = 404;
+            }
+        }
     }
 
-    @Override
-    public synchronized void buttonUpdate(Arduino.Button button) {
-        new Thread(() -> {
-            System.out.println("Pressed button: " + button);
-            if (button == Arduino.Button.Button1) {
-                masterToggle(new Arguments());
-            } else if (button == Arduino.Button.Button2) {
-                music.volumeneutral(new Arguments());
-                music.play(new Arguments("url=spotify:user:1133212423:playlist:5SVPJUsErNknfYqlQHAQU0"));
-            }
-        }).start();
+    private synchronized void masterToggle(Arguments arguments) {
+        Arguments dummyArguments = new Arguments();
+        if (!musicLivingRoom.isPlaying() && !lights.isOn()) {
+            lights.toggle1on(dummyArguments);
+            lights.toggle2on(dummyArguments);
+        } else {
+            musicLivingRoom.pause(dummyArguments);
+            lights.toggle1off(dummyArguments);
+            lights.toggle2off(dummyArguments);
+        }
     }
 }
