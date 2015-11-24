@@ -60,7 +60,8 @@ public class Temperature {
     private int parseInside(String response) {
         if (!response.isEmpty()) {
             try {
-                return Integer.valueOf(response);
+                float temp = Float.valueOf(response);
+                return (int) temp;
             } catch (NumberFormatException e) {
                 return -101;
             }
