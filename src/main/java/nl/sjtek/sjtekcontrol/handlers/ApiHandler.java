@@ -26,6 +26,7 @@ public class ApiHandler implements HttpHandler {
     private TV tv;
     private Sonarr sonarr;
     private Minecraft minecraft;
+    private Quotes quotes;
 
     private int responseCode = 0;
 
@@ -48,6 +49,8 @@ public class ApiHandler implements HttpHandler {
         this.sonarr = new Sonarr();
         System.out.print(", minecraft");
         this.minecraft = new Minecraft();
+        System.out.print(", quotes");
+        this.quotes = new Quotes();
 
         if (musicLivingRoom == null) {
             System.out.println("\nIn error state: music");
@@ -111,8 +114,9 @@ public class ApiHandler implements HttpHandler {
             String stringTv = tv.toString();
             String stringSonarr = sonarr.toString();
             String stringMinecraft = minecraft.toString();
+            String stringQuotes = quotes.toString();
 
-            response = JsonResponse.generate(stringMusic, stringLights, stringTemperature, stringTv, stringSonarr, stringMinecraft);
+            response = JsonResponse.generate(stringMusic, stringLights, stringTemperature, stringTv, stringSonarr, stringMinecraft, stringQuotes);
         } else {
             response = Page.getPage(responseCode);
         }
