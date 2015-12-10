@@ -86,6 +86,9 @@ public class Arguments {
             case YouTube:
                 prefix = "yt:";
                 break;
+            case SoundCloud:
+                prefix = "sc:";
+                break;
         }
 
         return ((url != null && !url.isEmpty()) ? prefix + url : null);
@@ -148,7 +151,8 @@ public class Arguments {
 
     public enum StreamType {
         Stream,
-        YouTube
+        YouTube,
+        SoundCloud
     }
 
     public static class MinecraftData {
