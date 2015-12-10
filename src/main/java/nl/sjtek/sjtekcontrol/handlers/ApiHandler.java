@@ -18,7 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.UnknownHostException;
 
-@SuppressWarnings("UnusedParameters")
+@SuppressWarnings({"UnusedParameters", "unused"})
 public class ApiHandler implements HttpHandler {
 
     public static final String CONTEXT = "/api";
@@ -114,20 +114,18 @@ public class ApiHandler implements HttpHandler {
                         String methodString = splittedPath[3];
 
                         if (classString.equals("music")) {
-                            execMusic(arguments, methodString, music);
+                            execute(arguments, methodString, music);
                         } else if (classString.equals(Lights.class.getSimpleName().toLowerCase())) {
-                            execLights(arguments, methodString);
-                        } else if (classString.equals(Temperature.class.getSimpleName().toLowerCase())) {
-                            responseCode = 404;
+                            execute(arguments, methodString, lights);
                         } else if (classString.equals(TV.class.getSimpleName().toLowerCase())) {
-                            execTV(arguments, methodString);
+                            execute(arguments, methodString, tv);
                         } else if (classString.equals(Minecraft.class.getSimpleName().toLowerCase())) {
-                            execMinecraft(arguments, methodString);
+                            execute(arguments, methodString, minecraft);
                         } else if (classString.equals(NFC.class.getSimpleName().toLowerCase())) {
                             responseType = ResponseType.CLEAN;
-                            execNFC(arguments, methodString);
+                            execute(arguments, methodString, nfc);
                         } else if (classString.equals(NightMode.class.getSimpleName().toLowerCase())) {
-                            execNightMode(arguments, methodString);
+                            execute(arguments, methodString, nightMode);
                         }
                         break;
                 }
@@ -170,107 +168,17 @@ public class ApiHandler implements HttpHandler {
         outputStream.close();
     }
 
-    private void execMusic(Arguments arguments, String methodString, Music musicInstance) {
+    private void execute(Arguments arguments, String methodString, Object executor) {
         Method method = null;
         try {
-            method = Music.class.getDeclaredMethod(methodString, arguments.getClass());
+            method = executor.getClass().getDeclaredMethod(methodString, arguments.getClass());
         } catch (NoSuchMethodException | SecurityException e) {
             responseCode = 404;
         }
 
         if (method != null) {
             try {
-                method.invoke(musicInstance, arguments);
-                responseCode = 200;
-            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-                responseCode = 404;
-            }
-        }
-    }
-
-    private void execLights(Arguments arguments, String methodString) {
-        Method method = null;
-        try {
-            method = lights.getClass().getDeclaredMethod(methodString, arguments.getClass());
-        } catch (NoSuchMethodException | SecurityException e) {
-            responseCode = 404;
-        }
-
-        if (method != null) {
-            try {
-                method.invoke(lights, arguments);
-                responseCode = 200;
-            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-                responseCode = 404;
-            }
-        }
-    }
-
-    private void execTV(Arguments arguments, String methodString) {
-        Method method = null;
-        try {
-            method = tv.getClass().getDeclaredMethod(methodString, arguments.getClass());
-        } catch (NoSuchMethodException | SecurityException e) {
-            responseCode = 404;
-        }
-
-        if (method != null) {
-            try {
-                method.invoke(tv, arguments);
-                responseCode = 200;
-            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-                responseCode = 404;
-            }
-        }
-    }
-
-    private void execMinecraft(Arguments arguments, String methodString) {
-        Method method = null;
-        try {
-            method = minecraft.getClass().getDeclaredMethod(methodString, arguments.getClass());
-        } catch (NoSuchMethodException | SecurityException e) {
-            responseCode = 404;
-        }
-
-        if (method != null) {
-            try {
-                method.invoke(minecraft, arguments);
-                responseCode = 200;
-            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-                responseCode = 404;
-            }
-        }
-    }
-
-    private void execNFC(Arguments arguments, String methodString) {
-        Method method = null;
-        try {
-            method = nfc.getClass().getDeclaredMethod(methodString, arguments.getClass());
-        } catch (NoSuchMethodException | SecurityException e) {
-            responseCode = 404;
-        }
-
-        if (method != null) {
-            try {
-                method.invoke(nfc, arguments);
-                responseCode = 200;
-            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-                responseCode = 404;
-            }
-        }
-    }
-
-    private void execNightMode(Arguments arguments, String methodString) {
-        Method method = null;
-        try {
-            method = nightMode.getClass().getDeclaredMethod(methodString, arguments.getClass());
-        } catch (NoSuchMethodException | SecurityException e) {
-            responseCode = 404;
-        }
-
-        if (method != null) {
-            try {
-                method.invoke(nightMode, arguments);
+                method.invoke(executor, arguments);
                 responseCode = 200;
             } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
                 responseCode = 404;
