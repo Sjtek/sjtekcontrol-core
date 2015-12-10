@@ -1,6 +1,6 @@
 package nl.sjtek.sjtekcontrol.devices;
 
-import nl.sjtek.sjtekcontrol.data.Settings;
+import nl.sjtek.sjtekcontrol.data.SettingsManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -15,7 +15,7 @@ public class Quotes {
 
     public String getAll() {
         JSONArray jsonArray = new JSONArray();
-        for (String quote : Settings.getInstance().getQuotes().getQuotes()) {
+        for (String quote : SettingsManager.getInstance().getQuotes().getQuotes()) {
             jsonArray.put(quote);
         }
         return jsonArray.toString();
@@ -23,7 +23,7 @@ public class Quotes {
 
     @Override
     public String toString() {
-        String[] quotes = Settings.getInstance().getQuotes().getQuotes();
+        String[] quotes = SettingsManager.getInstance().getQuotes().getQuotes();
         String quote;
         if (quotes.length > 0) {
             quote = quotes[random.nextInt(quotes.length)];

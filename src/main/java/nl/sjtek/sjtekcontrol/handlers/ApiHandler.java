@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import nl.sjtek.sjtekcontrol.data.Arguments;
 import nl.sjtek.sjtekcontrol.data.JsonResponse;
+import nl.sjtek.sjtekcontrol.data.SettingsManager;
 import nl.sjtek.sjtekcontrol.devices.*;
 import nl.sjtek.sjtekcontrol.utils.Page;
 import nl.sjtek.sjtekcontrol.utils.Personalise;
@@ -79,7 +80,7 @@ public class ApiHandler implements HttpHandler {
                 httpExchange.getRequestURI().getPath() + " | " + arguments.toString());
         String splittedPath[] = fullPath.split("/");
 
-        boolean cleanOutput = false;
+        ResponseType responseType = ResponseType.DEFAULT;
 
         if (splittedPath.length < 3) {
             responseCode = 200;
@@ -103,6 +104,12 @@ public class ApiHandler implements HttpHandler {
                         Speech.speak("" + arguments.getText());
                         responseCode = 200;
                         break;
+                    case "reload":
+                        SettingsManager.getInstance().reload();
+                        if (arguments.isUseVoice()) Speech.speakAsync("Settings reloaded");
+                        responseType = ResponseType.SETTINGS;
+                        responseCode = 200;
+                        break;
                     default:
                         String methodString = splittedPath[3];
 
@@ -117,7 +124,7 @@ public class ApiHandler implements HttpHandler {
                         } else if (classString.equals(Minecraft.class.getSimpleName().toLowerCase())) {
                             execMinecraft(arguments, methodString);
                         } else if (classString.equals(NFC.class.getSimpleName().toLowerCase())) {
-                            cleanOutput = true;
+                            responseType = ResponseType.CLEAN;
                             execNFC(arguments, methodString);
                         } else if (classString.equals(NightMode.class.getSimpleName().toLowerCase())) {
                             execNightMode(arguments, methodString);
@@ -131,18 +138,27 @@ public class ApiHandler implements HttpHandler {
 
         String response;
         if (responseCode == 200) {
-            if (cleanOutput) {
-                response = "{ }";
-            } else {
-                String stringMusic = music.toString();
-                String stringLights = lights.toString();
-                String stringTemperature = temperature.toString();
-                String stringTv = tv.toString();
-                String stringSonarr = sonarr.toString();
-                String stringMinecraft = minecraft.toString();
-                String stringQuotes = quotes.toString();
+            switch (responseType) {
+                case DEFAULT: {
+                    String stringMusic = music.toString();
+                    String stringLights = lights.toString();
+                    String stringTemperature = temperature.toString();
+                    String stringTv = tv.toString();
+                    String stringSonarr = sonarr.toString();
+                    String stringMinecraft = minecraft.toString();
+                    String stringQuotes = quotes.toString();
 
-                response = JsonResponse.generate(stringMusic, stringLights, stringTemperature, stringTv, stringSonarr, stringMinecraft, stringQuotes);
+                    response = JsonResponse.generate(stringMusic, stringLights, stringTemperature, stringTv, stringSonarr, stringMinecraft, stringQuotes);
+                }
+                break;
+                case CLEAN:
+                    response = "{ }";
+                    break;
+                case SETTINGS:
+                    response = SettingsManager.getInstance().toString();
+                    break;
+                default:
+                    response = "{ }";
             }
         } else {
             response = Page.getPage(responseCode);
@@ -325,5 +341,11 @@ public class ApiHandler implements HttpHandler {
 
     public boolean isOn(boolean checkWouter) {
         return (music.isPlaying() || (lights.getToggle1() || lights.getToggle2() || (checkWouter && lights.getToggle3())));
+    }
+
+    private enum ResponseType {
+        DEFAULT,
+        CLEAN,
+        SETTINGS
     }
 }

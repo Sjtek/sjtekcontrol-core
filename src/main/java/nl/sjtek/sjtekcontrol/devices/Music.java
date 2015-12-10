@@ -1,7 +1,7 @@
 package nl.sjtek.sjtekcontrol.devices;
 
 import nl.sjtek.sjtekcontrol.data.Arguments;
-import nl.sjtek.sjtekcontrol.data.Settings;
+import nl.sjtek.sjtekcontrol.data.SettingsManager;
 import org.bff.javampd.MPD;
 import org.bff.javampd.MPDFile;
 import org.bff.javampd.Player;
@@ -30,8 +30,8 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
      */
     public Music() throws UnknownHostException, MPDConnectionException {
         MPD.Builder builder = new MPD.Builder();
-        builder.server(Settings.getInstance().getMusic().getMpdHost());
-        builder.port(Settings.getInstance().getMusic().getMpdPort());
+        builder.server(SettingsManager.getInstance().getMusic().getMpdHost());
+        builder.port(SettingsManager.getInstance().getMusic().getMpdPort());
         mpd = builder.build();
 
         StandAloneMonitor monitor = mpd.getMonitor();
@@ -215,8 +215,8 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
             path = arguments.getUrl();
             injectTaylorSwift = false;
         } else {
-            path = Settings.getInstance().getMusic().getDefaultPlaylist();
-            injectTaylorSwift = Settings.getInstance().getMusic().isTaylorSwiftInject();
+            path = SettingsManager.getInstance().getMusic().getDefaultPlaylist();
+            injectTaylorSwift = SettingsManager.getInstance().getMusic().isTaylorSwiftInject();
         }
 
         try {
@@ -229,7 +229,7 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
 
         if (injectTaylorSwift) {
             MPDFile tt = new MPDFile();
-            tt.setPath(Settings.getInstance().getMusic().getTaylorSwiftPath());
+            tt.setPath(SettingsManager.getInstance().getMusic().getTaylorSwiftPath());
             try {
                 mpd.getPlaylist().addFileOrDirectory(tt);
             } catch (MPDPlaylistException e) {
@@ -248,7 +248,7 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
      */
     public void volumelower(Arguments arguments) {
         try {
-            int newVolume = mpd.getPlayer().getVolume() - Settings.getInstance().getMusic().getVolumeStepDown();
+            int newVolume = mpd.getPlayer().getVolume() - SettingsManager.getInstance().getMusic().getVolumeStepDown();
             if (newVolume < 0) newVolume = 0;
             mpd.getPlayer().setVolume(newVolume);
         } catch (MPDPlayerException ignored) {
@@ -262,7 +262,7 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
      */
     public void volumeraise(Arguments arguments) {
         try {
-            int newVolume = mpd.getPlayer().getVolume() + Settings.getInstance().getMusic().getVolumeStepUp();
+            int newVolume = mpd.getPlayer().getVolume() + SettingsManager.getInstance().getMusic().getVolumeStepUp();
             if (newVolume > 100) newVolume = 100;
             mpd.getPlayer().setVolume(newVolume);
         } catch (MPDPlayerException ignored) {
@@ -277,7 +277,7 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
      */
     public void volumeneutral(Arguments arguments) {
         try {
-            mpd.getPlayer().setVolume(Settings.getInstance().getMusic().getVolumeNeutral());
+            mpd.getPlayer().setVolume(SettingsManager.getInstance().getMusic().getVolumeNeutral());
         } catch (MPDPlayerException ignored) {
 
         }

@@ -11,20 +11,20 @@ import java.util.Random;
 /**
  * Created by wouter on 22-11-15.
  */
-public class Settings {
+public class SettingsManager {
 
     private static final String DEFAULT_PATH = "/etc/sjtekcontrol.json";
-    private static Settings instance = new Settings();
+    private static SettingsManager instance = new SettingsManager();
 
     private Music music = new Music();
     private TV tv = new TV();
     private Quotes quotes = new Quotes();
 
-    private Settings() {
+    private SettingsManager() {
         dump();
     }
 
-    public static Settings getInstance() {
+    public static SettingsManager getInstance() {
         return instance;
     }
 
@@ -37,23 +37,23 @@ public class Settings {
     }
 
     public void reload(String path) {
-        Settings newSettings;
+        SettingsManager newSettingsManager;
         try {
             String jsonString = readFile(path);
             if (!jsonString.isEmpty()) {
-                newSettings = new Gson().fromJson(jsonString, this.getClass());
+                newSettingsManager = new Gson().fromJson(jsonString, this.getClass());
             } else {
                 throw new IOException("Data empty");
             }
         } catch (FileNotFoundException e) {
 
-            newSettings = new Settings();
+            newSettingsManager = new SettingsManager();
         } catch (IOException e) {
             e.printStackTrace();
-            newSettings = new Settings();
+            newSettingsManager = new SettingsManager();
         }
 
-        instance = newSettings;
+        instance = newSettingsManager;
     }
 
     private String readFile(String path) throws IOException {
@@ -88,7 +88,7 @@ public class Settings {
     }
 
     public class Music {
-        private String mpdHost = "mopidy";
+        private String mpdHost = "127.0.0.1";
         private int mpdPort = 6600;
 
         private String defaultPlaylist = "spotify:user:1133212423:playlist:2A8r6F6GiLwpBCUQ0ImYKW";
