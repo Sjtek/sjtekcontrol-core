@@ -3,8 +3,10 @@ package nl.sjtek.sjtekcontrol.data;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * Created by wouter on 22-11-15.
@@ -12,33 +14,22 @@ import java.io.IOException;
 public class Settings {
 
     private static final String DEFAULT_PATH = "/etc/sjtekcontrol.json";
-    private static Settings settings = new Settings();
+    private static Settings instance = new Settings();
 
-    private String mpdHost = "mopidy";
-    private int mpdPort = 6600;
-
-    private String tvHost = "192.168.0.66";
-    private int tvPort = 8080;
-    private int tvKey = 861540;
-
-    private String musicDefaultPlaylist = "spotify:user:1133212423:playlist:2A8r6F6GiLwpBCUQ0ImYKW";
-    private String musicDefaultRave = "spotify:track:3QKv87XsylJWvTCzssDvnr";
-    private String musicTaylorSwiftPath = "Local media/Taylor Swift";
-    private boolean musicInjectTaylorSwift = true;
-    private int musicVolumeNeutral = 10;
-    private int musicVolumeUpStep = 3;
-    private int musicVolumeDownStep = 3;
-
-    private int speechVolume = 50;
-
-    private String[] quotes = {};
+    private Music music = new Music();
+    private TV tv = new TV();
+    private Quotes quotes = new Quotes();
 
     private Settings() {
-
+        dump();
     }
 
     public static Settings getInstance() {
-        return settings;
+        return instance;
+    }
+
+    public void dump() {
+        System.out.println("Dump: " + new Gson().toJson(this));
     }
 
     public void reload() {
@@ -54,24 +45,15 @@ public class Settings {
             } else {
                 throw new IOException("Data empty");
             }
+        } catch (FileNotFoundException e) {
+
+            newSettings = new Settings();
         } catch (IOException e) {
             e.printStackTrace();
             newSettings = new Settings();
         }
 
-        this.mpdHost = newSettings.getMpdHost();
-        this.mpdPort = newSettings.getMpdPort();
-        this.tvHost = newSettings.getTvHost();
-        this.tvPort = newSettings.getTvPort();
-        this.tvKey = newSettings.getTvKey();
-        this.musicDefaultPlaylist = newSettings.getMusicDefaultPlaylist();
-        this.musicDefaultRave = newSettings.getMusicDefaultRave();
-        this.musicTaylorSwiftPath = newSettings.getMusicTaylorSwiftPath();
-        this.musicInjectTaylorSwift = newSettings.getMusicInjectTaylorSwift();
-        this.musicVolumeNeutral = newSettings.getMusicVolumeNeutral();
-        this.musicVolumeUpStep = newSettings.getMusicVolumeUpStep();
-        this.musicVolumeDownStep = newSettings.getMusicVolumeDownStep();
-        this.speechVolume = newSettings.getSpeechVolume();
+        instance = newSettings;
     }
 
     private String readFile(String path) throws IOException {
@@ -88,64 +70,104 @@ public class Settings {
         }
     }
 
-    public String getMpdHost() {
-        return mpdHost;
+    public Music getMusic() {
+        return music;
     }
 
-    public int getMpdPort() {
-        return mpdPort;
+    public TV getTv() {
+        return tv;
     }
 
-    public String getTvHost() {
-        return tvHost;
-    }
-
-    public int getTvPort() {
-        return tvPort;
-    }
-
-    public int getTvKey() {
-        return tvKey;
-    }
-
-    public String getMusicDefaultPlaylist() {
-        return musicDefaultPlaylist;
-    }
-
-    public String getMusicDefaultRave() {
-        return musicDefaultRave;
-    }
-
-    public String getMusicTaylorSwiftPath() {
-        return musicTaylorSwiftPath;
-    }
-
-    public boolean getMusicInjectTaylorSwift() {
-        return musicInjectTaylorSwift;
-    }
-
-    public int getMusicVolumeNeutral() {
-        return musicVolumeNeutral;
-    }
-
-    public int getMusicVolumeUpStep() {
-        return musicVolumeUpStep;
-    }
-
-    public int getMusicVolumeDownStep() {
-        return musicVolumeDownStep;
-    }
-
-    public int getSpeechVolume() {
-        return speechVolume;
-    }
-
-    public String[] getQuotes() {
+    public Quotes getQuotes() {
         return quotes;
     }
 
     @Override
     public String toString() {
         return new Gson().toJson(this);
+    }
+
+    public class Music {
+        private String mpdHost = "mopidy";
+        private int mpdPort = 6600;
+
+        private String defaultPlaylist = "spotify:user:1133212423:playlist:2A8r6F6GiLwpBCUQ0ImYKW";
+        private boolean taylorSwiftInject = true;
+        private String taylorSwiftPath = "Local media/Taylor Swift";
+        private int volumeNeutral = 10;
+        private int volumeStepUp = 3;
+        private int volumeStepDown = 3;
+
+        public String getMpdHost() {
+            return mpdHost;
+        }
+
+        public int getMpdPort() {
+            return mpdPort;
+        }
+
+        public String getDefaultPlaylist() {
+            return defaultPlaylist;
+        }
+
+        public boolean isTaylorSwiftInject() {
+            return taylorSwiftInject;
+        }
+
+        public String getTaylorSwiftPath() {
+            return taylorSwiftPath;
+        }
+
+        public int getVolumeNeutral() {
+            return volumeNeutral;
+        }
+
+        public int getVolumeStepUp() {
+            return volumeStepUp;
+        }
+
+        public int getVolumeStepDown() {
+            return volumeStepDown;
+        }
+    }
+
+    public class TV {
+        private String host = "192.168.0.66";
+        private int port = 8080;
+        private String key = "861540";
+
+        public String getHost() {
+            return host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public String getKey() {
+            return key;
+        }
+    }
+
+    public class Quotes {
+        private String[] quotes = {
+                "Alleen massaproductie",
+                "Dien mam",
+                "Mwoah, Gertje",
+                "Analysamson",
+                "Een frietkraam dat geen frieten verkoopt",
+                "Moet hebben, afblijven",
+                "Sjtek masterrace",
+                "Ja joa",
+                "10/10 would yolo again",
+        };
+
+        public String[] getQuotes() {
+            return quotes;
+        }
+
+        public String getQuote() {
+            return getQuotes()[new Random().nextInt(getQuotes().length)];
+        }
     }
 }

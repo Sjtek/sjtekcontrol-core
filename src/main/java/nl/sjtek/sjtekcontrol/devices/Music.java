@@ -30,8 +30,8 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
      */
     public Music() throws UnknownHostException, MPDConnectionException {
         MPD.Builder builder = new MPD.Builder();
-        builder.server(Settings.getInstance().getMpdHost());
-        builder.port(Settings.getInstance().getMpdPort());
+        builder.server(Settings.getInstance().getMusic().getMpdHost());
+        builder.port(Settings.getInstance().getMusic().getMpdPort());
         mpd = builder.build();
 
         StandAloneMonitor monitor = mpd.getMonitor();
@@ -215,8 +215,8 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
             path = arguments.getUrl();
             injectTaylorSwift = false;
         } else {
-            path = Settings.getInstance().getMusicDefaultPlaylist();
-            injectTaylorSwift = Settings.getInstance().getMusicInjectTaylorSwift();
+            path = Settings.getInstance().getMusic().getDefaultPlaylist();
+            injectTaylorSwift = Settings.getInstance().getMusic().isTaylorSwiftInject();
         }
 
         try {
@@ -229,7 +229,7 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
 
         if (injectTaylorSwift) {
             MPDFile tt = new MPDFile();
-            tt.setPath(Settings.getInstance().getMusicTaylorSwiftPath());
+            tt.setPath(Settings.getInstance().getMusic().getTaylorSwiftPath());
             try {
                 mpd.getPlaylist().addFileOrDirectory(tt);
             } catch (MPDPlaylistException e) {
@@ -248,7 +248,7 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
      */
     public void volumelower(Arguments arguments) {
         try {
-            int newVolume = mpd.getPlayer().getVolume() - Settings.getInstance().getMusicVolumeDownStep();
+            int newVolume = mpd.getPlayer().getVolume() - Settings.getInstance().getMusic().getVolumeStepDown();
             if (newVolume < 0) newVolume = 0;
             mpd.getPlayer().setVolume(newVolume);
         } catch (MPDPlayerException ignored) {
@@ -262,7 +262,7 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
      */
     public void volumeraise(Arguments arguments) {
         try {
-            int newVolume = mpd.getPlayer().getVolume() + Settings.getInstance().getMusicVolumeUpStep();
+            int newVolume = mpd.getPlayer().getVolume() + Settings.getInstance().getMusic().getVolumeStepUp();
             if (newVolume > 100) newVolume = 100;
             mpd.getPlayer().setVolume(newVolume);
         } catch (MPDPlayerException ignored) {
@@ -277,7 +277,7 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
      */
     public void volumeneutral(Arguments arguments) {
         try {
-            mpd.getPlayer().setVolume(Settings.getInstance().getMusicVolumeNeutral());
+            mpd.getPlayer().setVolume(Settings.getInstance().getMusic().getVolumeNeutral());
         } catch (MPDPlayerException ignored) {
 
         }
@@ -336,58 +336,58 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
         }
     }
 
-public class MusicState {
-    private String artist = "";
-    private String title = "";
-    private String album = "";
-    private long timeTotal = 0;
-    private long timeElapsed = 0;
-    private int volume = -1;
-    private String status = "ERROR";
+    public class MusicState {
+        private String artist = "";
+        private String title = "";
+        private String album = "";
+        private long timeTotal = 0;
+        private long timeElapsed = 0;
+        private int volume = -1;
+        private String status = "ERROR";
 
-    public void setArtist(String artist) {
-        this.artist = artist;
+        public void setArtist(String artist) {
+            this.artist = artist;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public void setAlbum(String album) {
+            this.album = album;
+        }
+
+        public void setTimeTotal(long timeTotal) {
+            this.timeTotal = timeTotal;
+        }
+
+        public void setTimeElapsed(long timeElapsed) {
+            this.timeElapsed = timeElapsed;
+        }
+
+        public void setVolume(int volume) {
+            this.volume = volume;
+        }
+
+        public void setStatus(Player.Status status) {
+            this.status = (status != null ? status.toString() : "ERROR");
+        }
+
+        @Override
+        public String toString() {
+            JSONObject jsonSong = new JSONObject();
+            jsonSong.put("artist", artist);
+            jsonSong.put("title", title);
+            jsonSong.put("album", album);
+            jsonSong.put("total", timeTotal);
+            jsonSong.put("elapsed", timeElapsed);
+
+            JSONObject jsonMusic = new JSONObject();
+            jsonMusic.put("song", jsonSong);
+            jsonMusic.put("volume", volume);
+            jsonMusic.put("state", status);
+
+            return jsonMusic.toString();
+        }
     }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setAlbum(String album) {
-        this.album = album;
-    }
-
-    public void setTimeTotal(long timeTotal) {
-        this.timeTotal = timeTotal;
-    }
-
-    public void setTimeElapsed(long timeElapsed) {
-        this.timeElapsed = timeElapsed;
-    }
-
-    public void setVolume(int volume) {
-        this.volume = volume;
-    }
-
-    public void setStatus(Player.Status status) {
-        this.status = (status != null ? status.toString() : "ERROR");
-    }
-
-    @Override
-    public String toString() {
-        JSONObject jsonSong = new JSONObject();
-        jsonSong.put("artist", artist);
-        jsonSong.put("title", title);
-        jsonSong.put("album", album);
-        jsonSong.put("total", timeTotal);
-        jsonSong.put("elapsed", timeElapsed);
-
-        JSONObject jsonMusic = new JSONObject();
-        jsonMusic.put("song", jsonSong);
-        jsonMusic.put("volume", volume);
-        jsonMusic.put("state", status);
-
-        return jsonMusic.toString();
-    }
-}
 }

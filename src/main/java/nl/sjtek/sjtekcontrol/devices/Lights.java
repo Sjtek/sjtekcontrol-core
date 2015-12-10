@@ -60,6 +60,10 @@ public class Lights {
         }
     }
 
+    public boolean getToggle1() {
+        return states[1];
+    }
+
     public void toggle2(Arguments arguments) {
         if (states[2]) {
             toggle2off(arguments);
@@ -80,6 +84,10 @@ public class Lights {
         }
     }
 
+    public boolean getToggle2() {
+        return states[2];
+    }
+
     public void toggle3(Arguments arguments) {
         if (states[3]) {
             toggle3off(arguments);
@@ -98,6 +106,10 @@ public class Lights {
         if (action(SWITCH3ON) == 200) {
             states[3] = true;
         }
+    }
+
+    public boolean getToggle3() {
+        return states[3];
     }
 
     private synchronized int action(String action) {

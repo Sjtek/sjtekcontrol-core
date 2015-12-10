@@ -13,7 +13,11 @@ public class SjtekControl {
     public SjtekControl() {
         System.out.println("Starting SjtekControl");
         System.out.println("Starting SjtekAPI");
-        this.apiHandler = new ApiHandler();
+        this.apiHandler = ApiHandler.getInstance();
+    }
+
+    public static void main(String args[]) throws IOException {
+        new SjtekControl().start();
     }
 
     public void start() throws IOException {
@@ -23,10 +27,6 @@ public class SjtekControl {
         server.setExecutor(null);
         System.out.println("on port 8000");
         server.start();
-    }
-
-    public static void main(String args[]) throws IOException {
-        new SjtekControl().start();
     }
 }
 

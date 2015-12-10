@@ -1,5 +1,6 @@
 package nl.sjtek.sjtekcontrol.data;
 
+import nl.sjtek.sjtekcontrol.utils.User;
 import org.apache.commons.codec.Charsets;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -9,17 +10,13 @@ import java.util.List;
 
 public class Arguments {
 
-    public enum StreamType {
-        Stream,
-        YouTube
-    }
-
     private boolean useVoice = false;
     private String url = null;
     private String text = null;
     private StreamType streamType = StreamType.Stream;
     private MinecraftData minecraftData = new MinecraftData();
-
+    private String cardId = null;
+    private User user = null;
     public Arguments() {
 
     }
@@ -54,12 +51,30 @@ public class Arguments {
                 } catch (NumberFormatException e) {
                     minecraftData.setEnergyProducing(-1);
                 }
+            } else if ("cardid".equals(name)) {
+                cardId = value;
+            } else if ("user".equals(name)) {
+                user = User.valueOf(value.toUpperCase());
             }
         }
     }
 
+    private static <T extends Enum<?>> T searchEnum(Class<T> enumeration, String search) {
+        for (T each : enumeration.getEnumConstants()) {
+            if (each.name().compareToIgnoreCase(search) == 0) {
+                return each;
+            }
+        }
+        return null;
+    }
+
     public boolean isUseVoice() {
         return useVoice;
+    }
+
+    public Arguments setUseVoice(boolean useVoice) {
+        this.useVoice = useVoice;
+        return this;
     }
 
     public String getUrl() {
@@ -73,19 +88,57 @@ public class Arguments {
                 break;
         }
 
-        return ((url != null && !url.isEmpty()) ? prefix + url : null) ;
+        return ((url != null && !url.isEmpty()) ? prefix + url : null);
+    }
+
+    public Arguments setUrl(String url) {
+        this.url = url;
+        return this;
     }
 
     public String getText() {
         return text;
     }
 
+    public Arguments setText(String text) {
+        this.text = text;
+        return this;
+    }
+
     public StreamType getStreamType() {
         return streamType;
     }
 
+    public Arguments setStreamType(StreamType streamType) {
+        this.streamType = streamType;
+        return this;
+    }
+
     public MinecraftData getMinecraftData() {
         return minecraftData;
+    }
+
+    public Arguments setMinecraftData(MinecraftData minecraftData) {
+        this.minecraftData = minecraftData;
+        return this;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public Arguments setCardId(String cardId) {
+        this.cardId = cardId;
+        return this;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public Arguments setUser(User user) {
+        this.user = user;
+        return this;
     }
 
     @Override
@@ -93,13 +146,9 @@ public class Arguments {
         return "Voice: " + useVoice + " Url: " + url + " Stream: " + streamType + " Text: " + text;
     }
 
-    private static <T extends Enum<?>> T searchEnum(Class<T> enumeration, String search) {
-        for (T each : enumeration.getEnumConstants()) {
-            if (each.name().compareToIgnoreCase(search) == 0) {
-                return each;
-            }
-        }
-        return null;
+    public enum StreamType {
+        Stream,
+        YouTube
     }
 
     public static class MinecraftData {

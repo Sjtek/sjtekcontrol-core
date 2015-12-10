@@ -1,8 +1,8 @@
 package nl.sjtek.sjtekcontrol.utils;
 
-import nl.sjtek.sjtekcontrol.data.Settings;
+import nl.sjtek.sjtekcontrol.handlers.ApiHandler;
 
-import java.io.*;
+import java.io.IOException;
 
 public class Speech {
 
@@ -12,10 +12,11 @@ public class Speech {
 //            "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:11.0) " +
 //                    "Gecko/20100101 Firefox/11.0";
 
-    private Speech() { }
+    private Speech() {
+    }
 
     public static void main(String[] args) throws Exception {
-        speek("Hello Tijn. You just lost the game.");
+        speak("Hello Tijn. You just lost the game.");
     }
 
 //    private static void download(String text, File output) throws IOException {
@@ -59,15 +60,24 @@ public class Speech {
 //        }
 //    }
 
-    public static synchronized void speek(String text) {
+    public static synchronized void speak(String text) {
+        if (ApiHandler.getInstance().getNightMode().isEnabled()) return;
+        if (text == null || text.isEmpty()) return;
+
+        String[] command = new String[]{"/usr/bin/speak", "\"" + text + "\""};
+        for (String string : command) {
+            System.out.print(string + " ");
+        }
+        System.out.println();
+
         try {
-            Executor.execute(new String[]{"/usr/bin/espeak", "-a " + Settings.getInstance().getSpeechVolume(), "\"" + text + "\""});
+            Executor.execute(command);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    public static void speekAsync(String text) {
+    public static void speakAsync(String text) {
         new SpeechAsyncThread(text).start();
     }
 
@@ -80,7 +90,7 @@ public class Speech {
 
         @Override
         public void run() {
-            speek(text);
+            speak(text);
         }
     }
 }

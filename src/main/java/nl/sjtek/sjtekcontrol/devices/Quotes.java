@@ -15,7 +15,7 @@ public class Quotes {
 
     public String getAll() {
         JSONArray jsonArray = new JSONArray();
-        for (String quote : Settings.getInstance().getQuotes()) {
+        for (String quote : Settings.getInstance().getQuotes().getQuotes()) {
             jsonArray.put(quote);
         }
         return jsonArray.toString();
@@ -23,7 +23,7 @@ public class Quotes {
 
     @Override
     public String toString() {
-        String[] quotes = Settings.getInstance().getQuotes();
+        String[] quotes = Settings.getInstance().getQuotes().getQuotes();
         String quote;
         if (quotes.length > 0) {
             quote = quotes[random.nextInt(quotes.length)];
