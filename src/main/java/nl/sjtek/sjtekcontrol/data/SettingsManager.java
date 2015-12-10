@@ -6,21 +6,54 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 
 /**
  * Created by wouter on 22-11-15.
  */
 public class SettingsManager {
 
-    private static final String DEFAULT_PATH = "/etc/sjtekcontrol.json";
+    private static final String DEFAULT_PATH = "/etc/sjtekcontrol/settings.json";
     private static SettingsManager instance = new SettingsManager();
 
     private Music music = new Music();
     private TV tv = new TV();
     private Quotes quotes = new Quotes();
 
+    private Map<String, UserSettings> userSettings;
+
     private SettingsManager() {
+
+        userSettings = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        userSettings.put("Wouter", new UserSettings(
+                new String[]{
+                        "sir wouter",
+                        "lord habets"
+                },
+                new String[]{
+                        "spotify:user:1133212423:playlist:6GoCxjOJ5pXgr74Za0z9bt"
+                }
+        ));
+        userSettings.put("Tijn", new UserSettings(
+                new String[]{
+                        "3D",
+                        "master renders"
+                },
+                new String[]{
+                        "spotify:user:1123840057:playlist:1kbSO9MqJMWOdsIfPhjcvW"
+                }
+        ));
+        userSettings.put("Kevin", new UserSettings(
+                new String[]{
+                        "kevin"
+                },
+                new String[]{
+                        "spotify:user:1130395265:playlist:5UOGVcoR34i1XUFLYCXbnz"
+                }
+        ));
+
         dump();
     }
 
@@ -37,16 +70,18 @@ public class SettingsManager {
     }
 
     public void reload(String path) {
+        System.out.println();
+        System.out.println("Reloading settings...");
         SettingsManager newSettingsManager;
         try {
             String jsonString = readFile(path);
             if (!jsonString.isEmpty()) {
                 newSettingsManager = new Gson().fromJson(jsonString, this.getClass());
+                System.out.println("Reload completed.");
             } else {
                 throw new IOException("Data empty");
             }
         } catch (FileNotFoundException e) {
-
             newSettingsManager = new SettingsManager();
         } catch (IOException e) {
             e.printStackTrace();
@@ -80,6 +115,10 @@ public class SettingsManager {
 
     public Quotes getQuotes() {
         return quotes;
+    }
+
+    public Map<String, UserSettings> getUserSettings() {
+        return userSettings;
     }
 
     @Override
@@ -168,6 +207,24 @@ public class SettingsManager {
 
         public String getQuote() {
             return getQuotes()[new Random().nextInt(getQuotes().length)];
+        }
+    }
+
+    public class UserSettings {
+        private final String[] nickNames;
+        private final String[] playlists;
+
+        public UserSettings(String[] nickNames, String[] playlists) {
+            this.nickNames = nickNames;
+            this.playlists = playlists;
+        }
+
+        public String[] getNickNames() {
+            return nickNames;
+        }
+
+        public String[] getPlaylists() {
+            return playlists;
         }
     }
 }

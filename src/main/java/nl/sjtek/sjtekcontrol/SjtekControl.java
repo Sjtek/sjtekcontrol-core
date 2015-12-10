@@ -1,6 +1,7 @@
 package nl.sjtek.sjtekcontrol;
 
 import com.sun.net.httpserver.HttpServer;
+import nl.sjtek.sjtekcontrol.data.SettingsManager;
 import nl.sjtek.sjtekcontrol.handlers.ApiHandler;
 
 import java.io.IOException;
@@ -12,6 +13,8 @@ public class SjtekControl {
 
     public SjtekControl() {
         System.out.println("Starting SjtekControl");
+        System.out.println("Loading settings:");
+        SettingsManager.getInstance();
         System.out.println("Starting SjtekAPI");
         this.apiHandler = ApiHandler.getInstance();
     }
