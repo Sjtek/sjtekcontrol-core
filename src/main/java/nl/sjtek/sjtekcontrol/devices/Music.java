@@ -2,6 +2,7 @@ package nl.sjtek.sjtekcontrol.devices;
 
 import nl.sjtek.sjtekcontrol.data.Arguments;
 import nl.sjtek.sjtekcontrol.data.SettingsManager;
+import nl.sjtek.sjtekcontrol.utils.Executor;
 import org.bff.javampd.MPD;
 import org.bff.javampd.MPDFile;
 import org.bff.javampd.Player;
@@ -13,6 +14,7 @@ import org.bff.javampd.exception.MPDPlaylistException;
 import org.bff.javampd.objects.MPDSong;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 
 
@@ -132,12 +134,21 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
             }
         } else {
             try {
-                MPDFile mpdFile = new MPDFile();
-                mpdFile.setPath(arguments.getUrl());
-                mpd.getPlaylist().addFileOrDirectory(mpdFile);
-                mpd.getPlayer().playNext();
-            } catch (MPDPlaylistException | MPDPlayerException e) {
+                String command =
+                        "/usr/bin/mpc"
+                                + " -h "
+                                + SettingsManager.getInstance().getMusic().getMpdHost()
+                                + " insert "
+                                + arguments.getUrl();
+                Executor.execute(command);
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
+            } finally {
+                try {
+                    mpd.getPlayer().playNext();
+                } catch (MPDPlayerException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
