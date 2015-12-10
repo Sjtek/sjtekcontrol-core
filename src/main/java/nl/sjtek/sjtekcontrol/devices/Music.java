@@ -210,8 +210,10 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
 
         String path;
         boolean injectTaylorSwift;
-
-        if (arguments.getUrl() != null) {
+        if (arguments.getUser() != null) {
+            path = arguments.getUser().getMusic();
+            injectTaylorSwift = false;
+        } else if (arguments.getUrl() != null) {
             path = arguments.getUrl();
             injectTaylorSwift = false;
         } else {
