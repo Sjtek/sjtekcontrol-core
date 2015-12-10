@@ -14,7 +14,7 @@ public class SjtekControl {
     public SjtekControl() {
         System.out.println("Starting SjtekControl");
         System.out.println("Loading settings:");
-        SettingsManager.getInstance();
+        SettingsManager.getInstance().reload();
         System.out.println("Starting SjtekAPI");
         this.apiHandler = ApiHandler.getInstance();
     }

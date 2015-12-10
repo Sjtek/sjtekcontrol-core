@@ -15,7 +15,7 @@ import java.util.TreeMap;
  */
 public class SettingsManager {
 
-    private static final String DEFAULT_PATH = "/etc/sjtekcontrol/settings.json";
+    private static final String DEFAULT_PATH = "/etc/sjtekcontrol/config.json";
     private static SettingsManager instance = new SettingsManager();
 
     private Music music = new Music();
@@ -79,11 +79,14 @@ public class SettingsManager {
                 newSettingsManager = new Gson().fromJson(jsonString, this.getClass());
                 System.out.println("Reload completed.");
             } else {
+                System.out.println("Reload error. Data is empty.");
                 throw new IOException("Data empty");
             }
         } catch (FileNotFoundException e) {
+            System.out.println("Reload error. File not found");
             newSettingsManager = new SettingsManager();
         } catch (IOException e) {
+            System.out.println("Reload error. IOException");
             e.printStackTrace();
             newSettingsManager = new SettingsManager();
         }
@@ -127,7 +130,7 @@ public class SettingsManager {
     }
 
     public class Music {
-        private String mpdHost = "127.0.0.1";
+        private String mpdHost = "mopidy";
         private int mpdPort = 6600;
 
         private String defaultPlaylist = "spotify:user:1133212423:playlist:2A8r6F6GiLwpBCUQ0ImYKW";
