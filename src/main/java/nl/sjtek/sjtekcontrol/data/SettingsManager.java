@@ -2,10 +2,7 @@ package nl.sjtek.sjtekcontrol.data;
 
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
@@ -53,16 +50,14 @@ public class SettingsManager {
                         "spotify:user:1130395265:playlist:5UOGVcoR34i1XUFLYCXbnz"
                 }
         ));
-
-        dump();
     }
 
     public static SettingsManager getInstance() {
         return instance;
     }
 
-    public void dump() {
-        System.out.println("Dump: " + new Gson().toJson(this));
+    public String dump() {
+        return new Gson().toJson(this, this.getClass());
     }
 
     public void reload() {
@@ -84,6 +79,7 @@ public class SettingsManager {
             }
         } catch (FileNotFoundException e) {
             System.out.println("Reload error. File not found");
+            writeFile(path);
             newSettingsManager = new SettingsManager();
         } catch (IOException e) {
             System.out.println("Reload error. IOException");
@@ -105,6 +101,16 @@ public class SettingsManager {
                 line = bufferedReader.readLine();
             }
             return stringBuilder.toString();
+        }
+    }
+
+    private void writeFile(String path) {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new PrintWriter(new FileWriter(path)))) {
+            bufferedWriter.write(dump());
+            bufferedWriter.flush();
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
