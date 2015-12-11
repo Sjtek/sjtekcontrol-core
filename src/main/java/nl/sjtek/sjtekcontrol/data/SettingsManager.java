@@ -31,6 +31,11 @@ public class SettingsManager {
                 },
                 new String[]{
                         "spotify:user:1133212423:playlist:6GoCxjOJ5pXgr74Za0z9bt"
+                },
+                new String[]{
+                        "1853719819",       // OV Chipkaart
+                        "16514020840",      // Witte kaart
+                        "48115222160",      // Sleutelhanger
                 }
         ));
         userSettings.put("Tijn", new UserSettings(
@@ -40,6 +45,10 @@ public class SettingsManager {
                 },
                 new String[]{
                         "spotify:user:1123840057:playlist:1kbSO9MqJMWOdsIfPhjcvW"
+                },
+                new String[]{
+                        "552518698",        // OV Chipkaart
+                        "6334480",          // Sleutelhanger
                 }
         ));
         userSettings.put("Kevin", new UserSettings(
@@ -48,6 +57,9 @@ public class SettingsManager {
                 },
                 new String[]{
                         "spotify:user:1130395265:playlist:5UOGVcoR34i1XUFLYCXbnz"
+                },
+                new String[]{
+                        "281846010",        // Sleutelhanger
                 }
         ));
     }
@@ -222,10 +234,12 @@ public class SettingsManager {
     public class UserSettings {
         private final String[] nickNames;
         private final String[] playlists;
+        private final String[] nfcTags;
 
-        public UserSettings(String[] nickNames, String[] playlists) {
+        public UserSettings(String[] nickNames, String[] playlists, String[] nfcTags) {
             this.nickNames = nickNames;
             this.playlists = playlists;
+            this.nfcTags = nfcTags;
         }
 
         public String[] getNickNames() {
@@ -234,6 +248,10 @@ public class SettingsManager {
 
         public String[] getPlaylists() {
             return playlists;
+        }
+
+        public String[] getNfcTags() {
+            return nfcTags;
         }
     }
 }
