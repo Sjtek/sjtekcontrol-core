@@ -3,10 +3,10 @@ package nl.sjtek.sjtekcontrol.network;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import nl.sjtek.sjtekcontrol.modules.*;
+import nl.sjtek.sjtekcontrol.settings.SettingsManager;
+import nl.sjtek.sjtekcontrol.settings.User;
 import nl.sjtek.sjtekcontrol.utils.Personalise;
-import nl.sjtek.sjtekcontrol.utils.SettingsManager;
 import nl.sjtek.sjtekcontrol.utils.Speech;
-import nl.sjtek.sjtekcontrol.utils.User;
 import org.bff.javampd.exception.MPDConnectionException;
 
 import java.io.IOException;

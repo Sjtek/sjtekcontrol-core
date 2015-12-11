@@ -1,5 +1,7 @@
 package nl.sjtek.sjtekcontrol.utils;
 
+import nl.sjtek.sjtekcontrol.settings.User;
+
 /**
  * Created by wouter on 28-11-15.
  */

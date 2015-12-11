@@ -1,8 +1,8 @@
 package nl.sjtek.sjtekcontrol.modules;
 
 import nl.sjtek.sjtekcontrol.network.Arguments;
+import nl.sjtek.sjtekcontrol.settings.SettingsManager;
 import nl.sjtek.sjtekcontrol.utils.Executor;
-import nl.sjtek.sjtekcontrol.utils.SettingsManager;
 import org.bff.javampd.MPD;
 import org.bff.javampd.MPDFile;
 import org.bff.javampd.Player;

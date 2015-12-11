@@ -1,4 +1,4 @@
-package nl.sjtek.sjtekcontrol.utils;
+package nl.sjtek.sjtekcontrol.settings;
 
 import java.util.Random;
 
@@ -12,7 +12,7 @@ public enum User {
 
     static Random random = new Random();
 
-    private SettingsManager.UserSettings getUserSettings() {
+    private UserSettings getUserSettings() {
         return SettingsManager.getInstance().getUserSettings().get(super.toString());
     }
 
@@ -27,6 +27,10 @@ public enum User {
     public String getMusic() {
         if (getPlaylists().length == 0) return "";
         return getPlaylists()[0];
+    }
+
+    public String[] getNFCTags() {
+        return getUserSettings().getNfcTags();
     }
 
     @Override

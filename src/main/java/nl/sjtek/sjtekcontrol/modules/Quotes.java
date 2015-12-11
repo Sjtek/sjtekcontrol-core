@@ -1,6 +1,6 @@
 package nl.sjtek.sjtekcontrol.modules;
 
-import nl.sjtek.sjtekcontrol.utils.SettingsManager;
+import nl.sjtek.sjtekcontrol.settings.SettingsManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

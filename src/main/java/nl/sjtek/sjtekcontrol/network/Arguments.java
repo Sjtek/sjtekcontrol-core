@@ -1,6 +1,6 @@
 package nl.sjtek.sjtekcontrol.network;
 
-import nl.sjtek.sjtekcontrol.utils.User;
+import nl.sjtek.sjtekcontrol.settings.User;
 import org.apache.commons.codec.Charsets;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;

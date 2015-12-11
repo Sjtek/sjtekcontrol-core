@@ -2,7 +2,7 @@ package nl.sjtek.sjtekcontrol.modules;
 
 import nl.sjtek.sjtekcontrol.network.ApiHandler;
 import nl.sjtek.sjtekcontrol.network.Arguments;
-import nl.sjtek.sjtekcontrol.utils.User;
+import nl.sjtek.sjtekcontrol.settings.User;
 import org.json.JSONObject;
 
 /**
@@ -11,34 +11,13 @@ import org.json.JSONObject;
 @SuppressWarnings("unused")
 public class NFC extends BaseModule {
 
-    private static final String[] CARDS_WOUTER = {
-            "1853719819",       // OV Chipkaart
-            "16514020840",      // Witte kaart
-            "48115222160",      // Sleutelhanger
-    };
-
-    private static final String[] CARDS_TIJN = {
-            "552518698",        // OV Chipkaart
-            "6334480",
-    };
-
-    private static final String[] CARDS_KEVIN = {
-            "281846010",
-    };
-
     public void read(Arguments arguments) {
         String scannedCard = arguments.getCardId();
 
-        for (String card : CARDS_WOUTER) {
-            if (scannedCard.equals(card)) doStuff(User.WOUTER);
-        }
-
-        for (String card : CARDS_TIJN) {
-            if (scannedCard.equals(card)) doStuff(User.TIJN);
-        }
-
-        for (String card : CARDS_KEVIN) {
-            if (scannedCard.equals(card)) doStuff(User.KEVIN);
+        for (User user : User.values()) {
+            for (String cardId : user.getNFCTags()) {
+                if (cardId.equals(scannedCard)) doStuff(user);
+            }
         }
     }
 
