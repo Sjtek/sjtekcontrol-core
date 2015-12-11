@@ -1,13 +1,10 @@
-package nl.sjtek.sjtekcontrol.handlers;
+package nl.sjtek.sjtekcontrol.network;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import nl.sjtek.sjtekcontrol.data.Arguments;
-import nl.sjtek.sjtekcontrol.data.JsonResponse;
-import nl.sjtek.sjtekcontrol.data.SettingsManager;
-import nl.sjtek.sjtekcontrol.devices.*;
-import nl.sjtek.sjtekcontrol.utils.Page;
+import nl.sjtek.sjtekcontrol.modules.*;
 import nl.sjtek.sjtekcontrol.utils.Personalise;
+import nl.sjtek.sjtekcontrol.utils.SettingsManager;
 import nl.sjtek.sjtekcontrol.utils.Speech;
 import nl.sjtek.sjtekcontrol.utils.User;
 import org.bff.javampd.exception.MPDConnectionException;
@@ -28,7 +25,6 @@ public class ApiHandler implements HttpHandler {
     private Temperature temperature;
     private TV tv;
     private Sonarr sonarr;
-    private Minecraft minecraft;
     private Quotes quotes;
     private NFC nfc;
     private NightMode nightMode;
@@ -52,8 +48,6 @@ public class ApiHandler implements HttpHandler {
         this.tv = new TV();
         System.out.print(", sonarr");
         this.sonarr = new Sonarr();
-        System.out.print(", minecraft");
-        this.minecraft = new Minecraft();
         System.out.print(", quotes");
         this.quotes = new Quotes();
         System.out.print(", NFC");
@@ -106,7 +100,7 @@ public class ApiHandler implements HttpHandler {
                         break;
                     case "reload":
                         SettingsManager.getInstance().reload();
-                        if (arguments.isUseVoice()) Speech.speakAsync("Settings reloaded");
+                        if (arguments.useVoice()) Speech.speakAsync("Settings reloaded");
                         responseType = ResponseType.SETTINGS;
                         responseCode = 200;
                         break;
@@ -119,8 +113,6 @@ public class ApiHandler implements HttpHandler {
                             execute(arguments, methodString, lights);
                         } else if (classString.equals(TV.class.getSimpleName().toLowerCase())) {
                             execute(arguments, methodString, tv);
-                        } else if (classString.equals(Minecraft.class.getSimpleName().toLowerCase())) {
-                            execute(arguments, methodString, minecraft);
                         } else if (classString.equals(NFC.class.getSimpleName().toLowerCase())) {
                             responseType = ResponseType.CLEAN;
                             execute(arguments, methodString, nfc);
@@ -138,15 +130,7 @@ public class ApiHandler implements HttpHandler {
         if (responseCode == 200) {
             switch (responseType) {
                 case DEFAULT: {
-                    String stringMusic = music.toString();
-                    String stringLights = lights.toString();
-                    String stringTemperature = temperature.toString();
-                    String stringTv = tv.toString();
-                    String stringSonarr = sonarr.toString();
-                    String stringMinecraft = minecraft.toString();
-                    String stringQuotes = quotes.toString();
-
-                    response = JsonResponse.generate(stringMusic, stringLights, stringTemperature, stringTv, stringSonarr, stringMinecraft, stringQuotes);
+                    response = Response.create(getAll());
                 }
                 break;
                 case CLEAN:
@@ -191,19 +175,19 @@ public class ApiHandler implements HttpHandler {
         User user = arguments.getUser();
         boolean isWouter = (user != null && user == User.WOUTER);
         if (!isOn(isWouter)) {
-            if (user != null && arguments.isUseVoice()) Speech.speakAsync(Personalise.messageWelcome(user));
+            if (user != null && arguments.useVoice()) Speech.speakAsync(Personalise.messageWelcome(user));
             lights.toggle1on(dummyArguments);
             lights.toggle2on(dummyArguments);
             if (isWouter) lights.toggle3on(dummyArguments);
             if (!nightMode.isEnabled()) {
                 if (user != null) {
-//                    music.start(new Arguments().setUrl(user.getMusic()));
+                    // music.start(new Arguments().setUrl(user.getMusic()));
                 } else if (arguments.getUrl() != null && !arguments.getUrl().isEmpty()) {
                     music.start(arguments);
                 }
             }
         } else {
-            if (user != null && arguments.isUseVoice()) Speech.speakAsync(Personalise.messageLeave(user));
+            if (user != null && arguments.useVoice()) Speech.speakAsync(Personalise.messageLeave(user));
             music.pause(dummyArguments);
             lights.toggle1off(dummyArguments);
             lights.toggle2off(dummyArguments);
@@ -231,10 +215,6 @@ public class ApiHandler implements HttpHandler {
         return sonarr;
     }
 
-    public Minecraft getMinecraft() {
-        return minecraft;
-    }
-
     public Quotes getQuotes() {
         return quotes;
     }
@@ -245,6 +225,19 @@ public class ApiHandler implements HttpHandler {
 
     public NightMode getNightMode() {
         return nightMode;
+    }
+
+    public BaseModule[] getAll() {
+        return new BaseModule[]{
+                music,
+                lights,
+                temperature,
+                tv,
+                sonarr,
+                quotes,
+                nfc,
+                nightMode,
+        };
     }
 
     public boolean isOn(boolean checkWouter) {

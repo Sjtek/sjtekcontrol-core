@@ -1,4 +1,4 @@
-package nl.sjtek.sjtekcontrol.devices;
+package nl.sjtek.sjtekcontrol.modules;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class Temperature {
+public class Temperature extends BaseModule {
 
     private static final int DELAY = 300000;
     private static final String WEATHER_URL_OUTSIDE = "http://api.openweathermap.org/data/2.5/weather?id=2747010?appid=526d01226448149fe241d2991d0637c4";
@@ -22,26 +22,16 @@ public class Temperature {
     }
 
     @Override
-    public String toString() {
+    public JSONObject toJson() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("inside", tempInside);
         jsonObject.put("outside", tempOutside);
-        return jsonObject.toString();
+        return jsonObject;
     }
 
-    private class UpdateThread implements Runnable {
-
-        @Override
-        public void run() {
-            while (true) {
-                tempOutside = parseOutside(download(WEATHER_URL_OUTSIDE));
-                tempInside = parseInside(download(WEATHER_URL_INSIDE));
-                try {
-                    Thread.sleep(DELAY);
-                } catch (InterruptedException ignored) {
-                }
-            }
-        }
+    @Override
+    public String getSummaryText() {
+        return "The temperature inside is " + tempInside + " degrees, and outside " + tempOutside + " degrees.";
     }
 
     private int parseOutside(String response) {
@@ -91,6 +81,21 @@ public class Temperature {
             }
         } catch (IOException e) {
             return "";
+        }
+    }
+
+    private class UpdateThread implements Runnable {
+
+        @Override
+        public void run() {
+            while (true) {
+                tempOutside = parseOutside(download(WEATHER_URL_OUTSIDE));
+                tempInside = parseInside(download(WEATHER_URL_INSIDE));
+                try {
+                    Thread.sleep(DELAY);
+                } catch (InterruptedException ignored) {
+                }
+            }
         }
     }
 }

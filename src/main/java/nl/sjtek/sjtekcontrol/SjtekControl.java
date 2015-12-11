@@ -1,8 +1,8 @@
 package nl.sjtek.sjtekcontrol;
 
 import com.sun.net.httpserver.HttpServer;
-import nl.sjtek.sjtekcontrol.data.SettingsManager;
-import nl.sjtek.sjtekcontrol.handlers.ApiHandler;
+import nl.sjtek.sjtekcontrol.network.ApiHandler;
+import nl.sjtek.sjtekcontrol.utils.SettingsManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

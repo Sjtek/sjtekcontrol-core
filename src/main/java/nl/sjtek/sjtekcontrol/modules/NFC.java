@@ -1,14 +1,15 @@
-package nl.sjtek.sjtekcontrol.devices;
+package nl.sjtek.sjtekcontrol.modules;
 
-import nl.sjtek.sjtekcontrol.data.Arguments;
-import nl.sjtek.sjtekcontrol.handlers.ApiHandler;
+import nl.sjtek.sjtekcontrol.network.ApiHandler;
+import nl.sjtek.sjtekcontrol.network.Arguments;
 import nl.sjtek.sjtekcontrol.utils.User;
+import org.json.JSONObject;
 
 /**
  * Created by wouter on 28-11-15.
  */
 @SuppressWarnings("unused")
-public class NFC {
+public class NFC extends BaseModule {
 
     private static final String[] CARDS_WOUTER = {
             "1853719819",       // OV Chipkaart
@@ -43,5 +44,15 @@ public class NFC {
 
     private void doStuff(User user) {
         ApiHandler.getInstance().masterToggle(new Arguments().setUseVoice(true).setUser(user));
+    }
+
+    @Override
+    public JSONObject toJson() {
+        return new JSONObject();
+    }
+
+    @Override
+    public String getSummaryText() {
+        return "There is not much to tell about the NFC module.";
     }
 }

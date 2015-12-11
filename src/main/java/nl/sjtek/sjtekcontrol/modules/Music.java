@@ -1,8 +1,8 @@
-package nl.sjtek.sjtekcontrol.devices;
+package nl.sjtek.sjtekcontrol.modules;
 
-import nl.sjtek.sjtekcontrol.data.Arguments;
-import nl.sjtek.sjtekcontrol.data.SettingsManager;
+import nl.sjtek.sjtekcontrol.network.Arguments;
 import nl.sjtek.sjtekcontrol.utils.Executor;
+import nl.sjtek.sjtekcontrol.utils.SettingsManager;
 import org.bff.javampd.MPD;
 import org.bff.javampd.MPDFile;
 import org.bff.javampd.Player;
@@ -19,7 +19,10 @@ import java.net.UnknownHostException;
 
 
 @SuppressWarnings({"UnusedParameters", "unused"})
-public class Music implements TrackPositionChangeListener, VolumeChangeListener, PlayerBasicChangeListener {
+public class Music extends BaseModule implements
+        TrackPositionChangeListener,
+        VolumeChangeListener,
+        PlayerBasicChangeListener {
 
     private MPD mpd = null;
     private MusicState musicState = new MusicState();
@@ -201,15 +204,6 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
     }
 
     /**
-     * Empty.
-     *
-     * @param arguments Arguments
-     */
-    public void info(Arguments arguments) {
-
-    }
-
-    /**
      * Clear queue and stop player. Then add SjtekSjpeellijst and Taylor Swift, shuffle it and start playback.
      *
      * @param arguments Arguments
@@ -304,12 +298,6 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
         }
     }
 
-
-    @Override
-    public String toString() {
-        return musicState.toString();
-    }
-
     @Override
     public void trackPositionChanged(TrackPositionChangeEvent event) {
         musicState.setTimeElapsed(event.getElapsedTime());
@@ -346,6 +334,31 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
             }
         } catch (MPDPlayerException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public JSONObject toJson() {
+        return musicState.toJson();
+    }
+
+    @Override
+    public String getSummaryText() {
+        try {
+            Player.Status status = mpd.getPlayer().getStatus();
+            switch (status) {
+                case STATUS_STOPPED:
+                    return "The music is stopped.";
+                case STATUS_PLAYING:
+                    return "The current playing song is " + musicState.title + " by " + musicState.artist + ".";
+                case STATUS_PAUSED:
+                    return "The music is paused.";
+                default:
+                    throw new MPDPlayerException("Unknown status");
+            }
+        } catch (MPDPlayerException e) {
+            e.printStackTrace();
+            return "An error occurred while communicating with Mopidy.";
         }
     }
 
@@ -386,8 +399,7 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
             this.status = (status != null ? status.toString() : "ERROR");
         }
 
-        @Override
-        public String toString() {
+        public JSONObject toJson() {
             JSONObject jsonSong = new JSONObject();
             jsonSong.put("artist", artist);
             jsonSong.put("title", title);
@@ -400,7 +412,7 @@ public class Music implements TrackPositionChangeListener, VolumeChangeListener,
             jsonMusic.put("volume", volume);
             jsonMusic.put("state", status);
 
-            return jsonMusic.toString();
+            return jsonMusic;
         }
     }
 }

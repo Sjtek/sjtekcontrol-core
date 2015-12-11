@@ -1,6 +1,6 @@
-package nl.sjtek.sjtekcontrol.devices;
+package nl.sjtek.sjtekcontrol.modules;
 
-import nl.sjtek.sjtekcontrol.data.Arguments;
+import nl.sjtek.sjtekcontrol.network.Arguments;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -9,18 +9,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @SuppressWarnings({"UnusedParameters", "unused"})
-public class Lights {
+public class Lights extends BaseModule {
 
-    private static final String SWITCH1ON  = "switch-1-on";
+    private static final String SWITCH1ON = "switch-1-on";
     private static final String SWITCH1OFF = "switch-1-off";
-    private static final String SWITCH2ON  = "switch-2-on";
+    private static final String SWITCH2ON = "switch-2-on";
     private static final String SWITCH2OFF = "switch-2-off";
-    private static final String SWITCH3ON  = "switch-3-on";
+    private static final String SWITCH3ON = "switch-3-on";
     private static final String SWITCH3OFF = "switch-3-off";
 
     private static final String ROOT_URL = "http://192.168.0.70/cgi-bin/";
 
-    private boolean states[] = { false, false, false, false };
+    private boolean states[] = {false, false, false, false};
 
     public Lights() {
 
@@ -138,11 +138,22 @@ public class Lights {
     }
 
     @Override
-    public String toString() {
+    public JSONObject toJson() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("1", states[1]);
         jsonObject.put("2", states[2]);
         jsonObject.put("3", states[3]);
-        return jsonObject.toString();
+        return jsonObject;
+    }
+
+    @Override
+    public String getSummaryText() {
+        String result =
+                (states[1] ? "1, " : "") +
+                        (states[2] ? "2, " : "") +
+                        (states[3] ? "3, " : "");
+        if (result.isEmpty())
+            return "The lights are turned off.";
+        return "The following lights are turned on: " + result + ".";
     }
 }

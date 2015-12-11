@@ -1,6 +1,7 @@
 package nl.sjtek.sjtekcontrol.utils;
 
-import nl.sjtek.sjtekcontrol.handlers.ApiHandler;
+import nl.sjtek.sjtekcontrol.modules.BaseModule;
+import nl.sjtek.sjtekcontrol.network.ApiHandler;
 
 import java.io.IOException;
 
@@ -59,6 +60,15 @@ public class Speech {
 //            e.printStackTrace();
 //        }
 //    }
+
+    public static void tellAboutModules(BaseModule... modules) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (BaseModule module : modules) {
+            stringBuilder.append(module.getSummaryText());
+            stringBuilder.append("  ");
+        }
+        speakAsync(stringBuilder.toString());
+    }
 
     public static synchronized void speak(String text) {
         if (ApiHandler.getInstance().getNightMode().isEnabled()) return;

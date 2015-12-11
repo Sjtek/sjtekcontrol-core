@@ -1,4 +1,4 @@
-package nl.sjtek.sjtekcontrol.data;
+package nl.sjtek.sjtekcontrol.utils;
 
 import com.google.gson.Gson;
 

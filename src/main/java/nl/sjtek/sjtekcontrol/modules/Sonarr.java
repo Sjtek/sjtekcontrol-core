@@ -1,4 +1,4 @@
-package nl.sjtek.sjtekcontrol.devices;
+package nl.sjtek.sjtekcontrol.modules;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * Created by wouter on 20-10-15.
  */
-public class Sonarr {
+public class Sonarr extends BaseModule {
 
     private static final String BASE_URL = "http://192.168.0.64/sonarr/api/calendar";
     private static final String API_KEY = "4259f1a8e0cb4f6098c3560b20320d68";
@@ -23,7 +23,13 @@ public class Sonarr {
     private ArrayList<Episode> episodes = new ArrayList<>();
 
     public Sonarr() {
-       new UpdateThread().start();
+        new UpdateThread().start();
+    }
+
+    public static void main(String args[]) {
+        Sonarr sonarr = new Sonarr();
+        sonarr.update();
+        System.out.println(sonarr.toString());
     }
 
     private void parseCalendar(String jsonString) {
@@ -48,7 +54,7 @@ public class Sonarr {
     }
 
     @Override
-    public String toString() {
+    public JSONObject toJson() {
         JSONArray jsonEpisodes = new JSONArray();
 
         for (Episode episode : episodes) {
@@ -57,8 +63,20 @@ public class Sonarr {
 
         JSONObject jsonSonarr = new JSONObject();
         jsonSonarr.put("upcoming", jsonEpisodes);
+        return jsonSonarr;
+    }
 
-        return jsonSonarr.toString();
+    @Override
+    public String getSummaryText() {
+        if (episodes.size() == 0) {
+            return "There are no upcoming episodes.";
+        } else {
+            Episode episode = episodes.get(0);
+            return "The next upcoming episode is " +
+                    episode.episodeName +
+                    " from " + episode.seriesTitle +
+                    " on " + episode.airDate + ".";
+        }
     }
 
     private synchronized void update() {
@@ -98,12 +116,6 @@ public class Sonarr {
                 }
             }
         }
-    }
-
-    public static void main(String args[]) {
-        Sonarr sonarr = new Sonarr();
-        sonarr.update();
-        System.out.println(sonarr.toString());
     }
 
     public class Episode {

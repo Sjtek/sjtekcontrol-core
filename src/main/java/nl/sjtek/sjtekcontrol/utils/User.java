@@ -1,7 +1,5 @@
 package nl.sjtek.sjtekcontrol.utils;
 
-import nl.sjtek.sjtekcontrol.data.SettingsManager;
-
 import java.util.Random;
 
 /**

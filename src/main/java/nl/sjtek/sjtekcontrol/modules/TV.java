@@ -1,13 +1,13 @@
-package nl.sjtek.sjtekcontrol.devices;
+package nl.sjtek.sjtekcontrol.modules;
 
-import nl.sjtek.sjtekcontrol.data.Arguments;
+import nl.sjtek.sjtekcontrol.network.Arguments;
 import nl.sjtek.sjtekcontrol.utils.Executor;
 import org.json.JSONObject;
 
 import java.io.IOException;
 
 @SuppressWarnings("unused")
-public class TV {
+public class TV extends BaseModule {
 
     // https://github.com/ypid/lgcommander
 
@@ -33,6 +33,16 @@ public class TV {
         new ExecuteThread("25");
     }
 
+    @Override
+    public JSONObject toJson() {
+        return new JSONObject();
+    }
+
+    @Override
+    public String getSummaryText() {
+        return "There is not much to tell about the TV.";
+    }
+
     private class ExecuteThread extends Thread {
 
         private final String[] command;
@@ -50,11 +60,5 @@ public class TV {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public String toString() {
-        JSONObject jsonObject = new JSONObject();
-        return jsonObject.toString();
     }
 }

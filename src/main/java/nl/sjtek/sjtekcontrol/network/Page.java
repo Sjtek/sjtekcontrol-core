@@ -1,4 +1,4 @@
-package nl.sjtek.sjtekcontrol.utils;
+package nl.sjtek.sjtekcontrol.network;
 
 public class Page {
 
