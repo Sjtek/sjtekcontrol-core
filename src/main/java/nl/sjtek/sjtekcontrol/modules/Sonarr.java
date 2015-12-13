@@ -16,7 +16,7 @@ import java.util.ArrayList;
  */
 public class Sonarr extends BaseModule {
 
-    private static final String BASE_URL = "http://192.168.0.64/sonarr/api/calendar";
+    private static final String BASE_URL = "http://sonarr/sonarr/api/calendar";
     private static final String API_KEY = "4259f1a8e0cb4f6098c3560b20320d68";
     private static final int INTERVAL = 3600000;
 

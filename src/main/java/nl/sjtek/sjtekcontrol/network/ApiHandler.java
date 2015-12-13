@@ -85,6 +85,7 @@ public class ApiHandler implements HttpHandler {
                 switch (classString) {
                     case "info":
                         responseCode = 200;
+                        if (arguments.useVoice()) Speech.tellAboutModules(getAll());
                         break;
                     case "switch":
                         masterToggle(arguments);
@@ -152,7 +153,12 @@ public class ApiHandler implements HttpHandler {
         outputStream.close();
     }
 
-    private void execute(Arguments arguments, String methodString, Object executor) {
+    private void execute(Arguments arguments, String methodString, BaseModule executor) {
+        if ("info".equals(methodString)) {
+            executor.info(arguments);
+            responseCode = 200;
+            return;
+        }
         Method method = null;
         try {
             method = executor.getClass().getDeclaredMethod(methodString, arguments.getClass());
