@@ -15,7 +15,7 @@ public class Response {
     public static String create(BaseModule... modules) {
         JSONObject jsonObject = new JSONObject();
         for (BaseModule module : modules) {
-            jsonObject.put(module.getClass().getSimpleName().toLowerCase(), module.toString());
+            jsonObject.put(module.getClass().getSimpleName().toLowerCase(), module.toJson());
         }
         return jsonObject.toString();
     }
