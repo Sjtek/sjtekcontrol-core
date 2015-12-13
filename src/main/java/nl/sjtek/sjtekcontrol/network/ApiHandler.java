@@ -108,13 +108,17 @@ public class ApiHandler implements HttpHandler {
                     default:
                         String methodString = splittedPath[3];
 
-                        if (classString.equals("music")) {
+                        System.out.println();
+                        System.out.println("Method string: " + methodString);
+
+                        if (classString.equals(Music.class.getSimpleName().toLowerCase())) {
                             execute(arguments, methodString, music);
                         } else if (classString.equals(Lights.class.getSimpleName().toLowerCase())) {
                             execute(arguments, methodString, lights);
                         } else if (classString.equals(TV.class.getSimpleName().toLowerCase())) {
                             execute(arguments, methodString, tv);
                         } else if (classString.equals(NFC.class.getSimpleName().toLowerCase())) {
+                            System.out.println("is NFC");
                             responseType = ResponseType.CLEAN;
                             execute(arguments, methodString, nfc);
                         } else if (classString.equals(NightMode.class.getSimpleName().toLowerCase())) {

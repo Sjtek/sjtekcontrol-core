@@ -13,7 +13,7 @@ public enum User {
     static Random random = new Random();
 
     private UserSettings getUserSettings() {
-        return SettingsManager.getInstance().getUserSettings().get(super.toString());
+        return SettingsManager.getInstance().getUserSettings().get(super.toString().toLowerCase());
     }
 
     public String[] getPlaylists() {

@@ -25,7 +25,7 @@ public class UserSettings {
 
     public static Map<String, UserSettings> getDefaults() {
         Map<String, UserSettings> userSettings = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        userSettings.put("Wouter", new UserSettings(
+        userSettings.put("wouter", new UserSettings(
                 new String[]{
                         "sir wouter",
                         "lord habets"
@@ -68,7 +68,7 @@ public class UserSettings {
                 }
 
         ));
-        userSettings.put("Tijn", new UserSettings(
+        userSettings.put("tijn", new UserSettings(
                 new String[]{
                         "3D",
                         "master renders"
@@ -109,7 +109,7 @@ public class UserSettings {
                         }
                 }
         ));
-        userSettings.put("Kevin", new UserSettings(
+        userSettings.put("kevin", new UserSettings(
                 new String[]{
                         "kevin"
                 },

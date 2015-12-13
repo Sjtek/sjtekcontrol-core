@@ -12,16 +12,14 @@ import org.json.JSONObject;
 public class NFC extends BaseModule {
 
     public void read(Arguments arguments) {
-        String scannedCard = arguments.getCardId();
-
         for (User user : User.values()) {
             for (String cardId : user.getNFCTags()) {
-                if (cardId.equals(scannedCard)) doStuff(user);
+                if (cardId.equals(arguments.getCardId())) doStuff(user);
             }
         }
     }
 
-    private void doStuff(User user) {
+    public void doStuff(User user) {
         ApiHandler.getInstance().masterToggle(new Arguments().setUseVoice(true).setUser(user));
     }
 
