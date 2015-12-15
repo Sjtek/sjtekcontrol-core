@@ -33,6 +33,14 @@ public enum User {
         return getUserSettings().getNfcTags();
     }
 
+    public String[][] getGreetings() {
+        return getUserSettings().getGreetings();
+    }
+
+    public String[][] getFarewells() {
+        return getUserSettings().getFarewells();
+    }
+
     @Override
     public String toString() {
         return getNickNames()[random.nextInt(getNickNames().length)];
