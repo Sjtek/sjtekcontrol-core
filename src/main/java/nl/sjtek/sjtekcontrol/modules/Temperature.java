@@ -7,10 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Temperature extends BaseModule {
 
-    private static final int DELAY = 300000;
+    private static final int DELAY_INSIDE = 300000;
+    private static final int DELAY_OUTSIDE = 3600000;
     private static final String WEATHER_URL_OUTSIDE = "http://api.openweathermap.org/data/2.5/weather?id=2747010?appid=526d01226448149fe241d2991d0637c4";
     private static final String WEATHER_URL_INSIDE = "http://192.168.0.70/cgi-bin/temp";
 
@@ -18,7 +21,10 @@ public class Temperature extends BaseModule {
     private int tempOutside = -100;
 
     public Temperature() {
-        new Thread(new UpdateThread()).start();
+        Timer timerInside = new Timer();
+        timerInside.scheduleAtFixedRate(new InsideTask(), 0, DELAY_INSIDE);
+        Timer timerOutside = new Timer();
+        timerOutside.scheduleAtFixedRate(new OutsideTask(), 0, DELAY_OUTSIDE);
     }
 
     @Override
@@ -67,6 +73,7 @@ public class Temperature extends BaseModule {
             connection.setRequestMethod("GET");
             connection.connect();
             int responseCode = connection.getResponseCode();
+            System.out.println("" + responseCode + " - downloaded " + stringUrl);
             if (responseCode == 200) {
                 InputStream inputStream = connection.getInputStream();
                 StringBuilder stringBuffer = new StringBuilder();
@@ -84,18 +91,19 @@ public class Temperature extends BaseModule {
         }
     }
 
-    private class UpdateThread implements Runnable {
+    private class InsideTask extends TimerTask {
 
         @Override
         public void run() {
-            while (true) {
-                tempOutside = parseOutside(download(WEATHER_URL_OUTSIDE));
-                tempInside = parseInside(download(WEATHER_URL_INSIDE));
-                try {
-                    Thread.sleep(DELAY);
-                } catch (InterruptedException ignored) {
-                }
-            }
+            tempInside = parseInside(download(WEATHER_URL_INSIDE));
+        }
+    }
+
+    private class OutsideTask extends TimerTask {
+
+        @Override
+        public void run() {
+            tempOutside = parseOutside(download(WEATHER_URL_OUTSIDE));
         }
     }
 }

@@ -7,7 +7,7 @@ import nl.sjtek.sjtekcontrol.settings.SettingsManager;
 import nl.sjtek.sjtekcontrol.settings.User;
 import nl.sjtek.sjtekcontrol.utils.Personalise;
 import nl.sjtek.sjtekcontrol.utils.Speech;
-import org.bff.javampd.exception.MPDConnectionException;
+import org.bff.javampd.server.MPDConnectionException;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,27 +32,27 @@ public class ApiHandler implements HttpHandler {
     private int responseCode = 0;
 
     private ApiHandler() {
-        System.out.print("Loading module");
-        System.out.print(" music");
+        System.out.print("Loading modules:");
+        System.out.println(" - music");
         try {
             this.music = new Music();
         } catch (UnknownHostException | MPDConnectionException e) {
             e.printStackTrace();
             this.music = null;
         }
-        System.out.print(", lights");
+        System.out.println(" - lights");
         this.lights = new Lights();
-        System.out.print(", temperature");
+        System.out.println(" - temperature");
         this.temperature = new Temperature();
-        System.out.print(",  tv");
+        System.out.println(" - tv");
         this.tv = new TV();
-        System.out.print(", sonarr");
+        System.out.println(" - sonarr");
         this.sonarr = new Sonarr();
-        System.out.print(", quotes");
+        System.out.println(" - quotes");
         this.quotes = new Quotes();
-        System.out.print(", NFC");
+        System.out.println(" - NFC");
         this.nfc = new NFC();
-        System.out.print(", NightMode");
+        System.out.println(" - NightMode");
         this.nightMode = new NightMode();
 
         if (music == null) {
@@ -67,11 +67,13 @@ public class ApiHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+        long start = System.currentTimeMillis();
         Arguments arguments = new Arguments(httpExchange.getRequestURI().getQuery());
         String fullPath = httpExchange.getRequestURI().getPath().toLowerCase();
         System.out.println();
         System.out.println(httpExchange.getRemoteAddress().toString() + " | " +
-                httpExchange.getRequestURI().getPath() + " | " + arguments.toString());
+                httpExchange.getRequestURI().getPath() + " | " +
+                httpExchange.getRequestURI().getQuery());
         String splittedPath[] = fullPath.split("/");
 
         ResponseType responseType = ResponseType.DEFAULT;
@@ -108,9 +110,6 @@ public class ApiHandler implements HttpHandler {
                     default:
                         String methodString = splittedPath[3];
 
-                        System.out.println();
-                        System.out.println("Method string: " + methodString);
-
                         if (classString.equals(Music.class.getSimpleName().toLowerCase())) {
                             execute(arguments, methodString, music);
                         } else if (classString.equals(Lights.class.getSimpleName().toLowerCase())) {
@@ -118,7 +117,6 @@ public class ApiHandler implements HttpHandler {
                         } else if (classString.equals(TV.class.getSimpleName().toLowerCase())) {
                             execute(arguments, methodString, tv);
                         } else if (classString.equals(NFC.class.getSimpleName().toLowerCase())) {
-                            System.out.println("is NFC");
                             responseType = ResponseType.CLEAN;
                             execute(arguments, methodString, nfc);
                         } else if (classString.equals(NightMode.class.getSimpleName().toLowerCase())) {
@@ -151,6 +149,8 @@ public class ApiHandler implements HttpHandler {
             response = Page.getPage(responseCode);
         }
 
+        long stop = System.currentTimeMillis();
+        System.out.println("Response " + responseCode + " " + responseType + " " + (stop - start) + "ms");
         httpExchange.sendResponseHeaders(responseCode, response.getBytes().length);
         OutputStream outputStream = httpExchange.getResponseBody();
         outputStream.write(response.getBytes());

@@ -3,15 +3,11 @@ package nl.sjtek.sjtekcontrol.modules;
 import nl.sjtek.sjtekcontrol.network.Arguments;
 import nl.sjtek.sjtekcontrol.settings.SettingsManager;
 import nl.sjtek.sjtekcontrol.utils.Executor;
-import org.bff.javampd.MPD;
-import org.bff.javampd.MPDFile;
-import org.bff.javampd.Player;
-import org.bff.javampd.StandAloneMonitor;
-import org.bff.javampd.events.*;
-import org.bff.javampd.exception.MPDConnectionException;
-import org.bff.javampd.exception.MPDPlayerException;
-import org.bff.javampd.exception.MPDPlaylistException;
-import org.bff.javampd.objects.MPDSong;
+import org.bff.javampd.file.MPDFile;
+import org.bff.javampd.player.Player;
+import org.bff.javampd.server.MPD;
+import org.bff.javampd.server.MPDConnectionException;
+import org.bff.javampd.song.MPDSong;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -19,10 +15,7 @@ import java.net.UnknownHostException;
 
 
 @SuppressWarnings({"UnusedParameters", "unused"})
-public class Music extends BaseModule implements
-        TrackPositionChangeListener,
-        VolumeChangeListener,
-        PlayerBasicChangeListener {
+public class Music extends BaseModule {
 
     private MPD mpd = null;
     private MusicState musicState = new MusicState();
@@ -38,12 +31,6 @@ public class Music extends BaseModule implements
         builder.server(SettingsManager.getInstance().getMusic().getMpdHost());
         builder.port(SettingsManager.getInstance().getMusic().getMpdPort());
         mpd = builder.build();
-
-        StandAloneMonitor monitor = mpd.getMonitor();
-        monitor.addVolumeChangeListener(this);
-        monitor.addPlayerChangeListener(this);
-        monitor.addTrackPositionChangeListener(this);
-        monitor.start();
     }
 
     /**
@@ -52,16 +39,12 @@ public class Music extends BaseModule implements
      * @param arguments Arguments
      */
     public void toggle(Arguments arguments) {
-        try {
-            Player player = mpd.getPlayer();
-            Player.Status status = player.getStatus();
-            if (status == Player.Status.STATUS_STOPPED) {
-                player.play();
-            } else {
-                player.pause();
-            }
-        } catch (MPDPlayerException ignored) {
-
+        Player player = mpd.getPlayer();
+        Player.Status status = player.getStatus();
+        if (status == Player.Status.STATUS_STOPPED) {
+            player.play();
+        } else {
+            player.pause();
         }
     }
 
@@ -72,21 +55,12 @@ public class Music extends BaseModule implements
      * @param arguments Uses URL
      */
     public void play(Arguments arguments) {
-        int length;
-        try {
-            length = mpd.getPlaylist().getSongList().size();
-        } catch (MPDPlaylistException e) {
-            length = -1;
-        }
+        int length = mpd.getPlaylist().getSongList().size();
 
         if (length == 0) {
             start(new Arguments());
         } else {
-            try {
-                mpd.getPlayer().play();
-            } catch (MPDPlayerException ignored) {
-
-            }
+            mpd.getPlayer().play();
         }
     }
 
@@ -96,14 +70,10 @@ public class Music extends BaseModule implements
      * @param arguments Arguments
      */
     public void pause(Arguments arguments) {
-        try {
-            Player player = mpd.getPlayer();
-            Player.Status status = player.getStatus();
-            if (status == Player.Status.STATUS_PLAYING) {
-                player.pause();
-            }
-        } catch (MPDPlayerException ignored) {
-
+        Player player = mpd.getPlayer();
+        Player.Status status = player.getStatus();
+        if (status == Player.Status.STATUS_PLAYING) {
+            player.pause();
         }
     }
 
@@ -113,13 +83,10 @@ public class Music extends BaseModule implements
      * @param arguments Arguments
      */
     public void stop(Arguments arguments) {
-        try {
-            if (mpd.getPlayer().getStatus() != Player.Status.STATUS_STOPPED) {
-                mpd.getPlayer().stop();
-            } else {
-                clear(new Arguments());
-            }
-        } catch (MPDPlayerException ignored) {
+        if (mpd.getPlayer().getStatus() != Player.Status.STATUS_STOPPED) {
+            mpd.getPlayer().stop();
+        } else {
+            clear(new Arguments());
         }
     }
 
@@ -130,11 +97,7 @@ public class Music extends BaseModule implements
      */
     public void next(Arguments arguments) {
         if (arguments.getUrl() == null) {
-            try {
-                mpd.getPlayer().playNext();
-            } catch (MPDPlayerException ignored) {
-
-            }
+            mpd.getPlayer().playNext();
         } else {
             try {
                 String command =
@@ -147,11 +110,7 @@ public class Music extends BaseModule implements
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             } finally {
-                try {
-                    mpd.getPlayer().playNext();
-                } catch (MPDPlayerException e) {
-                    e.printStackTrace();
-                }
+                mpd.getPlayer().playNext();
             }
         }
     }
@@ -162,11 +121,7 @@ public class Music extends BaseModule implements
      * @param arguments Arguments
      */
     public void previous(Arguments arguments) {
-        try {
-            mpd.getPlayer().playPrev();
-        } catch (MPDPlayerException ignored) {
-
-        }
+        mpd.getPlayer().playPrevious();
     }
 
     /**
@@ -175,11 +130,7 @@ public class Music extends BaseModule implements
      * @param arguments Arguments
      */
     public void shuffle(Arguments arguments) {
-        try {
-            mpd.getPlaylist().shuffle();
-        } catch (MPDPlaylistException ignored) {
-
-        }
+        mpd.getPlaylist().shuffle();
     }
 
     /**
@@ -188,10 +139,7 @@ public class Music extends BaseModule implements
      * @param arguments Arguments
      */
     public void clear(Arguments arguments) {
-        try {
-            mpd.getPlaylist().clearPlaylist();
-        } catch (MPDPlaylistException ignored) {
-        }
+        mpd.getPlaylist().clearPlaylist();
     }
 
     /**
@@ -226,22 +174,14 @@ public class Music extends BaseModule implements
             injectTaylorSwift = SettingsManager.getInstance().getMusic().isTaylorSwiftInject();
         }
 
-        try {
-            MPDFile mpdFile = new MPDFile();
-            mpdFile.setPath(path);
-            mpd.getPlaylist().addFileOrDirectory(mpdFile);
-        } catch (MPDPlaylistException e) {
-            e.printStackTrace();
-        }
+        MPDFile mpdFile = new MPDFile();
+        mpdFile.setPath(path);
+        mpd.getPlaylist().addFileOrDirectory(mpdFile);
 
         if (injectTaylorSwift) {
             MPDFile tt = new MPDFile();
             tt.setPath(SettingsManager.getInstance().getMusic().getTaylorSwiftPath());
-            try {
-                mpd.getPlaylist().addFileOrDirectory(tt);
-            } catch (MPDPlaylistException e) {
-                e.printStackTrace();
-            }
+            mpd.getPlaylist().addFileOrDirectory(tt);
         }
 
         shuffle(dummyArguments);
@@ -254,12 +194,9 @@ public class Music extends BaseModule implements
      * @param arguments Arguments
      */
     public void volumelower(Arguments arguments) {
-        try {
-            int newVolume = mpd.getPlayer().getVolume() - SettingsManager.getInstance().getMusic().getVolumeStepDown();
-            if (newVolume < 0) newVolume = 0;
-            mpd.getPlayer().setVolume(newVolume);
-        } catch (MPDPlayerException ignored) {
-        }
+        int newVolume = mpd.getPlayer().getVolume() - SettingsManager.getInstance().getMusic().getVolumeStepDown();
+        if (newVolume < 0) newVolume = 0;
+        mpd.getPlayer().setVolume(newVolume);
     }
 
     /**
@@ -268,13 +205,9 @@ public class Music extends BaseModule implements
      * @param arguments Arguments
      */
     public void volumeraise(Arguments arguments) {
-        try {
-            int newVolume = mpd.getPlayer().getVolume() + SettingsManager.getInstance().getMusic().getVolumeStepUp();
-            if (newVolume > 100) newVolume = 100;
-            mpd.getPlayer().setVolume(newVolume);
-        } catch (MPDPlayerException ignored) {
-
-        }
+        int newVolume = mpd.getPlayer().getVolume() + SettingsManager.getInstance().getMusic().getVolumeStepUp();
+        if (newVolume > 100) newVolume = 100;
+        mpd.getPlayer().setVolume(newVolume);
     }
 
     /**
@@ -283,82 +216,55 @@ public class Music extends BaseModule implements
      * @param arguments Arguments
      */
     public void volumeneutral(Arguments arguments) {
-        try {
-            mpd.getPlayer().setVolume(SettingsManager.getInstance().getMusic().getVolumeNeutral());
-        } catch (MPDPlayerException ignored) {
-
-        }
+        mpd.getPlayer().setVolume(SettingsManager.getInstance().getMusic().getVolumeNeutral());
     }
 
     public boolean isPlaying() {
-        try {
-            return mpd.getPlayer().getStatus() == Player.Status.STATUS_PLAYING;
-        } catch (MPDPlayerException e) {
-            return false;
+        return mpd.getPlayer().getStatus() == Player.Status.STATUS_PLAYING;
+    }
+
+    private void updateMusicState() {
+        Player player = mpd.getPlayer();
+        MPDSong song = player.getCurrentSong();
+        Player.Status status = player.getStatus();
+        if (status != Player.Status.STATUS_PLAYING && status != Player.Status.STATUS_PAUSED) {
+            song = null;
         }
-    }
-
-    @Override
-    public void trackPositionChanged(TrackPositionChangeEvent event) {
-        musicState.setTimeElapsed(event.getElapsedTime());
-    }
-
-    @Override
-    public void volumeChanged(VolumeChangeEvent event) {
-        musicState.setVolume(event.getVolume());
-    }
-
-    @Override
-    public void playerBasicChange(PlayerBasicChangeEvent event) {
-        try {
-            Player player = mpd.getPlayer();
-            MPDSong song = player.getCurrentSong();
-            Player.Status status = player.getStatus();
-            System.out.println("New player status: " + status.toString());
-            if (status != Player.Status.STATUS_PLAYING && status != Player.Status.STATUS_PAUSED) {
-                song = null;
-                System.out.println("Song is null");
-            }
-            if (song != null) {
-                musicState.setArtist(song.getArtistName());
-                musicState.setAlbum(song.getAlbumName());
-                musicState.setTitle(song.getName());
-                musicState.setTimeTotal(player.getTotalTime());
-                musicState.setStatus(status);
-            } else {
-                musicState.setArtist("");
-                musicState.setAlbum("");
-                musicState.setTitle("");
-                musicState.setTimeTotal(0);
-                musicState.setStatus(status);
-            }
-        } catch (MPDPlayerException e) {
-            e.printStackTrace();
+        if (song != null) {
+            musicState.setArtist(song.getArtistName());
+            musicState.setAlbum(song.getAlbumName());
+            musicState.setTitle(song.getName());
+            musicState.setTimeElapsed(player.getElapsedTime());
+            musicState.setTimeTotal(player.getTotalTime());
+            musicState.setStatus(status);
+        } else {
+            musicState.setArtist("");
+            musicState.setAlbum("");
+            musicState.setTitle("");
+            musicState.setTimeElapsed(0);
+            musicState.setTimeTotal(0);
+            musicState.setStatus(status);
         }
     }
 
     @Override
     public JSONObject toJson() {
+        updateMusicState();
         return musicState.toJson();
     }
 
     @Override
     public String getSummaryText() {
-        try {
-            Player.Status status = mpd.getPlayer().getStatus();
-            switch (status) {
-                case STATUS_STOPPED:
-                    return "The music is stopped.";
-                case STATUS_PLAYING:
-                    return "The current playing song is " + musicState.title + " by " + musicState.artist + ".";
-                case STATUS_PAUSED:
-                    return "The music is paused.";
-                default:
-                    throw new MPDPlayerException("Unknown status");
-            }
-        } catch (MPDPlayerException e) {
-            e.printStackTrace();
-            return "An error occurred while communicating with Mopidy.";
+        Player.Status status = mpd.getPlayer().getStatus();
+        switch (status) {
+            case STATUS_STOPPED:
+                return "The music is stopped.";
+            case STATUS_PLAYING:
+                return "The current playing song is " + musicState.title + " by " + musicState.artist + ".";
+            case STATUS_PAUSED:
+                return "The music is paused.";
+            default:
+                return "Unknown status";
         }
     }
 

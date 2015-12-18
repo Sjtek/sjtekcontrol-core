@@ -10,26 +10,28 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by wouter on 20-10-15.
  */
 public class Sonarr extends BaseModule {
 
-    private static final String BASE_URL = "http://sonarr/sonarr/api/calendar";
+    private static final String BASE_URL = "https://sjtek.nl/sonarr/api/calendar";
     private static final String API_KEY = "4259f1a8e0cb4f6098c3560b20320d68";
     private static final int INTERVAL = 3600000;
 
     private ArrayList<Episode> episodes = new ArrayList<>();
 
     public Sonarr() {
-        new UpdateThread().start();
+        new Timer().scheduleAtFixedRate(new UpdateTask(), 0, INTERVAL);
     }
 
     public static void main(String args[]) {
         Sonarr sonarr = new Sonarr();
         sonarr.update();
-        System.out.println(sonarr.toString());
+        System.out.println(sonarr.toJson().toString());
     }
 
     private void parseCalendar(String jsonString) {
@@ -103,18 +105,11 @@ public class Sonarr extends BaseModule {
         }
     }
 
-    private class UpdateThread extends Thread {
+    private class UpdateTask extends TimerTask {
+
         @Override
         public void run() {
-            super.run();
-            while (true) {
-                update();
-                try {
-                    Thread.sleep(INTERVAL);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            update();
         }
     }
 

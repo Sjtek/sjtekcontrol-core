@@ -71,7 +71,10 @@ public class Speech {
     }
 
     public static synchronized void speak(String text) {
-        if (ApiHandler.getInstance().getNightMode().isEnabled()) return;
+        if (ApiHandler.getInstance().getNightMode().isEnabled()) {
+            System.out.println("NightMode enabled, speech disabled.");
+            return;
+        }
         if (text == null || text.isEmpty()) return;
 
         String[] command = new String[]{"/usr/bin/speak", "\"" + text + "\""};
