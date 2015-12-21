@@ -18,6 +18,7 @@ public class SettingsManager {
     private Music music = new Music();
     private TV tv = new TV();
     private Quotes quotes = new Quotes();
+    private LastFM lastFM = new LastFM();
 
     private Map<String, UserSettings> userSettings = UserSettings.getDefaults();
 
@@ -80,6 +81,10 @@ public class SettingsManager {
 
     public Map<String, UserSettings> getUserSettings() {
         return userSettings;
+    }
+
+    public LastFM getLastFM() {
+        return lastFM;
     }
 
     @Override
