@@ -1,8 +1,10 @@
 package nl.sjtek.sjtekcontrol.settings;
 
 import com.google.gson.Gson;
+import nl.sjtek.sjtekcontrol.utils.FileUtils;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -40,7 +42,7 @@ public class SettingsManager {
         System.out.println("Reloading settings...");
         SettingsManager newSettingsManager;
         try {
-            String jsonString = readFile(path);
+            String jsonString = FileUtils.readFile(path);
             if (!jsonString.isEmpty()) {
                 newSettingsManager = new Gson().fromJson(jsonString, this.getClass());
                 System.out.println("Reload completed.");
@@ -50,7 +52,10 @@ public class SettingsManager {
             }
         } catch (FileNotFoundException e) {
             System.out.println("Reload error. File not found");
-            writeFile(path);
+            try {
+                FileUtils.writeFile(path, dump());
+            } catch (IOException ignored) {
+            }
             newSettingsManager = new SettingsManager();
         } catch (IOException e) {
             System.out.println("Reload error. IOException");
@@ -59,30 +64,6 @@ public class SettingsManager {
         }
 
         instance = newSettingsManager;
-    }
-
-    private String readFile(String path) throws IOException {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(path))) {
-            StringBuilder stringBuilder = new StringBuilder();
-            String line = bufferedReader.readLine();
-
-            while (line != null) {
-                stringBuilder.append(line);
-                stringBuilder.append("\n");
-                line = bufferedReader.readLine();
-            }
-            return stringBuilder.toString();
-        }
-    }
-
-    private void writeFile(String path) {
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new PrintWriter(new FileWriter(path)))) {
-            bufferedWriter.write(dump());
-            bufferedWriter.flush();
-            bufferedWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public Music getMusic() {
