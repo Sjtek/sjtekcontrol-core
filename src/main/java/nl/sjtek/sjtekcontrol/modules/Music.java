@@ -3,6 +3,9 @@ package nl.sjtek.sjtekcontrol.modules;
 import nl.sjtek.sjtekcontrol.network.Arguments;
 import nl.sjtek.sjtekcontrol.settings.SettingsManager;
 import nl.sjtek.sjtekcontrol.utils.Executor;
+import nl.sjtek.sjtekcontrol.utils.lastfm.Album;
+import nl.sjtek.sjtekcontrol.utils.lastfm.Artist;
+import nl.sjtek.sjtekcontrol.utils.lastfm.LastFM;
 import org.bff.javampd.file.MPDFile;
 import org.bff.javampd.player.Player;
 import org.bff.javampd.server.MPD;
@@ -231,15 +234,13 @@ public class Music extends BaseModule {
             song = null;
         }
         if (song != null) {
-            musicState.setArtist(song.getArtistName());
-            musicState.setAlbum(song.getAlbumName());
+            musicState.setAlbumAndArtist(song.getAlbumName(), song.getArtistName());
             musicState.setTitle(song.getName());
             musicState.setTimeElapsed(player.getElapsedTime());
             musicState.setTimeTotal(player.getTotalTime());
             musicState.setStatus(status);
         } else {
-            musicState.setArtist("");
-            musicState.setAlbum("");
+            musicState.setAlbumAndArtist("", "");
             musicState.setTitle("");
             musicState.setTimeElapsed(0);
             musicState.setTimeTotal(0);
@@ -276,17 +277,23 @@ public class Music extends BaseModule {
         private long timeElapsed = 0;
         private int volume = -1;
         private String status = "ERROR";
-
-        public void setArtist(String artist) {
-            this.artist = artist;
-        }
+        private Album lastFMAlbum = null;
+        private Artist lastFMArtist = null;
 
         public void setTitle(String title) {
             this.title = title;
         }
 
-        public void setAlbum(String album) {
-            this.album = album;
+        public void setAlbumAndArtist(String album, String artist) {
+            if (!this.album.equals(album) || !this.artist.equals(artist)) {
+                if (!this.artist.equals(artist)) {
+                    lastFMArtist = LastFM.getInstance().getArtist(artist);
+                }
+
+                if (!this.album.equals(album)) {
+                    lastFMAlbum = LastFM.getInstance().getAlbum(artist, album);
+                }
+            }
         }
 
         public void setTimeTotal(long timeTotal) {
@@ -312,6 +319,16 @@ public class Music extends BaseModule {
             jsonSong.put("album", album);
             jsonSong.put("total", timeTotal);
             jsonSong.put("elapsed", timeElapsed);
+            if (lastFMAlbum != null && lastFMAlbum.isValid()) {
+                jsonSong.put("albumArt", lastFMAlbum.getImage().getMega());
+            } else {
+                jsonSong.put("albumArt", "");
+            }
+
+            if (lastFMArtist != null && lastFMArtist.isValid()) {
+                jsonSong.put("artistArt", lastFMArtist.getImage().getMega());
+                jsonSong.put("artistArt", "");
+            }
 
             JSONObject jsonMusic = new JSONObject();
             jsonMusic.put("song", jsonSong);

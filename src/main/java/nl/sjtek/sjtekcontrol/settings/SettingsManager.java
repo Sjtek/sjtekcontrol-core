@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class SettingsManager {
 
-    private static final String DEFAULT_PATH = "/etc/sjtekcontrol/config.json";
+    private static final String DEFAULT_PATH = "/var/sjtekcontrol/config.json";
     private static SettingsManager instance = new SettingsManager();
 
     private Music music = new Music();
