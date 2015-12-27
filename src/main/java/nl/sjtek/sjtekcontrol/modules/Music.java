@@ -285,15 +285,20 @@ public class Music extends BaseModule {
         }
 
         public void setAlbumAndArtist(String album, String artist) {
+
             if (!this.album.equals(album) || !this.artist.equals(artist)) {
+                String artists[] = artist.split(";");
                 if (!this.artist.equals(artist)) {
-                    lastFMArtist = LastFM.getInstance().getArtist(artist);
+                    lastFMArtist = LastFM.getInstance().getArtist(artists[0]);
                 }
 
                 if (!this.album.equals(album)) {
-                    lastFMAlbum = LastFM.getInstance().getAlbum(artist, album);
+                    lastFMAlbum = LastFM.getInstance().getAlbum(artists[0], album);
                 }
             }
+
+            this.album = album;
+            this.artist = artist;
         }
 
         public void setTimeTotal(long timeTotal) {
@@ -327,6 +332,7 @@ public class Music extends BaseModule {
 
             if (lastFMArtist != null && lastFMArtist.isValid()) {
                 jsonSong.put("artistArt", lastFMArtist.getImage().getMega());
+            } else {
                 jsonSong.put("artistArt", "");
             }
 

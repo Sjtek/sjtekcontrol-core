@@ -1,6 +1,7 @@
 package nl.sjtek.sjtekcontrol.utils.lastfm;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import nl.sjtek.sjtekcontrol.settings.SettingsManager;
 import nl.sjtek.sjtekcontrol.utils.FileUtils;
 
@@ -28,7 +29,7 @@ public class Cache {
                 String artistString = FileUtils.readFile(SettingsManager.getInstance().getLastFM().getCachePathArtists());
                 String albumString = FileUtils.readFile(SettingsManager.getInstance().getLastFM().getCachePathAlbum());
 
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
                 artistHolder = gson.fromJson(artistString, ArtistHolder.class);
                 albumHolder = gson.fromJson(albumString, AlbumHolder.class);
@@ -57,7 +58,7 @@ public class Cache {
 
     private synchronized void saveArtists() {
         try {
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             FileUtils.writeFile(SettingsManager.getInstance().getLastFM().getCachePathArtists(), gson.toJson(artistHolder));
         } catch (IOException e) {
             e.printStackTrace();
@@ -66,7 +67,7 @@ public class Cache {
 
     private synchronized void saveAlbums() {
         try {
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             FileUtils.writeFile(SettingsManager.getInstance().getLastFM().getCachePathAlbum(), gson.toJson(albumHolder));
         } catch (IOException e) {
             e.printStackTrace();
@@ -74,29 +75,31 @@ public class Cache {
     }
 
     public Album getAlbum(String queryArtist, String queryAlbum) {
-        String key = Album.getKey(queryArtist, queryAlbum);
+        String key = queryArtist + "-" + queryAlbum;
         synchronized (key) {
             return albumHolder.albumMap.get(key);
         }
     }
 
     public Artist getArtist(String query) {
-        String key = Artist.getKey(query);
+        String key = query;
         synchronized (key) {
             return artistHolder.artistMap.get(key);
         }
     }
 
-    public void update(Artist artist) {
-        synchronized (artist.getKey()) {
-            artistHolder.artistMap.put(artist.getKey(), artist);
+    public void update(String query, Artist artist) {
+        String key = query;
+        synchronized (key) {
+            artistHolder.artistMap.put(key, artist);
             saveArtists();
         }
     }
 
-    public void update(Album album) {
-        synchronized (album.getKey()) {
-            albumHolder.albumMap.put(album.getKey(), album);
+    public void update(String queryArtist, String queryAlbum, Album album) {
+        String key = queryArtist + "-" + queryAlbum;
+        synchronized (key) {
+            albumHolder.albumMap.put(key, album);
             saveAlbums();
         }
     }

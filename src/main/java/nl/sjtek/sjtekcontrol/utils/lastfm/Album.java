@@ -19,14 +19,6 @@ public class Album extends CacheItem {
         this.image = image;
     }
 
-    public static String getKey(String queryArtist, String queryAlbum) {
-        return queryArtist + "-" + queryAlbum;
-    }
-
-    public String getKey() {
-        return getKey(artist, name);
-    }
-
     public String getArtist() {
         return artist;
     }

@@ -51,10 +51,10 @@ public class LastFM {
             if (artist != null) {
                 return artist;
             }
-            System.out.println("Downloading " + query);
+            System.out.println("Downloading artist " + query);
             artist = downloadArtist(query);
-            cache.update(artist);
-            System.out.println("Downloaded " + artist.toString());
+            cache.update(query, artist);
+            System.out.println("Downloaded artist " + artist.toString());
             return artist;
         }
     }
@@ -71,10 +71,10 @@ public class LastFM {
                 return album;
             }
 
-            System.out.println("Downloading " + queryArtist + " - " + queryAlbum);
+            System.out.println("Downloading album " + queryArtist + " - " + queryAlbum);
             album = downloadAlbum(queryArtist, queryAlbum);
-            cache.update(album);
-            System.out.println("Downloaded " + album.toString());
+            cache.update(queryArtist, queryAlbum, album);
+            System.out.println("Downloaded album " + album.toString());
             return album;
         }
     }
@@ -89,9 +89,11 @@ public class LastFM {
     }
 
     private Album downloadAlbum(String queryArtist, String queryAlbum) {
-        queryArtist = encodeString(queryArtist);
-        queryAlbum = encodeString(queryAlbum);
-        String url = String.format(URL_ALBUM, queryArtist, queryAlbum, SettingsManager.getInstance().getLastFM().getApiKey());
+        String url = String.format(
+                URL_ALBUM,
+                encodeString(queryArtist),
+                encodeString(queryAlbum),
+                SettingsManager.getInstance().getLastFM().getApiKey());
         String response = download(url);
 
         if (response != null && !response.isEmpty()) {
@@ -103,7 +105,7 @@ public class LastFM {
                 return new Album(artistName, albumName, image);
             } catch (JSONException e) {
                 e.printStackTrace();
-                return new Album();
+                return new Album("", "", new Image());
             }
         } else {
             return new Album();
@@ -111,17 +113,19 @@ public class LastFM {
     }
 
     private Artist downloadArtist(String query) {
-        query = encodeString(query);
-        String response = download(String.format(URL_ARTIST, query, SettingsManager.getInstance().getLastFM().getApiKey()));
+        String response = download(String.format(
+                URL_ARTIST,
+                encodeString(query),
+                SettingsManager.getInstance().getLastFM().getApiKey()));
         if (response != null && !response.isEmpty()) {
             try {
                 JSONObject jsonArtist = new JSONObject(response).getJSONObject("artist");
                 String name = jsonArtist.getString("name");
                 Image image = getImage(jsonArtist.getJSONArray("image"));
-                return new Artist(Artist.getKey(query), name, image);
+                return new Artist(name, image);
             } catch (JSONException e) {
                 e.printStackTrace();
-                return new Artist();
+                return new Artist("", new Image());
             }
         } else {
             return new Artist();
@@ -181,36 +185,6 @@ public class LastFM {
             }
         } catch (IOException e) {
             return "";
-        }
-    }
-
-    private class ArtistDownloadThread implements Runnable {
-
-        private final String queryArtist;
-
-        private ArtistDownloadThread(String queryArtist) {
-            this.queryArtist = queryArtist;
-        }
-
-        @Override
-        public void run() {
-            downloadArtist(queryArtist);
-        }
-    }
-
-    private class AlbumDownloadThread implements Runnable {
-
-        private final String queryArtist;
-        private final String queryAlbum;
-
-        public AlbumDownloadThread(String queryArtist, String queryAlbum) {
-            this.queryArtist = queryArtist;
-            this.queryAlbum = queryAlbum;
-        }
-
-        @Override
-        public void run() {
-            downloadAlbum(queryArtist, queryAlbum);
         }
     }
 }
