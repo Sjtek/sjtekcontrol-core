@@ -228,12 +228,13 @@ public class Music extends BaseModule {
 
     private void updateMusicState() {
         Player player = null;
-        MPDSong song = null;
+        MPDSong song;
         Player.Status status = null;
         try {
             player = mpd.getPlayer();
             song = player.getCurrentSong();
             status = player.getStatus();
+            musicState.setVolume(player.getVolume());
             if (status != Player.Status.STATUS_PLAYING && status != Player.Status.STATUS_PAUSED) {
                 song = null;
             }
