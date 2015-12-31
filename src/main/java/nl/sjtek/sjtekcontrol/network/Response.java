@@ -17,6 +17,6 @@ public class Response {
         for (BaseModule module : modules) {
             jsonObject.put(module.getClass().getSimpleName().toLowerCase(), module.toJson());
         }
-        return jsonObject.toString(2);
+        return jsonObject.toString();
     }
 }

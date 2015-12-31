@@ -151,6 +151,9 @@ public class ApiHandler implements HttpHandler {
 
         long stop = System.currentTimeMillis();
         System.out.println("Response " + responseCode + " " + responseType + " " + (stop - start) + "ms");
+//        if (responseCode == 200) {
+//            httpExchange.getRequestHeaders().add("Content-Type", "application/json");
+//        }
         httpExchange.sendResponseHeaders(responseCode, response.getBytes().length);
         OutputStream outputStream = httpExchange.getResponseBody();
         outputStream.write(response.getBytes());

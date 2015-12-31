@@ -227,10 +227,18 @@ public class Music extends BaseModule {
     }
 
     private void updateMusicState() {
-        Player player = mpd.getPlayer();
-        MPDSong song = player.getCurrentSong();
-        Player.Status status = player.getStatus();
-        if (status != Player.Status.STATUS_PLAYING && status != Player.Status.STATUS_PAUSED) {
+        Player player = null;
+        MPDSong song = null;
+        Player.Status status = null;
+        try {
+            player = mpd.getPlayer();
+            song = player.getCurrentSong();
+            status = player.getStatus();
+            if (status != Player.Status.STATUS_PLAYING && status != Player.Status.STATUS_PAUSED) {
+                song = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             song = null;
         }
         if (song != null) {
