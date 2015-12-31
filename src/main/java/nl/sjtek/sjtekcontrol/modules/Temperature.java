@@ -14,11 +14,14 @@ public class Temperature extends BaseModule {
 
     private static final int DELAY_INSIDE = 300000;
     private static final int DELAY_OUTSIDE = 3600000;
-    private static final String WEATHER_URL_OUTSIDE = "http://api.openweathermap.org/data/2.5/weather?id=2747010?appid=526d01226448149fe241d2991d0637c4";
+    private static final String WEATHER_URL_OUTSIDE = "http://3ddev.nl/watson/api/weather.php?city=Son";
     private static final String WEATHER_URL_INSIDE = "http://192.168.0.70/cgi-bin/temp";
 
     private float tempInside = 0;
     private int tempOutside = -100;
+    private float humidity = 0;
+    private String description = "error";
+    private String icon = "";
 
     public Temperature() {
         Timer timerInside = new Timer();
@@ -32,6 +35,9 @@ public class Temperature extends BaseModule {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("inside", tempInside);
         jsonObject.put("outside", tempOutside);
+        jsonObject.put("humidity", humidity);
+        jsonObject.put("description", description);
+        jsonObject.put("icon", icon);
         return jsonObject;
     }
 
@@ -43,8 +49,12 @@ public class Temperature extends BaseModule {
     private int parseOutside(String response) {
         if (!response.isEmpty()) {
             try {
-                float temp = new JSONObject(response).getJSONObject("main").getLong("temp");
-                return (int) (temp - 273);
+                JSONObject jsonObject = new JSONObject(response);
+                float temp = jsonObject.getLong("temp");
+                humidity = jsonObject.getLong("humidity");
+                description = jsonObject.getString("description");
+                icon = jsonObject.getString("icon");
+                return (int) temp;
             } catch (JSONException e) {
                 return -101;
             }
