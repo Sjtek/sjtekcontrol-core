@@ -28,7 +28,6 @@ public class ApiHandler implements HttpHandler {
     private Quotes quotes;
     private NFC nfc;
     private NightMode nightMode;
-    private Countdown countdown;
 
     private int responseCode = 0;
 
@@ -55,8 +54,6 @@ public class ApiHandler implements HttpHandler {
         this.nfc = new NFC();
         System.out.println(" - NightMode");
         this.nightMode = new NightMode();
-        System.out.println(" - Countdown");
-        this.countdown = new Countdown();
 
         if (music == null) {
             System.out.println("\nIn error state: music");
@@ -154,6 +151,9 @@ public class ApiHandler implements HttpHandler {
 
         long stop = System.currentTimeMillis();
         System.out.println("Response " + responseCode + " " + responseType + " " + (stop - start) + "ms");
+//        if (responseCode == 200) {
+//            httpExchange.getRequestHeaders().add("Content-Type", "application/json");
+//        }
         httpExchange.sendResponseHeaders(responseCode, response.getBytes().length);
         OutputStream outputStream = httpExchange.getResponseBody();
         outputStream.write(response.getBytes());
@@ -240,10 +240,6 @@ public class ApiHandler implements HttpHandler {
         return nightMode;
     }
 
-    public Countdown getCountdown() {
-        return countdown;
-    }
-
     public BaseModule[] getAll() {
         return new BaseModule[]{
                 music,
@@ -254,7 +250,6 @@ public class ApiHandler implements HttpHandler {
                 quotes,
                 nfc,
                 nightMode,
-                countdown,
         };
     }
 
