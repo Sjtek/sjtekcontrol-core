@@ -82,13 +82,15 @@ public class Sonarr extends BaseModule {
     }
 
     private synchronized void update() {
+        int responseCode = -1;
         try {
             URL url = new URL(BASE_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("X-Api-Key", API_KEY);
             connection.connect();
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
                 BufferedInputStream bufIn =
                         new BufferedInputStream(connection.getInputStream());
                 byte[] buffer = new byte[1024];
@@ -103,6 +105,7 @@ public class Sonarr extends BaseModule {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("" + responseCode + " - downloaded " + BASE_URL);
     }
 
     private class UpdateTask extends TimerTask {

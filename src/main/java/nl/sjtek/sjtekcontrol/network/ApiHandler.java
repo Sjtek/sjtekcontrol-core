@@ -121,7 +121,12 @@ public class ApiHandler implements HttpHandler {
                             execute(arguments, methodString, nfc);
                         } else if (classString.equals(NightMode.class.getSimpleName().toLowerCase())) {
                             execute(arguments, methodString, nightMode);
+                        } else if (classString.equals(Temperature.class.getSimpleName().toLowerCase())) {
+                            execute(arguments, methodString, temperature);
+                        } else if (classString.equals(Sonarr.class.getSimpleName().toLowerCase())) {
+                            execute(arguments, methodString, sonarr);
                         }
+
                         break;
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
