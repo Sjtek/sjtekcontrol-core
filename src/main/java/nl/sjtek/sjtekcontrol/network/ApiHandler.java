@@ -28,6 +28,7 @@ public class ApiHandler implements HttpHandler {
     private Quotes quotes;
     private NFC nfc;
     private NightMode nightMode;
+    private Time time;
 
     private int responseCode = 0;
 
@@ -54,6 +55,8 @@ public class ApiHandler implements HttpHandler {
         this.nfc = new NFC();
         System.out.println(" - NightMode");
         this.nightMode = new NightMode();
+        System.out.println(" - Time");
+        this.time = new Time();
 
         if (music == null) {
             System.out.println("\nIn error state: music");
@@ -125,6 +128,8 @@ public class ApiHandler implements HttpHandler {
                             execute(arguments, methodString, temperature);
                         } else if (classString.equals(Sonarr.class.getSimpleName().toLowerCase())) {
                             execute(arguments, methodString, sonarr);
+                        } else if (classString.equals(Time.class.getSimpleName().toLowerCase())) {
+                            execute(arguments, methodString, time);
                         }
 
                         break;
@@ -255,6 +260,7 @@ public class ApiHandler implements HttpHandler {
                 quotes,
                 nfc,
                 nightMode,
+                time,
         };
     }
 
