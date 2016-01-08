@@ -7,60 +7,51 @@ import nl.sjtek.sjtekcontrol.settings.SettingsManager;
 import nl.sjtek.sjtekcontrol.settings.User;
 import nl.sjtek.sjtekcontrol.utils.Personalise;
 import nl.sjtek.sjtekcontrol.utils.Speech;
-import org.bff.javampd.server.MPDConnectionException;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings({"UnusedParameters", "unused"})
 public class ApiHandler implements HttpHandler {
 
     public static final String CONTEXT = "/api";
     private static ApiHandler instance = new ApiHandler();
-    private Music music;
-    private Lights lights;
-    private Temperature temperature;
-    private TV tv;
-    private Sonarr sonarr;
-    private Quotes quotes;
-    private NFC nfc;
-    private NightMode nightMode;
-    private Time time;
-
-    private int responseCode = 0;
+    private Map<String, BaseModule> modules = new HashMap<>();
 
     private ApiHandler() {
         System.out.print("Loading modules:");
-        System.out.println(" - music");
-        try {
-            this.music = new Music();
-        } catch (UnknownHostException | MPDConnectionException e) {
-            e.printStackTrace();
-            this.music = null;
-        }
-        System.out.println(" - lights");
-        this.lights = new Lights();
-        System.out.println(" - temperature");
-        this.temperature = new Temperature();
-        System.out.println(" - tv");
-        this.tv = new TV();
-        System.out.println(" - sonarr");
-        this.sonarr = new Sonarr();
-        System.out.println(" - quotes");
-        this.quotes = new Quotes();
-        System.out.println(" - NFC");
-        this.nfc = new NFC();
-        System.out.println(" - NightMode");
-        this.nightMode = new NightMode();
-        System.out.println(" - Time");
-        this.time = new Time();
 
-        if (music == null) {
-            System.out.println("\nIn error state: music");
+        System.out.println(" - music");
+        Music musicNaspoleon = null;
+        try {
+            musicNaspoleon = new Music();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
         }
+        modules.put("music", musicNaspoleon);
+
+        System.out.println(" - lights");
+        modules.put("lights", new Lights());
+        System.out.println(" - temperature");
+        modules.put("temperature", new Temperature());
+        System.out.println(" - tv");
+        modules.put("tv", new TV());
+        System.out.println(" - sonarr");
+        modules.put("sonarr", new Sonarr());
+        System.out.println(" - quotes");
+        modules.put("quotes", new Quotes());
+        System.out.println(" - NFC");
+        modules.put("nfc", new NFC());
+        System.out.println(" - NightMode");
+        modules.put("nightmode", new NightMode());
+        System.out.println(" - Time");
+        modules.put("time", new Time());
+
         System.out.println();
     }
 
@@ -71,6 +62,7 @@ public class ApiHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         long start = System.currentTimeMillis();
+        int responseCode = 0;
         Arguments arguments = new Arguments(httpExchange.getRequestURI().getQuery());
         String fullPath = httpExchange.getRequestURI().getPath().toLowerCase();
         System.out.println();
@@ -90,7 +82,7 @@ public class ApiHandler implements HttpHandler {
                 switch (classString) {
                     case "info":
                         responseCode = 200;
-                        if (arguments.useVoice()) Speech.tellAboutModules(getAll());
+                        if (arguments.useVoice()) Speech.tellAboutModules(modules);
                         break;
                     case "switch":
                         masterToggle(arguments);
@@ -113,39 +105,28 @@ public class ApiHandler implements HttpHandler {
                     default:
                         String methodString = splittedPath[3];
 
-                        if (classString.equals(Music.class.getSimpleName().toLowerCase())) {
-                            execute(arguments, methodString, music);
-                        } else if (classString.equals(Lights.class.getSimpleName().toLowerCase())) {
-                            execute(arguments, methodString, lights);
-                        } else if (classString.equals(TV.class.getSimpleName().toLowerCase())) {
-                            execute(arguments, methodString, tv);
-                        } else if (classString.equals(NFC.class.getSimpleName().toLowerCase())) {
-                            responseType = ResponseType.CLEAN;
-                            execute(arguments, methodString, nfc);
-                        } else if (classString.equals(NightMode.class.getSimpleName().toLowerCase())) {
-                            execute(arguments, methodString, nightMode);
-                        } else if (classString.equals(Temperature.class.getSimpleName().toLowerCase())) {
-                            execute(arguments, methodString, temperature);
-                        } else if (classString.equals(Sonarr.class.getSimpleName().toLowerCase())) {
-                            execute(arguments, methodString, sonarr);
-                        } else if (classString.equals(Time.class.getSimpleName().toLowerCase())) {
-                            execute(arguments, methodString, time);
+                        BaseModule baseModule = modules.get(classString);
+                        if (baseModule != null) {
+                            execute(arguments, methodString, baseModule);
+                            responseCode = 200;
+                        } else {
+                            throw new NullPointerException("No such module");
                         }
 
                         break;
                 }
-            } catch (ArrayIndexOutOfBoundsException e) {
+            } catch (ArrayIndexOutOfBoundsException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | NullPointerException e) {
                 responseCode = 404;
             }
         }
 
+        responseCode = Page.makeValid(responseCode);
         String response;
         if (responseCode == 200) {
             switch (responseType) {
-                case DEFAULT: {
-                    response = Response.create(getAll());
-                }
-                break;
+                case DEFAULT:
+                    response = Response.create(modules);
+                    break;
                 case CLEAN:
                     response = "{ }";
                     break;
@@ -161,39 +142,34 @@ public class ApiHandler implements HttpHandler {
 
         long stop = System.currentTimeMillis();
         System.out.println("Response " + responseCode + " " + responseType + " " + (stop - start) + "ms");
-//        if (responseCode == 200) {
-//            httpExchange.getRequestHeaders().add("Content-Type", "application/json");
-//        }
         httpExchange.sendResponseHeaders(responseCode, response.getBytes().length);
         OutputStream outputStream = httpExchange.getResponseBody();
         outputStream.write(response.getBytes());
         outputStream.close();
     }
 
-    private void execute(Arguments arguments, String methodString, BaseModule executor) {
+    private void execute(Arguments arguments, String methodString, BaseModule executor)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         if ("info".equals(methodString)) {
             executor.info(arguments);
-            responseCode = 200;
             return;
         }
-        Method method = null;
-        try {
-            method = executor.getClass().getDeclaredMethod(methodString, arguments.getClass());
-        } catch (NoSuchMethodException | SecurityException e) {
-            responseCode = 404;
-        }
+        Method method;
+        method = executor.getClass().getDeclaredMethod(methodString, arguments.getClass());
+
 
         if (method != null) {
-            try {
-                method.invoke(executor, arguments);
-                responseCode = 200;
-            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-                responseCode = 404;
-            }
+            method.invoke(executor, arguments);
+        } else {
+            throw new NullPointerException("Method not found");
         }
     }
 
     public synchronized void masterToggle(Arguments arguments) {
+        Lights lights = getLights();
+        Music music = getMusic();
+        NightMode nightMode = getNightMode();
+
         Arguments dummyArguments = new Arguments();
         User user = arguments.getUser();
         boolean isWouter = (user != null && user == User.WOUTER);
@@ -219,52 +195,41 @@ public class ApiHandler implements HttpHandler {
     }
 
     public Music getMusic() {
-        return music;
+        return (Music) modules.get("music");
     }
 
     public Lights getLights() {
-        return lights;
+        return (Lights) modules.get("lights");
     }
 
     public Temperature getTemperature() {
-        return temperature;
+        return (Temperature) modules.get("temperature");
     }
 
     public TV getTv() {
-        return tv;
+        return (TV) modules.get("tv");
     }
 
     public Sonarr getSonarr() {
-        return sonarr;
+        return (Sonarr) modules.get("sonarr");
     }
 
     public Quotes getQuotes() {
-        return quotes;
+        return (Quotes) modules.get("quotes");
     }
 
     public NFC getNfc() {
-        return nfc;
+        return (NFC) modules.get("nfc");
     }
 
     public NightMode getNightMode() {
-        return nightMode;
+        return (NightMode) modules.get("nightmode");
     }
 
-    public BaseModule[] getAll() {
-        return new BaseModule[]{
-                music,
-                lights,
-                temperature,
-                tv,
-                sonarr,
-                quotes,
-                nfc,
-                nightMode,
-                time,
-        };
-    }
 
     public boolean isOn(boolean checkWouter) {
+        Lights lights = getLights();
+        Music music = getMusic();
         return (music.isPlaying() || (lights.getToggle1() || lights.getToggle2() || (checkWouter && lights.getToggle3())));
     }
 

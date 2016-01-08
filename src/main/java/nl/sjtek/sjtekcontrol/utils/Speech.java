@@ -4,6 +4,7 @@ import nl.sjtek.sjtekcontrol.modules.BaseModule;
 import nl.sjtek.sjtekcontrol.network.ApiHandler;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class Speech {
 
@@ -61,10 +62,11 @@ public class Speech {
 //        }
 //    }
 
-    public static void tellAboutModules(BaseModule... modules) {
+    public static void tellAboutModules(Map<String, BaseModule> map) {
         StringBuilder stringBuilder = new StringBuilder();
-        for (BaseModule module : modules) {
-            stringBuilder.append(module.getSummaryText());
+
+        for (Map.Entry<String, BaseModule> set : map.entrySet()) {
+            stringBuilder.append(set.getValue());
             stringBuilder.append("  ");
         }
         speakAsync(stringBuilder.toString());
