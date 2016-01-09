@@ -167,7 +167,7 @@ public class Music extends BaseModule {
         String path;
         boolean injectTaylorSwift;
         if (arguments.getUser() != null) {
-            path = arguments.getUser().getMusic();
+            path = arguments.getUser().getDefaultPlaylist();
             injectTaylorSwift = false;
         } else if (arguments.getUrl() != null) {
             path = arguments.getUrl();

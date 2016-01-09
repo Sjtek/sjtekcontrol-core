@@ -39,7 +39,7 @@ public class Arguments {
             } else if ("cardid".equals(name)) {
                 cardId = value;
             } else if ("user".equals(name)) {
-                user = User.valueOf(value.toUpperCase());
+                user = User.getUser(value.toUpperCase());
             }
         }
     }

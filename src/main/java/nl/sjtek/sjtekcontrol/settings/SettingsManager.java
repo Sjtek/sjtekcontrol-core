@@ -20,7 +20,7 @@ public class SettingsManager {
     private Quotes quotes = new Quotes();
     private LastFM lastFM = new LastFM();
 
-    private Map<String, UserSettings> userSettings = UserSettings.getDefaults();
+    private Map<String, User> users = User.getDefaults();
 
     private SettingsManager() {
 
@@ -79,8 +79,12 @@ public class SettingsManager {
         return quotes;
     }
 
-    public Map<String, UserSettings> getUserSettings() {
-        return userSettings;
+    public Map<String, User> getUsers() {
+        return users;
+    }
+
+    public User getUser(String name) {
+        return users.get(name.toLowerCase());
     }
 
     public LastFM getLastFM() {

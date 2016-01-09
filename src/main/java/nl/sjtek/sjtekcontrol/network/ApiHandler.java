@@ -172,12 +172,13 @@ public class ApiHandler implements HttpHandler {
 
         Arguments dummyArguments = new Arguments();
         User user = arguments.getUser();
-        boolean isWouter = (user != null && user == User.WOUTER);
-        if (!isOn(isWouter)) {
+        boolean checkExtra = false;
+        if (user != null) checkExtra = user.isCheckExtraLight();
+        if (!isOn(checkExtra)) {
             if (user != null && arguments.useVoice()) Speech.speakAsync(Personalise.messageWelcome(user));
             lights.toggle1on(dummyArguments);
             lights.toggle2on(dummyArguments);
-            if (isWouter) lights.toggle3on(dummyArguments);
+            if (checkExtra) lights.toggle3on(dummyArguments);
             if (!nightMode.isEnabled()) {
                 if (user != null) {
                     // music.start(new Arguments().setUrl(user.getMusic()));
@@ -190,7 +191,7 @@ public class ApiHandler implements HttpHandler {
             music.pause(dummyArguments);
             lights.toggle1off(dummyArguments);
             lights.toggle2off(dummyArguments);
-            if (isWouter) lights.toggle3off(dummyArguments);
+            if (checkExtra) lights.toggle3off(dummyArguments);
         }
     }
 
@@ -227,10 +228,10 @@ public class ApiHandler implements HttpHandler {
     }
 
 
-    public boolean isOn(boolean checkWouter) {
+    public boolean isOn(boolean checkExtra) {
         Lights lights = getLights();
         Music music = getMusic();
-        return (music.isPlaying() || (lights.getToggle1() || lights.getToggle2() || (checkWouter && lights.getToggle3())));
+        return (music.isPlaying() || (lights.getToggle1() || lights.getToggle2() || (checkExtra && lights.getToggle3())));
     }
 
     private enum ResponseType {
