@@ -1,5 +1,6 @@
 package nl.sjtek.sjtekcontrol.settings;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
@@ -9,16 +10,18 @@ import java.util.TreeMap;
  */
 public class User {
     private final String[] nickNames;
-    private final String[] playlists;
+    private final String defaultPlaylist;
+    private final Map<String, String> playlists;
     private final String[] nfcTags;
     private final String[][] greetings;
     private final String[][] farewells;
     private final boolean checkExtraLight;
 
     public User(
-            String[] nickNames, String[] playlists, String[] nfcTags,
+            String[] nickNames, String defaultPlaylist, Map<String, String> playlists, String[] nfcTags,
             String[][] greetings, String[][] farewells, boolean checkExtraLight) {
         this.nickNames = nickNames;
+        this.defaultPlaylist = defaultPlaylist;
         this.playlists = playlists;
         this.nfcTags = nfcTags;
         this.greetings = greetings;
@@ -32,14 +35,17 @@ public class User {
 
     public static Map<String, User> getDefaults() {
         Map<String, User> userSettings = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, String> plWouter = new HashMap<>();
+        plWouter.put("Dinges7", "spotify:user:1133212423:playlist:75lLEqfsZ0lR1L8xz61TnB");
+        plWouter.put("Dinges3", "spotify:user:1133212423:playlist:6clH0v0FfHyjsEiHgULafH");
+        plWouter.put("Dinges4", "spotify:user:1133212423:playlist:6GoCxjOJ5pXgr74Za0z9bt");
         userSettings.put("wouter", new User(
                 new String[]{
                         "sir wouter",
                         "lord habets"
                 },
-                new String[]{
-                        "spotify:user:1133212423:playlist:6GoCxjOJ5pXgr74Za0z9bt"
-                },
+                "Dinges7",
+                plWouter,
                 new String[]{
                         "1853719819",       // OV Chipkaart
                         "16514020840",      // Witte kaart
@@ -76,14 +82,15 @@ public class User {
                 false
 
         ));
+        Map<String, String> plTijn = new HashMap<>();
+        plTijn.put("Swek muziek", "spotify:user:1123840057:playlist:1kbSO9MqJMWOdsIfPhjcvW");
         userSettings.put("tijn", new User(
                 new String[]{
                         "3D",
                         "master renders"
                 },
-                new String[]{
-                        "spotify:user:1123840057:playlist:1kbSO9MqJMWOdsIfPhjcvW"
-                },
+                "Swek muziek",
+                plTijn,
                 new String[]{
                         "552518698",        // OV Chipkaart
                         "6334480",          // Sleutelhanger
@@ -118,13 +125,14 @@ public class User {
                 },
                 false
         ));
+        Map<String, String> plKevin = new HashMap<>();
+        plKevin.put("sjpeellist", "spotify:user:1130395265:playlist:5UOGVcoR34i1XUFLYCXbnz");
         userSettings.put("kevin", new User(
                 new String[]{
                         "kevin"
                 },
-                new String[]{
-                        "spotify:user:1130395265:playlist:5UOGVcoR34i1XUFLYCXbnz"
-                },
+                "sjpeellist",
+                plKevin,
                 new String[]{
                         "281846010",        // Sleutelhanger
                 },
@@ -169,12 +177,12 @@ public class User {
         return getNickNames()[new Random().nextInt(getNickNames().length)];
     }
 
-    public String[] getPlaylists() {
+    public Map<String, String> getPlaylists() {
         return playlists;
     }
 
     public String getDefaultPlaylist() {
-        return getPlaylists()[0];
+        return getPlaylists().get(defaultPlaylist);
     }
 
     public String[] getNfcTags() {
