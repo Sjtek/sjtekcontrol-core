@@ -10,19 +10,17 @@ import java.util.TreeMap;
  */
 public class User {
     private final String[] nickNames;
-    private final String defaultPlaylist;
-    private final Map<String, String> playlists;
+    private final PlaylistSet playlistSet;
     private final String[] nfcTags;
     private final String[][] greetings;
     private final String[][] farewells;
     private final boolean checkExtraLight;
 
     public User(
-            String[] nickNames, String defaultPlaylist, Map<String, String> playlists, String[] nfcTags,
+            String[] nickNames, PlaylistSet playlistSet, String[] nfcTags,
             String[][] greetings, String[][] farewells, boolean checkExtraLight) {
         this.nickNames = nickNames;
-        this.defaultPlaylist = defaultPlaylist;
-        this.playlists = playlists;
+        this.playlistSet = playlistSet;
         this.nfcTags = nfcTags;
         this.greetings = greetings;
         this.farewells = farewells;
@@ -44,8 +42,7 @@ public class User {
                         "sir wouter",
                         "lord habets"
                 },
-                "Dinges7",
-                plWouter,
+                new PlaylistSet("Dinges7", plWouter),
                 new String[]{
                         "1853719819",       // OV Chipkaart
                         "16514020840",      // Witte kaart
@@ -89,8 +86,7 @@ public class User {
                         "3D",
                         "master renders"
                 },
-                "Swek muziek",
-                plTijn,
+                new PlaylistSet("Swek muziek", plTijn),
                 new String[]{
                         "552518698",        // OV Chipkaart
                         "6334480",          // Sleutelhanger
@@ -131,8 +127,7 @@ public class User {
                 new String[]{
                         "kevin"
                 },
-                "sjpeellist",
-                plKevin,
+                new PlaylistSet("sjpeellist", plKevin),
                 new String[]{
                         "281846010",        // Sleutelhanger
                 },
@@ -178,11 +173,15 @@ public class User {
     }
 
     public Map<String, String> getPlaylists() {
-        return playlists;
+        return playlistSet.getPlaylists();
     }
 
     public String getDefaultPlaylist() {
-        return getPlaylists().get(defaultPlaylist);
+        return playlistSet.getDefaultPlaylist();
+    }
+
+    public PlaylistSet getPlaylistSet() {
+        return playlistSet;
     }
 
     public String[] getNfcTags() {

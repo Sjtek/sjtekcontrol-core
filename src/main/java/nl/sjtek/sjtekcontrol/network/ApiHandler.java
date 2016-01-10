@@ -102,6 +102,10 @@ public class ApiHandler implements HttpHandler {
                         responseType = ResponseType.SETTINGS;
                         responseCode = 200;
                         break;
+                    case "data":
+                        responseType = ResponseType.DATA;
+                        responseCode = 200;
+                        break;
                     default:
                         String methodString = splittedPath[3];
 
@@ -132,6 +136,9 @@ public class ApiHandler implements HttpHandler {
                     break;
                 case SETTINGS:
                     response = SettingsManager.getInstance().toString();
+                    break;
+                case DATA:
+                    response = Response.createData();
                     break;
                 default:
                     response = "{ }";
@@ -237,6 +244,7 @@ public class ApiHandler implements HttpHandler {
     private enum ResponseType {
         DEFAULT,
         CLEAN,
-        SETTINGS
+        SETTINGS,
+        DATA
     }
 }
