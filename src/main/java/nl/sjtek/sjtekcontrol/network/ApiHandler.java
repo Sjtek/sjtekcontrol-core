@@ -176,29 +176,26 @@ public class ApiHandler implements HttpHandler {
         Lights lights = getLights();
         Music music = getMusic();
         NightMode nightMode = getNightMode();
+        TV tv = getTv();
 
         Arguments dummyArguments = new Arguments();
         User user = arguments.getUser();
-        boolean checkExtra = false;
-        if (user != null) checkExtra = user.isCheckExtraLight();
+        boolean checkExtra = user.isCheckExtraLight();
         if (!isOn(checkExtra)) {
-            if (user != null && arguments.useVoice()) Speech.speakAsync(Personalise.messageWelcome(user));
+            if (arguments.useVoice()) Speech.speakAsync(Personalise.messageWelcome(user));
             lights.toggle1on(dummyArguments);
             lights.toggle2on(dummyArguments);
             if (checkExtra) lights.toggle3on(dummyArguments);
-            if (!nightMode.isEnabled()) {
-                if (user != null) {
-                    // music.start(new Arguments().setUrl(user.getMusic()));
-                } else if (arguments.getUrl() != null && !arguments.getUrl().isEmpty()) {
-                    music.start(arguments);
-                }
+            if (!nightMode.isEnabled() && user.isAutoStartMusic()) {
+                music.start(arguments);
             }
         } else {
-            if (user != null && arguments.useVoice()) Speech.speakAsync(Personalise.messageLeave(user));
+            if (arguments.useVoice()) Speech.speakAsync(Personalise.messageLeave(user));
             music.pause(dummyArguments);
             lights.toggle1off(dummyArguments);
             lights.toggle2off(dummyArguments);
             if (checkExtra) lights.toggle3off(dummyArguments);
+            tv.off(dummyArguments);
         }
     }
 

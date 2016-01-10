@@ -2,6 +2,7 @@ package nl.sjtek.sjtekcontrol.modules;
 
 import nl.sjtek.sjtekcontrol.network.Arguments;
 import nl.sjtek.sjtekcontrol.settings.SettingsManager;
+import nl.sjtek.sjtekcontrol.settings.User;
 import nl.sjtek.sjtekcontrol.utils.Executor;
 import nl.sjtek.sjtekcontrol.utils.lastfm.Album;
 import nl.sjtek.sjtekcontrol.utils.lastfm.Artist;
@@ -166,15 +167,13 @@ public class Music extends BaseModule {
 
         String path;
         boolean injectTaylorSwift;
-        if (arguments.getUser() != null) {
-            path = arguments.getUser().getDefaultPlaylist();
-            injectTaylorSwift = false;
-        } else if (arguments.getUrl() != null) {
+        if (arguments.getUrl() != null && !arguments.getUrl().isEmpty()) {
             path = arguments.getUrl();
             injectTaylorSwift = false;
         } else {
-            path = SettingsManager.getInstance().getMusic().getDefaultPlaylist();
-            injectTaylorSwift = SettingsManager.getInstance().getMusic().isTaylorSwiftInject();
+            User user = arguments.getUser();
+            path = user.getDefaultPlaylist();
+            injectTaylorSwift = user.isInjectTaylorSwift();
         }
 
         MPDFile mpdFile = new MPDFile();
@@ -333,6 +332,8 @@ public class Music extends BaseModule {
             jsonSong.put("album", album);
             jsonSong.put("total", timeTotal);
             jsonSong.put("elapsed", timeElapsed);
+//            jsonSong.put("albumArt", "moet jij geen stage zoeken?");
+//            jsonSong.put("artistArt", "moet jij geen stage zoeken?");
             if (lastFMAlbum != null && lastFMAlbum.isValid()) {
                 jsonSong.put("albumArt", lastFMAlbum.getImage().getMega());
             } else {

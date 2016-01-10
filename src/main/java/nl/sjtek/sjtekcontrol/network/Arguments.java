@@ -10,11 +10,11 @@ import java.util.List;
 public class Arguments {
 
     private boolean useVoice = false;
-    private String url = null;
+    private String url = "";
     private String text = null;
     private StreamType streamType = StreamType.Stream;
     private String cardId = null;
-    private User user = null;
+    private User user = User.getDefaultUser();
 
     public Arguments() {
 
@@ -63,6 +63,7 @@ public class Arguments {
     }
 
     public String getUrl() {
+        if (url.isEmpty()) return url;
         String prefix = "";
         switch (getStreamType()) {
             case Stream:
@@ -79,7 +80,7 @@ public class Arguments {
                 break;
         }
 
-        return ((url != null && !url.isEmpty()) ? prefix + url : null);
+        return prefix + url;
     }
 
     public Arguments setUrl(String url) {

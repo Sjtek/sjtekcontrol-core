@@ -27,7 +27,6 @@ public class Response {
     public static String createData() {
         JSONObject jsonObject = new JSONObject();
         JSONObject jsonPlaylists = new JSONObject();
-        jsonPlaylists.put("sjtek", SettingsManager.getInstance().getMusic().getPlaylistSet().toJson());
         for (Map.Entry<String, User> entry : SettingsManager.getInstance().getUsers().entrySet()) {
             jsonPlaylists.put(entry.getKey(), entry.getValue().getPlaylistSet().toJson());
         }

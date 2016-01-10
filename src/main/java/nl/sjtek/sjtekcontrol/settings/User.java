@@ -15,16 +15,20 @@ public class User {
     private final String[][] greetings;
     private final String[][] farewells;
     private final boolean checkExtraLight;
+    private final boolean injectTaylorSwift;
+    private final boolean autoStartMusic;
 
     public User(
             String[] nickNames, PlaylistSet playlistSet, String[] nfcTags,
-            String[][] greetings, String[][] farewells, boolean checkExtraLight) {
+            String[][] greetings, String[][] farewells, boolean checkExtraLight, boolean injectTaylorSwift, boolean autoStartMusic) {
         this.nickNames = nickNames;
         this.playlistSet = playlistSet;
         this.nfcTags = nfcTags;
         this.greetings = greetings;
         this.farewells = farewells;
         this.checkExtraLight = checkExtraLight;
+        this.injectTaylorSwift = injectTaylorSwift;
+        this.autoStartMusic = autoStartMusic;
     }
 
     public static User getUser(String name) {
@@ -33,6 +37,46 @@ public class User {
 
     public static Map<String, User> getDefaults() {
         Map<String, User> userSettings = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, String> plSjtek = new HashMap<>();
+        plSjtek.put("SjtekSjpeellijst", "spotify:user:1133212423:playlist:2A8r6F6GiLwpBCUQ0ImYKW");
+        userSettings.put("default", new User(
+                new String[]{
+                        ""
+                },
+                new PlaylistSet("SjtekSjpeellijst", plSjtek),
+                new String[]{
+                        "13376969"
+                },
+                new String[][]{
+                        new String[]{
+                                "Good night %s."
+                        },
+                        new String[]{
+                                "Good morning %s."
+                        },
+                        new String[]{
+                                "Good afternoon %s."
+                        },
+                        new String[]{
+                                "Good evening %s."
+                        }
+                },
+                new String[][]{
+                        new String[]{
+                                "Sleep well, %s."
+                        },
+                        new String[]{
+                                "Good luck today, %s."
+                        },
+                        new String[]{
+                                "Good bye, %s."
+                        },
+                        new String[]{
+                                "Have a nice evening, %s."
+                        }
+                },
+                false, true, false
+        ));
         Map<String, String> plWouter = new HashMap<>();
         plWouter.put("Dinges7", "spotify:user:1133212423:playlist:75lLEqfsZ0lR1L8xz61TnB");
         plWouter.put("Dinges3", "spotify:user:1133212423:playlist:6clH0v0FfHyjsEiHgULafH");
@@ -76,7 +120,7 @@ public class User {
                                 "Have a nice evening, %s."
                         }
                 },
-                false
+                false, false, false
 
         ));
         Map<String, String> plTijn = new HashMap<>();
@@ -119,7 +163,7 @@ public class User {
                                 "Have a nice evening, %s."
                         }
                 },
-                false
+                false, false, false
         ));
         Map<String, String> plKevin = new HashMap<>();
         plKevin.put("sjpeellist", "spotify:user:1130395265:playlist:5UOGVcoR34i1XUFLYCXbnz");
@@ -159,9 +203,13 @@ public class User {
                                 "Have a nice evening, %s."
                         }
                 },
-                false
+                false, false, false
         ));
         return userSettings;
+    }
+
+    public static User getDefaultUser() {
+        return getUser("default");
     }
 
     public String[] getNickNames() {
@@ -198,5 +246,13 @@ public class User {
 
     public boolean isCheckExtraLight() {
         return checkExtraLight;
+    }
+
+    public boolean isInjectTaylorSwift() {
+        return injectTaylorSwift;
+    }
+
+    public boolean isAutoStartMusic() {
+        return autoStartMusic;
     }
 }
