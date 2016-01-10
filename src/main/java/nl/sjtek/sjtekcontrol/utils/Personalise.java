@@ -13,11 +13,11 @@ public class Personalise {
     private static Random random = new Random();
 
     public static String messageWelcome(User user) {
-        return getText("Welcome back, ", user.getGreetings(), user.toString());
+        return getText("Welcome back, ", user.getGreetings(), user.getRandomNickname());
     }
 
     public static String messageLeave(User user) {
-        return getText("Good bye, ", user.getFarewells(), user.toString());
+        return getText("Good bye, ", user.getFarewells(), user.getRandomNickname());
     }
 
     private static String getText(String defaultText, String[][] strings, String name) {
