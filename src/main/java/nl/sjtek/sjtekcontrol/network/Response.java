@@ -1,5 +1,6 @@
 package nl.sjtek.sjtekcontrol.network;
 
+import com.google.gson.Gson;
 import nl.sjtek.sjtekcontrol.modules.BaseModule;
 import nl.sjtek.sjtekcontrol.settings.SettingsManager;
 import nl.sjtek.sjtekcontrol.settings.User;
@@ -31,6 +32,7 @@ public class Response {
             jsonPlaylists.put(entry.getKey(), entry.getValue().getPlaylistSet().toJson());
         }
         jsonObject.put("playlists", jsonPlaylists);
+        jsonObject.put("users", new JSONObject(new Gson().toJson(SettingsManager.getInstance().getUsers())));
         return jsonObject.toString();
     }
 }

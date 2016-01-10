@@ -6,17 +6,11 @@ import java.util.Random;
  * Created by wouter on 11-12-15.
  */
 public class Quotes {
-    private String[] quotes = {
-            "Alleen massaproductie",
-            "Dien mam",
-            "Mwoah, Gertje",
-            "Analysamson",
-            "Een frietkraam dat geen frieten verkoopt",
-            "Moet hebben, afblijven",
-            "Sjtek masterrace",
-            "Ja joa",
-            "10/10 would yolo again",
-    };
+    private final String[] quotes;
+
+    public Quotes(String[] quotes) {
+        this.quotes = quotes;
+    }
 
     public String[] getQuotes() {
         return quotes;

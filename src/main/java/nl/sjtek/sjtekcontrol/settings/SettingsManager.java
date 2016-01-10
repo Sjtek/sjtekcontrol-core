@@ -1,6 +1,7 @@
 package nl.sjtek.sjtekcontrol.settings;
 
 import com.google.gson.Gson;
+import nl.sjtek.sjtekcontrol.utils.DummyData;
 import nl.sjtek.sjtekcontrol.utils.FileUtils;
 
 import java.io.FileNotFoundException;
@@ -13,17 +14,20 @@ import java.util.Map;
 public class SettingsManager {
 
     private static final String DEFAULT_PATH = "/var/sjtekcontrol/config.json";
-    private static SettingsManager instance = new SettingsManager();
+    private static SettingsManager instance = DummyData.getSettingsManager();
 
-    private Music music = new Music();
-    private TV tv = new TV();
-    private Quotes quotes = new Quotes();
-    private LastFM lastFM = new LastFM();
+    private final Music music;
+    private final TV tv;
+    private final Quotes quotes;
+    private final LastFM lastFM;
+    private final Map<String, User> users;
 
-    private Map<String, User> users = User.getDefaults();
-
-    private SettingsManager() {
-
+    public SettingsManager(Music music, TV tv, Quotes quotes, LastFM lastFM, Map<String, User> users) {
+        this.music = music;
+        this.tv = tv;
+        this.quotes = quotes;
+        this.lastFM = lastFM;
+        this.users = users;
     }
 
     public static SettingsManager getInstance() {
@@ -57,11 +61,11 @@ public class SettingsManager {
                 FileUtils.writeFile(path, dump());
             } catch (IOException ignored) {
             }
-            newSettingsManager = new SettingsManager();
+            newSettingsManager = DummyData.getSettingsManager();
         } catch (IOException e) {
             System.out.println("Reload error. IOException");
             e.printStackTrace();
-            newSettingsManager = new SettingsManager();
+            newSettingsManager = DummyData.getSettingsManager();
         }
 
         instance = newSettingsManager;
@@ -94,24 +98,6 @@ public class SettingsManager {
     @Override
     public String toString() {
         return new Gson().toJson(this);
-    }
-
-    public class TV {
-        private String host = "192.168.0.66";
-        private int port = 8080;
-        private String key = "861540";
-
-        public String getHost() {
-            return host;
-        }
-
-        public int getPort() {
-            return port;
-        }
-
-        public String getKey() {
-            return key;
-        }
     }
 
 }

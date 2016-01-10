@@ -4,13 +4,22 @@ package nl.sjtek.sjtekcontrol.settings;
  * Created by wouter on 11-12-15.
  */
 public class Music {
-    private String mpdHost = "mopidy";
-    private int mpdPort = 6600;
+    private final String mpdHost;
+    private final int mpdPort;
 
-    private String taylorSwiftPath = "Local media/Taylor Swift";
-    private int volumeNeutral = 10;
-    private int volumeStepUp = 3;
-    private int volumeStepDown = 3;
+    private final String taylorSwiftPath;
+    private final int volumeNeutral;
+    private final int volumeStepUp;
+    private final int volumeStepDown;
+
+    public Music(String mpdHost, int mpdPort, String taylorSwiftPath, int volumeNeutral, int volumeStepUp, int volumeStepDown) {
+        this.mpdHost = mpdHost;
+        this.mpdPort = mpdPort;
+        this.taylorSwiftPath = taylorSwiftPath;
+        this.volumeNeutral = volumeNeutral;
+        this.volumeStepUp = volumeStepUp;
+        this.volumeStepDown = volumeStepDown;
+    }
 
     public String getMpdHost() {
         return mpdHost;

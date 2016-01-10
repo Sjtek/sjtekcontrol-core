@@ -5,9 +5,15 @@ package nl.sjtek.sjtekcontrol.settings;
  */
 public class LastFM {
 
-    private String apiKey = "";
-    private String cachePathArtists = "/var/sjtekcontrol/lastfm/artists.json";
-    private String cachePathAlbum = "/var/sjtekcontrol/lastfm/albums.json";
+    private final String apiKey;
+    private final String cachePathArtists;
+    private final String cachePathAlbum;
+
+    public LastFM(String apiKey, String cachePathArtists, String cachePathAlbum) {
+        this.apiKey = apiKey;
+        this.cachePathArtists = cachePathArtists;
+        this.cachePathAlbum = cachePathAlbum;
+    }
 
     public String getApiKey() {
         return apiKey;
