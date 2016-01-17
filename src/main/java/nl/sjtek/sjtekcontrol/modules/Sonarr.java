@@ -1,5 +1,6 @@
 package nl.sjtek.sjtekcontrol.modules;
 
+import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,20 +10,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * Created by wouter on 20-10-15.
  */
 public class Sonarr extends BaseModule {
 
-    private static final String BASE_URL = "https://sjtek.nl/sonarr/api/calendar";
+    private static final String BASE_URL = "https://sjtek.nl/sonarr/api";
+    private static final String URL_CALENDAR = BASE_URL + "/calendar";
+    private static final String URL_DISKSPACE = BASE_URL + "/diskspace";
     private static final String API_KEY = "4259f1a8e0cb4f6098c3560b20320d68";
     private static final int INTERVAL = 3600000;
 
     private ArrayList<Episode> episodes = new ArrayList<>();
+    private Map<String, Disk> disks = new HashMap<>();
 
     public Sonarr() {
         new Timer().scheduleAtFixedRate(new UpdateTask(), 0, INTERVAL);
@@ -55,6 +57,19 @@ public class Sonarr extends BaseModule {
         }
     }
 
+    private void parseDiskSpace(String jsonString) {
+        disks.clear();
+        JSONArray jsonArray = new JSONArray(jsonString);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            String name = jsonObject.getString("path");
+            if (name.equals("/") || name.equals("/tv")) {
+                Disk disk = new Disk(jsonObject.getDouble("freeSpace"), jsonObject.getDouble("totalSpace"));
+                disks.put(name, disk);
+            }
+        }
+    }
+
     @Override
     public JSONObject toJson() {
         JSONArray jsonEpisodes = new JSONArray();
@@ -63,8 +78,12 @@ public class Sonarr extends BaseModule {
             jsonEpisodes.put(episode.toJsonObject());
         }
 
+        JSONObject jsonObject = new JSONObject(new Gson().toJson(disks));
+
         JSONObject jsonSonarr = new JSONObject();
         jsonSonarr.put("upcoming", jsonEpisodes);
+        jsonSonarr.put("diskUsage", jsonObject);
+
         return jsonSonarr;
     }
 
@@ -81,10 +100,15 @@ public class Sonarr extends BaseModule {
         }
     }
 
-    private synchronized void update() {
+    private void update() {
+        parseCalendar(download(URL_CALENDAR));
+        parseDiskSpace(download(URL_DISKSPACE));
+    }
+
+    private synchronized String download(String urlString) {
         int responseCode = -1;
         try {
-            URL url = new URL(BASE_URL);
+            URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("X-Api-Key", API_KEY);
@@ -100,12 +124,14 @@ public class Sonarr extends BaseModule {
                     bufOut.write(buffer, 0, n);
                 }
 
-                parseCalendar(new String(bufOut.toByteArray()));
+                System.out.println("" + responseCode + " - downloaded " + urlString);
+                return new String(bufOut.toByteArray());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("" + responseCode + " - downloaded " + BASE_URL);
+        System.out.println("" + responseCode + " - downloaded " + urlString);
+        return "";
     }
 
     private class UpdateTask extends TimerTask {
@@ -144,6 +170,16 @@ public class Sonarr extends BaseModule {
         @Override
         public String toString() {
             return toJsonObject().toString();
+        }
+    }
+
+    private class Disk {
+        private final double free;
+        private final double total;
+
+        public Disk(double free, double total) {
+            this.free = free;
+            this.total = total;
         }
     }
 }
