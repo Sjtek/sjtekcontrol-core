@@ -100,7 +100,7 @@ public class Music extends BaseModule {
      * @param arguments Arguments
      */
     public void next(Arguments arguments) {
-        if (arguments.getUrl() == null) {
+        if (arguments.getUrl() == null || arguments.getUrl().isEmpty()) {
             mpd.getPlayer().playNext();
         } else {
             try {
