@@ -19,7 +19,7 @@ jar {
     manifest {
         attributes 'Implementation-Title': 'SjtekControlV3',
                 'Implementation-Version': version,
-                'Main-Class': 'nl.sjtek.sjtekcontrol.SjtekControl'
+                'Main-Class': 'nl.sjtek.control.core.SjtekControl'
     }
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
@@ -35,4 +35,4 @@ dependencies {
     compile 'com.google.code.gson:gson:2.4'
 }
 
-mainClassName = 'nl.sjtek.sjtekcontrol.SjtekControl'
+mainClassName = 'nl.sjtek.control.core.SjtekControl'
