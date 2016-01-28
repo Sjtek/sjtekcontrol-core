@@ -1,6 +1,6 @@
 package nl.sjtek.control.core.utils;
 
-import nl.sjtek.control.core.settings.User;
+import nl.sjtek.control.data.settings.User;
 
 import java.util.Calendar;
 import java.util.Random;

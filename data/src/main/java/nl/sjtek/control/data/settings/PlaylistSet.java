@@ -1,4 +1,4 @@
-package nl.sjtek.control.core.settings;
+package nl.sjtek.control.data.settings;
 
 import com.google.gson.Gson;
 import org.json.JSONObject;

@@ -2,11 +2,11 @@ package nl.sjtek.control.core.modules;
 
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.settings.SettingsManager;
-import nl.sjtek.control.core.settings.User;
 import nl.sjtek.control.core.utils.Executor;
 import nl.sjtek.control.core.utils.lastfm.Album;
 import nl.sjtek.control.core.utils.lastfm.Artist;
 import nl.sjtek.control.core.utils.lastfm.LastFM;
+import nl.sjtek.control.data.settings.User;
 import org.bff.javampd.file.MPDFile;
 import org.bff.javampd.player.Player;
 import org.bff.javampd.server.MPD;

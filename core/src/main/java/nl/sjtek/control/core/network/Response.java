@@ -3,7 +3,7 @@ package nl.sjtek.control.core.network;
 import com.google.gson.Gson;
 import nl.sjtek.control.core.modules.BaseModule;
 import nl.sjtek.control.core.settings.SettingsManager;
-import nl.sjtek.control.core.settings.User;
+import nl.sjtek.control.data.settings.User;
 import org.json.JSONObject;
 
 import java.util.Map;

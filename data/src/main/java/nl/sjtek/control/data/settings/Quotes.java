@@ -1,4 +1,4 @@
-package nl.sjtek.control.core.settings;
+package nl.sjtek.control.data.settings;
 
 import java.util.Random;
 

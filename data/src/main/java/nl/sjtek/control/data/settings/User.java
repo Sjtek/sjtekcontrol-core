@@ -1,4 +1,4 @@
-package nl.sjtek.control.core.settings;
+package nl.sjtek.control.data.settings;
 
 import java.util.Map;
 import java.util.Random;
@@ -27,14 +27,6 @@ public class User {
         this.checkExtraLight = checkExtraLight;
         this.injectTaylorSwift = injectTaylorSwift;
         this.autoStartMusic = autoStartMusic;
-    }
-
-    public static User getUser(String name) {
-        return SettingsManager.getInstance().getUser(name);
-    }
-
-    public static User getDefaultUser() {
-        return getUser("default");
     }
 
     public String[] getNickNames() {

@@ -3,7 +3,7 @@ package nl.sjtek.control.core.modules;
 import nl.sjtek.control.core.network.ApiHandler;
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.settings.SettingsManager;
-import nl.sjtek.control.core.settings.User;
+import nl.sjtek.control.data.settings.User;
 import org.json.JSONObject;
 
 import java.util.Map;

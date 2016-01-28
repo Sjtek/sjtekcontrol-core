@@ -3,6 +3,7 @@ package nl.sjtek.control.core.settings;
 import com.google.gson.Gson;
 import nl.sjtek.control.core.utils.DummyData;
 import nl.sjtek.control.core.utils.FileUtils;
+import nl.sjtek.control.data.settings.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -89,6 +90,10 @@ public class SettingsManager {
 
     public User getUser(String name) {
         return users.get(name.toLowerCase());
+    }
+
+    public User getDefaultUser() {
+        return getUser("default");
     }
 
     public LastFM getLastFM() {

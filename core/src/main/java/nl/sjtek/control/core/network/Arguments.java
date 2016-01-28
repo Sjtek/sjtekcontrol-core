@@ -1,6 +1,7 @@
 package nl.sjtek.control.core.network;
 
-import nl.sjtek.control.core.settings.User;
+import nl.sjtek.control.core.settings.SettingsManager;
+import nl.sjtek.control.data.settings.User;
 import org.apache.commons.codec.Charsets;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -14,7 +15,7 @@ public class Arguments {
     private String text = null;
     private StreamType streamType = StreamType.Stream;
     private String cardId = null;
-    private User user = User.getDefaultUser();
+    private User user = SettingsManager.getInstance().getDefaultUser();
 
     public Arguments() {
 
@@ -39,7 +40,7 @@ public class Arguments {
             } else if ("cardid".equals(name)) {
                 cardId = value;
             } else if ("user".equals(name)) {
-                user = User.getUser(value.toUpperCase());
+                user = SettingsManager.getInstance().getUser(value);
             }
         }
     }

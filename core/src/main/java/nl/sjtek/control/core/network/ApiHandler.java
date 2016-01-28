@@ -4,9 +4,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import nl.sjtek.control.core.modules.*;
 import nl.sjtek.control.core.settings.SettingsManager;
-import nl.sjtek.control.core.settings.User;
 import nl.sjtek.control.core.utils.Personalise;
 import nl.sjtek.control.core.utils.Speech;
+import nl.sjtek.control.data.settings.User;
 
 import java.io.IOException;
 import java.io.OutputStream;

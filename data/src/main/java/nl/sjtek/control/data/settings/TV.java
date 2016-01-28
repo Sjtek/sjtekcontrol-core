@@ -1,4 +1,4 @@
-package nl.sjtek.control.core.settings;
+package nl.sjtek.control.data.settings;
 
 /**
  * Created by wouter on 10-1-16.

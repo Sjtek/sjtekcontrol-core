@@ -1,6 +1,8 @@
 package nl.sjtek.control.core.utils;
 
-import nl.sjtek.control.core.settings.*;
+
+import nl.sjtek.control.core.settings.SettingsManager;
+import nl.sjtek.control.data.settings.*;
 
 import java.util.HashMap;
 import java.util.Map;
