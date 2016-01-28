@@ -1,38 +1,12 @@
-group 'SjtekControl'
-version '1.0-SNAPSHOT'
+group 'nl.sjtek.control'
+version '3.0'
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.2'
-    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+        gradleVersion = '2.10'
 }
-
-apply plugin: 'application'
-apply plugin: 'java'
-
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-}
-
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'SjtekControlV3',
-                'Implementation-Version': version,
-                'Main-Class': 'nl.sjtek.control.core.SjtekControl'
-    }
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
-
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile 'com.googlecode.soundlibs:jlayer:1.0.1-1'
-    compile 'org.json:json:20141113'
-    compile 'org.apache.httpcomponents:httpclient:4.5'
-    compile 'com.google.code.gson:gson:2.4'
-}
-
-mainClassName = 'nl.sjtek.control.core.SjtekControl'

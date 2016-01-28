@@ -87,3 +87,4 @@ gradle-app.setting
 push.sh
 run.sh
 upload.sh
+!javampd.jar
