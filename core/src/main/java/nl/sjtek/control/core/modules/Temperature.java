@@ -1,5 +1,7 @@
 package nl.sjtek.control.core.modules;
 
+import nl.sjtek.control.data.responses.Response;
+import nl.sjtek.control.data.responses.TemperatureResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,14 +33,8 @@ public class Temperature extends BaseModule {
     }
 
     @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("inside", tempInside);
-        jsonObject.put("outside", tempOutside);
-        jsonObject.put("humidity", humidity);
-        jsonObject.put("description", description);
-        jsonObject.put("icon", icon);
-        return jsonObject;
+    public Response getResponse() {
+        return new TemperatureResponse(tempOutside, tempInside, humidity, description, icon);
     }
 
     @Override

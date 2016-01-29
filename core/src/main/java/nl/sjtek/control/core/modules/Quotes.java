@@ -1,8 +1,9 @@
 package nl.sjtek.control.core.modules;
 
 import nl.sjtek.control.core.settings.SettingsManager;
+import nl.sjtek.control.data.responses.QuotesResponse;
+import nl.sjtek.control.data.responses.Response;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.Random;
 
@@ -33,10 +34,8 @@ public class Quotes extends BaseModule {
     }
 
     @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("quote", getQuote());
-        return jsonObject;
+    public Response getResponse() {
+        return new QuotesResponse(getQuote());
     }
 
     @Override

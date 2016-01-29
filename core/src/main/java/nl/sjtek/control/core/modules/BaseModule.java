@@ -2,7 +2,7 @@ package nl.sjtek.control.core.modules;
 
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.utils.Speech;
-import org.json.JSONObject;
+import nl.sjtek.control.data.responses.Response;
 
 /**
  * Created by wouter on 11-12-15.
@@ -13,7 +13,7 @@ public abstract class BaseModule {
         if (arguments.useVoice()) Speech.speakAsync(getSummaryText());
     }
 
-    public abstract JSONObject toJson();
+    public abstract Response getResponse();
 
     public abstract String getSummaryText();
 

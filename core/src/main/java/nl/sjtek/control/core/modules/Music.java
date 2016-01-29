@@ -6,13 +6,14 @@ import nl.sjtek.control.core.utils.Executor;
 import nl.sjtek.control.core.utils.lastfm.Album;
 import nl.sjtek.control.core.utils.lastfm.Artist;
 import nl.sjtek.control.core.utils.lastfm.LastFM;
+import nl.sjtek.control.data.responses.MusicResponse;
+import nl.sjtek.control.data.responses.Response;
 import nl.sjtek.control.data.settings.User;
 import org.bff.javampd.file.MPDFile;
 import org.bff.javampd.player.Player;
 import org.bff.javampd.server.MPD;
 import org.bff.javampd.server.MPDConnectionException;
 import org.bff.javampd.song.MPDSong;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -22,7 +23,7 @@ import java.net.UnknownHostException;
 public class Music extends BaseModule {
 
     private MPD mpd = null;
-    private MusicState musicState = new MusicState();
+    private MusicResponse musicResponse;
 
     /**
      * Connect to an MPD server on an host with port port.
@@ -229,11 +230,12 @@ public class Music extends BaseModule {
         Player player = null;
         MPDSong song;
         Player.Status status = null;
+        MusicResponseBuilder builder = new MusicResponseBuilder();
         try {
             player = mpd.getPlayer();
             song = player.getCurrentSong();
             status = player.getStatus();
-            musicState.setVolume(player.getVolume());
+            builder.setVolume(player.getVolume());
             if (status != Player.Status.STATUS_PLAYING && status != Player.Status.STATUS_PAUSED) {
                 song = null;
             }
@@ -242,24 +244,25 @@ public class Music extends BaseModule {
             song = null;
         }
         if (song != null) {
-            musicState.setAlbumAndArtist(song.getAlbumName(), song.getArtistName());
-            musicState.setTitle(song.getName());
-            musicState.setTimeElapsed(player.getElapsedTime());
-            musicState.setTimeTotal(player.getTotalTime());
-            musicState.setStatus(status);
+            builder.setArtistAndAlbum(song.getArtistName(), song.getAlbumName());
+            builder.setTitle(song.getName());
+            builder.setTimeElapsed(player.getElapsedTime());
+            builder.setTimeTotal(player.getTotalTime());
+            builder.setStatus(status);
         } else {
-            musicState.setAlbumAndArtist("", "");
-            musicState.setTitle("");
-            musicState.setTimeElapsed(0);
-            musicState.setTimeTotal(0);
-            musicState.setStatus(status);
+            builder.setArtistAndAlbum("", "");
+            builder.setTitle("");
+            builder.setTimeElapsed(0);
+            builder.setTimeTotal(0);
+            builder.setStatus(status);
         }
+        musicResponse = builder.build();
     }
 
     @Override
-    public JSONObject toJson() {
+    public Response getResponse() {
         updateMusicState();
-        return musicState.toJson();
+        return musicResponse;
     }
 
     @Override
@@ -269,7 +272,7 @@ public class Music extends BaseModule {
             case STATUS_STOPPED:
                 return "The music is stopped.";
             case STATUS_PLAYING:
-                return "The current playing song is " + musicState.title + " by " + musicState.artist + ".";
+                return "The current playing song is " + musicResponse.getSong().getTitle() + " by " + musicResponse.getSong().getArtist() + ".";
             case STATUS_PAUSED:
                 return "The music is paused.";
             default:
@@ -277,81 +280,92 @@ public class Music extends BaseModule {
         }
     }
 
-    public class MusicState {
-        private String artist = "";
-        private String title = "";
-        private String album = "";
-        private long timeTotal = 0;
-        private long timeElapsed = 0;
-        private int volume = -1;
-        private String status = "ERROR";
-        private Album lastFMAlbum = null;
-        private Artist lastFMArtist = null;
+    private class MusicResponseBuilder {
+        private String artist;
+        private String title;
+        private String album;
+        private long timeTotal;
+        private long timeElapsed;
+        private int volume;
+        private String status;
+        private String albumArt = "";
+        private String artistArt = "";
 
-        public void setTitle(String title) {
-            this.title = title;
+        public MusicResponseBuilder() {
+
         }
 
-        public void setAlbumAndArtist(String album, String artist) {
+        public MusicResponseBuilder setArtistAndAlbum(String artist, String album) {
 
-            if (!this.album.equals(album) || !this.artist.equals(artist)) {
+            String previousArtist = "";
+            String previousAlbum = "";
+            String artistArt = "";
+            String albumArt = "";
+            if (musicResponse != null) {
+                previousArtist = musicResponse.getSong().getArtist();
+                previousAlbum = musicResponse.getSong().getAlbum();
+                artistArt = musicResponse.getSong().getArtistArt();
+                albumArt = musicResponse.getSong().getAlbumArt();
+            }
+
+            if (!previousAlbum.equals(album) || !previousArtist.equals(artist)) {
                 String artists[] = artist.split(";");
-                if (!this.artist.equals(artist)) {
-                    lastFMArtist = LastFM.getInstance().getArtist(artists[0]);
+                if (!previousArtist.equals(artist)) {
+                    Artist lastFMArtist = LastFM.getInstance().getArtist(artists[0]);
+                    if (lastFMArtist != null) {
+                        artistArt = lastFMArtist.getImage().getMega();
+                    } else {
+                        artistArt = "";
+                    }
                 }
 
-                if (!this.album.equals(album)) {
-                    lastFMAlbum = LastFM.getInstance().getAlbum(artists[0], album);
+                if (!previousAlbum.equals(album)) {
+                    Album lastFMAlbum = LastFM.getInstance().getAlbum(artists[0], album);
+                    if (lastFMAlbum != null) {
+                        albumArt = lastFMAlbum.getImage().getMega();
+                    } else {
+                        albumArt = "";
+                    }
                 }
             }
 
-            this.album = album;
             this.artist = artist;
+            this.album = album;
+            this.artistArt = artistArt;
+            this.albumArt = albumArt;
+            return this;
         }
 
-        public void setTimeTotal(long timeTotal) {
+        public MusicResponseBuilder setTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public MusicResponseBuilder setTimeTotal(long timeTotal) {
             this.timeTotal = timeTotal;
+            return this;
         }
 
-        public void setTimeElapsed(long timeElapsed) {
+        public MusicResponseBuilder setTimeElapsed(long timeElapsed) {
             this.timeElapsed = timeElapsed;
+            return this;
         }
 
-        public void setVolume(int volume) {
+        public MusicResponseBuilder setVolume(int volume) {
             this.volume = volume;
+            return this;
         }
 
-        public void setStatus(Player.Status status) {
-            this.status = (status != null ? status.toString() : "ERROR");
+        public MusicResponseBuilder setStatus(Player.Status status) {
+            this.status = status != null ? status.toString() : "ERROR";
+            return this;
         }
 
-        public JSONObject toJson() {
-            JSONObject jsonSong = new JSONObject();
-            jsonSong.put("artist", artist);
-            jsonSong.put("title", title);
-            jsonSong.put("album", album);
-            jsonSong.put("total", timeTotal);
-            jsonSong.put("elapsed", timeElapsed);
-//            jsonSong.put("albumArt", "moet jij geen stage zoeken?");
-//            jsonSong.put("artistArt", "moet jij geen stage zoeken?");
-            if (lastFMAlbum != null && lastFMAlbum.isValid()) {
-                jsonSong.put("albumArt", lastFMAlbum.getImage().getMega());
-            } else {
-                jsonSong.put("albumArt", "");
-            }
-
-            if (lastFMArtist != null && lastFMArtist.isValid()) {
-                jsonSong.put("artistArt", lastFMArtist.getImage().getMega());
-            } else {
-                jsonSong.put("artistArt", "");
-            }
-
-            JSONObject jsonMusic = new JSONObject();
-            jsonMusic.put("song", jsonSong);
-            jsonMusic.put("volume", volume);
-            jsonMusic.put("state", status);
-
-            return jsonMusic;
+        public MusicResponse build() {
+            return new MusicResponse(
+                    new MusicResponse.Song(artist, title, album, timeTotal, timeElapsed, albumArt, artistArt),
+                    volume, status
+            );
         }
     }
 }

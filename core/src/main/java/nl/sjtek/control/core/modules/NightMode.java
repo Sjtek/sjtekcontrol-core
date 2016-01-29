@@ -3,7 +3,8 @@ package nl.sjtek.control.core.modules;
 import nl.sjtek.control.core.network.ApiHandler;
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.utils.Speech;
-import org.json.JSONObject;
+import nl.sjtek.control.data.responses.NightModeResponse;
+import nl.sjtek.control.data.responses.Response;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -40,11 +41,8 @@ public class NightMode extends BaseModule {
     }
 
     @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("enabled", enabled);
-        jsonObject.put("nextDisable", nextDisable.toString());
-        return jsonObject;
+    public Response getResponse() {
+        return new NightModeResponse(enabled, nextDisable.toString());
     }
 
     @Override

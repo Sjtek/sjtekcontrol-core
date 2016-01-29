@@ -1,6 +1,7 @@
 package nl.sjtek.control.core.modules;
 
-import com.google.gson.Gson;
+import nl.sjtek.control.data.responses.Response;
+import nl.sjtek.control.data.responses.SonarrResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,21 +24,15 @@ public class Sonarr extends BaseModule {
     private static final String API_KEY = "4259f1a8e0cb4f6098c3560b20320d68";
     private static final int INTERVAL = 3600000;
 
-    private ArrayList<Episode> episodes = new ArrayList<>();
-    private Map<String, Disk> disks = new HashMap<>();
+    private List<SonarrResponse.Episode> upcoming = new ArrayList<>();
+    private Map<String, SonarrResponse.Disk> disks = new HashMap<>();
 
     public Sonarr() {
         new Timer().scheduleAtFixedRate(new UpdateTask(), 0, INTERVAL);
     }
 
-    public static void main(String args[]) {
-        Sonarr sonarr = new Sonarr();
-        sonarr.update();
-        System.out.println(sonarr.toJson().toString());
-    }
-
     private void parseCalendar(String jsonString) {
-        episodes = new ArrayList<>();
+        upcoming = new ArrayList<>();
         try {
             JSONArray jsonEpisodes = new JSONArray(jsonString);
             for (int i = 0; i < jsonEpisodes.length(); i++) {
@@ -49,11 +44,11 @@ public class Sonarr extends BaseModule {
                 String airDateUTC = jsonEpisode.getString("airDateUtc");
                 int seasonInt = jsonEpisode.getInt("seasonNumber");
                 int episodeInt = jsonEpisode.getInt("episodeNumber");
-                this.episodes.add(new Episode(seriesTitle, episodeName, airDate, airDateUTC, seasonInt, episodeInt));
+                this.upcoming.add(new SonarrResponse.Episode(seriesTitle, episodeName, airDate, airDateUTC, seasonInt, episodeInt));
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            this.episodes = new ArrayList<>();
+            this.upcoming = new ArrayList<>();
         }
     }
 
@@ -64,39 +59,27 @@ public class Sonarr extends BaseModule {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
             String name = jsonObject.getString("path");
             if (name.equals("/") || name.equals("/tv")) {
-                Disk disk = new Disk(jsonObject.getDouble("freeSpace"), jsonObject.getDouble("totalSpace"));
+                SonarrResponse.Disk disk = new SonarrResponse.Disk(jsonObject.getDouble("freeSpace"), jsonObject.getDouble("totalSpace"));
                 disks.put(name, disk);
             }
         }
     }
 
     @Override
-    public JSONObject toJson() {
-        JSONArray jsonEpisodes = new JSONArray();
-
-        for (Episode episode : episodes) {
-            jsonEpisodes.put(episode.toJsonObject());
-        }
-
-        JSONObject jsonObject = new JSONObject(new Gson().toJson(disks));
-
-        JSONObject jsonSonarr = new JSONObject();
-        jsonSonarr.put("upcoming", jsonEpisodes);
-        jsonSonarr.put("diskUsage", jsonObject);
-
-        return jsonSonarr;
+    public Response getResponse() {
+        return new SonarrResponse(upcoming, disks);
     }
 
     @Override
     public String getSummaryText() {
-        if (episodes.size() == 0) {
+        if (upcoming.size() == 0) {
             return "There are no upcoming episodes.";
         } else {
-            Episode episode = episodes.get(0);
+            SonarrResponse.Episode episode = upcoming.get(0);
             return "The next upcoming episode is " +
-                    episode.episodeName +
-                    " from " + episode.seriesTitle +
-                    " on " + episode.airDate + ".";
+                    episode.getEpisodeName() +
+                    " from " + episode.getSeriesTitle() +
+                    " on " + episode.getAirDate() + ".";
         }
     }
 
@@ -139,47 +122,6 @@ public class Sonarr extends BaseModule {
         @Override
         public void run() {
             update();
-        }
-    }
-
-    public class Episode {
-        private final String seriesTitle, episodeName;
-        private final String airDate, airDateUTC;
-        private final int seasonInt, episodeInt;
-
-        public Episode(String seriesTitle, String episodeName, String airDate, String airDateUTC, int seasonInt, int episodeInt) {
-            this.seriesTitle = seriesTitle;
-            this.episodeName = episodeName;
-            this.airDate = airDate;
-            this.airDateUTC = airDateUTC;
-            this.seasonInt = seasonInt;
-            this.episodeInt = episodeInt;
-        }
-
-        public JSONObject toJsonObject() {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("seriesTitle", seriesTitle);
-            jsonObject.put("episodeName", episodeName);
-            jsonObject.put("airDate", airDate);
-            jsonObject.put("airDateUTC", airDateUTC);
-            jsonObject.put("seasonNumber", seasonInt);
-            jsonObject.put("episodeInt", episodeInt);
-            return jsonObject;
-        }
-
-        @Override
-        public String toString() {
-            return toJsonObject().toString();
-        }
-    }
-
-    private class Disk {
-        private final double free;
-        private final double total;
-
-        public Disk(double free, double total) {
-            this.free = free;
-            this.total = total;
         }
     }
 }

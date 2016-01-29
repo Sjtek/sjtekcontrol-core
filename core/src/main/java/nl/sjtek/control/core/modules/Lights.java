@@ -1,7 +1,8 @@
 package nl.sjtek.control.core.modules;
 
 import nl.sjtek.control.core.network.Arguments;
-import org.json.JSONObject;
+import nl.sjtek.control.data.responses.LightsResponse;
+import nl.sjtek.control.data.responses.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -138,12 +139,8 @@ public class Lights extends BaseModule {
     }
 
     @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("1", states[1]);
-        jsonObject.put("2", states[2]);
-        jsonObject.put("3", states[3]);
-        return jsonObject;
+    public Response getResponse() {
+        return new LightsResponse(states[1], states[2], states[3]);
     }
 
     @Override

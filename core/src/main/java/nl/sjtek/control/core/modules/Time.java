@@ -1,6 +1,7 @@
 package nl.sjtek.control.core.modules;
 
-import org.json.JSONObject;
+import nl.sjtek.control.data.responses.Response;
+import nl.sjtek.control.data.responses.TimeResponse;
 
 import java.util.Calendar;
 
@@ -10,10 +11,8 @@ import java.util.Calendar;
 public class Time extends BaseModule {
 
     @Override
-    public JSONObject toJson() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("serverTime", Calendar.getInstance().getTime().toString());
-        return jsonObject;
+    public Response getResponse() {
+        return new TimeResponse(Calendar.getInstance().getTime().toString());
     }
 
     @Override

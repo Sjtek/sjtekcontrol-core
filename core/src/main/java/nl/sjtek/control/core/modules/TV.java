@@ -2,7 +2,8 @@ package nl.sjtek.control.core.modules;
 
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.utils.Executor;
-import org.json.JSONObject;
+import nl.sjtek.control.data.responses.Response;
+import nl.sjtek.control.data.responses.TVResponse;
 
 import java.io.IOException;
 
@@ -34,8 +35,8 @@ public class TV extends BaseModule {
     }
 
     @Override
-    public JSONObject toJson() {
-        return new JSONObject();
+    public Response getResponse() {
+        return new TVResponse();
     }
 
     @Override

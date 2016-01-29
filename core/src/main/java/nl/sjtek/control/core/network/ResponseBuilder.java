@@ -3,26 +3,29 @@ package nl.sjtek.control.core.network;
 import com.google.gson.Gson;
 import nl.sjtek.control.core.modules.BaseModule;
 import nl.sjtek.control.core.settings.SettingsManager;
+import nl.sjtek.control.data.responses.Response;
 import nl.sjtek.control.data.settings.User;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by wouter on 11-12-15.
  */
-public class Response {
+public class ResponseBuilder {
 
-    private Response() {
+    private ResponseBuilder() {
 
     }
 
     public static String create(Map<String, BaseModule> map) {
-        JSONObject jsonObject = new JSONObject();
-        for (Map.Entry<String, BaseModule> set : map.entrySet()) {
-            jsonObject.put(set.getKey(), set.getValue().toJson());
+        Map<String, Response> responseMap = new HashMap<>();
+        for (Map.Entry<String, BaseModule> entry : map.entrySet()) {
+            Response response = entry.getValue().getResponse();
+            responseMap.put(entry.getKey(), response);
         }
-        return jsonObject.toString();
+        return new Gson().toJson(responseMap);
     }
 
     public static String createData() {
