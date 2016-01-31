@@ -3,12 +3,12 @@ package nl.sjtek.control.data.settings;
 /**
  * Created by wouter on 10-1-16.
  */
-public class TV {
+public class TVSettings extends Setting {
     private final String host;
     private final int port;
     private final String key;
 
-    public TV(String host, int port, String key) {
+    public TVSettings(String host, int port, String key) {
         this.host = host;
         this.port = port;
         this.key = key;

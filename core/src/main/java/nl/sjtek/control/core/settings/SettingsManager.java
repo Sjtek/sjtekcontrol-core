@@ -17,13 +17,13 @@ public class SettingsManager {
     private static final String DEFAULT_PATH = "/var/sjtekcontrol/config.json";
     private static SettingsManager instance = DummyData.getSettingsManager();
 
-    private final Music music;
-    private final TV tv;
-    private final Quotes quotes;
-    private final LastFM lastFM;
+    private final MusicSettings music;
+    private final TVSettings tv;
+    private final QuotesSettings quotes;
+    private final LastFMSettings lastFM;
     private final Map<String, User> users;
 
-    public SettingsManager(Music music, TV tv, Quotes quotes, LastFM lastFM, Map<String, User> users) {
+    public SettingsManager(MusicSettings music, TVSettings tv, QuotesSettings quotes, LastFMSettings lastFM, Map<String, User> users) {
         this.music = music;
         this.tv = tv;
         this.quotes = quotes;
@@ -72,15 +72,15 @@ public class SettingsManager {
         instance = newSettingsManager;
     }
 
-    public Music getMusic() {
+    public MusicSettings getMusic() {
         return music;
     }
 
-    public TV getTv() {
+    public TVSettings getTv() {
         return tv;
     }
 
-    public Quotes getQuotes() {
+    public QuotesSettings getQuotes() {
         return quotes;
     }
 
@@ -96,7 +96,7 @@ public class SettingsManager {
         return getUser("default");
     }
 
-    public LastFM getLastFM() {
+    public LastFMSettings getLastFM() {
         return lastFM;
     }
 

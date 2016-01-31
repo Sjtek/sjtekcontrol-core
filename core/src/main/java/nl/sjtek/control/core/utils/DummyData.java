@@ -22,8 +22,8 @@ public class DummyData {
         );
     }
 
-    private static Music getDefaultMusic() {
-        return new Music(
+    private static MusicSettings getDefaultMusic() {
+        return new MusicSettings(
                 "mopidy",
                 6680,
                 "Local media/Taylor Swift",
@@ -31,8 +31,8 @@ public class DummyData {
         );
     }
 
-    private static Quotes getDefaultQuotes() {
-        return new Quotes(new String[]{
+    private static QuotesSettings getDefaultQuotes() {
+        return new QuotesSettings(new String[]{
                 "Alleen massaproductie",
                 "Dien mam",
                 "Mwoah, Gertje",
@@ -46,16 +46,16 @@ public class DummyData {
         });
     }
 
-    private static TV getDefaultTV() {
-        return new TV(
+    private static TVSettings getDefaultTV() {
+        return new TVSettings(
                 "192.168.0.66",
                 8080,
                 "861540"
         );
     }
 
-    private static LastFM getDefaultLastFM() {
-        return new LastFM(
+    private static LastFMSettings getDefaultLastFM() {
+        return new LastFMSettings(
                 "",
                 "/var/sjtekcontrol/lastfm/artists.json",
                 "/var/sjtekcontrol/lastfm/albums.json"

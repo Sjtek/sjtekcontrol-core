@@ -3,7 +3,7 @@ package nl.sjtek.control.data.settings;
 /**
  * Created by wouter on 11-12-15.
  */
-public class Music {
+public class MusicSettings extends Setting {
     private final String mpdHost;
     private final int mpdPort;
 
@@ -12,7 +12,7 @@ public class Music {
     private final int volumeStepUp;
     private final int volumeStepDown;
 
-    public Music(String mpdHost, int mpdPort, String taylorSwiftPath, int volumeNeutral, int volumeStepUp, int volumeStepDown) {
+    public MusicSettings(String mpdHost, int mpdPort, String taylorSwiftPath, int volumeNeutral, int volumeStepUp, int volumeStepDown) {
         this.mpdHost = mpdHost;
         this.mpdPort = mpdPort;
         this.taylorSwiftPath = taylorSwiftPath;

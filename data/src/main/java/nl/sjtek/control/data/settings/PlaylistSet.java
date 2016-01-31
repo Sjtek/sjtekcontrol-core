@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by wouter on 10-1-16.
  */
-public class PlaylistSet {
+public class PlaylistSet extends Setting {
 
     private final String defaultPlaylist;
     private final Map<String, String> playlists;

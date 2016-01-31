@@ -6,7 +6,7 @@ import java.util.Random;
 /**
  * Created by wouter on 11-12-15.
  */
-public class User {
+public class User extends Setting {
     private final String[] nickNames;
     private final PlaylistSet playlistSet;
     private final String[] nfcTags;

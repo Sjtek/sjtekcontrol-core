@@ -5,10 +5,10 @@ import java.util.Random;
 /**
  * Created by wouter on 11-12-15.
  */
-public class Quotes {
+public class QuotesSettings extends Setting {
     private final String[] quotes;
 
-    public Quotes(String[] quotes) {
+    public QuotesSettings(String[] quotes) {
         this.quotes = quotes;
     }
 
