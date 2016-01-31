@@ -16,6 +16,7 @@ public class Arguments {
     private StreamType streamType = StreamType.Stream;
     private String cardId = null;
     private User user = SettingsManager.getInstance().getDefaultUser();
+    private String code = "";
 
     public Arguments() {
 
@@ -41,6 +42,8 @@ public class Arguments {
                 cardId = value;
             } else if ("user".equals(name)) {
                 user = SettingsManager.getInstance().getUser(value);
+            } else if ("code".equals(name)) {
+                code = value;
             }
         }
     }
@@ -123,6 +126,14 @@ public class Arguments {
     public Arguments setUser(User user) {
         this.user = user;
         return this;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     @Override

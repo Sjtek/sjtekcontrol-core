@@ -50,13 +50,13 @@ public class Lights extends BaseModule {
     }
 
     public void toggle1off(Arguments arguments) {
-        if (action(SWITCH1OFF) == 200) {
+        if (action(SWITCH1OFF, arguments.getCode()) == 200) {
             states[1] = false;
         }
     }
 
     public void toggle1on(Arguments arguments) {
-        if (action(SWITCH1ON) == 200) {
+        if (action(SWITCH1ON, arguments.getCode()) == 200) {
             states[1] = true;
         }
     }
@@ -74,13 +74,13 @@ public class Lights extends BaseModule {
     }
 
     public void toggle2off(Arguments arguments) {
-        if (action(SWITCH2OFF) == 200) {
+        if (action(SWITCH2OFF, arguments.getCode()) == 200) {
             states[2] = false;
         }
     }
 
     public void toggle2on(Arguments arguments) {
-        if (action(SWITCH2ON) == 200) {
+        if (action(SWITCH2ON, arguments.getCode()) == 200) {
             states[2] = true;
         }
     }
@@ -98,13 +98,13 @@ public class Lights extends BaseModule {
     }
 
     public void toggle3off(Arguments arguments) {
-        if (action(SWITCH3OFF) == 200) {
+        if (action(SWITCH3OFF, arguments.getCode()) == 200) {
             states[3] = false;
         }
     }
 
     public void toggle3on(Arguments arguments) {
-        if (action(SWITCH3ON) == 200) {
+        if (action(SWITCH3ON, arguments.getCode()) == 200) {
             states[3] = true;
         }
     }
@@ -113,9 +113,9 @@ public class Lights extends BaseModule {
         return states[3];
     }
 
-    private synchronized int action(String action) {
+    private synchronized int action(String action, String code) {
         try {
-            URL url = new URL(ROOT_URL + action);
+            URL url = new URL(ROOT_URL + action + "?" + code);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.connect();
