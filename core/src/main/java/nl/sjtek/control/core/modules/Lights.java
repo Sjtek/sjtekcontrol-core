@@ -18,10 +18,12 @@ public class Lights extends BaseModule {
     private static final String SWITCH2OFF = "switch-2-off";
     private static final String SWITCH3ON = "switch-3-on";
     private static final String SWITCH3OFF = "switch-3-off";
+    private static final String SWITCH4ON = "switch-4-on";
+    private static final String SWITCH4OFF = "switch-4-off";
 
     private static final String ROOT_URL = "http://192.168.0.70/cgi-bin/";
 
-    private boolean states[] = {false, false, false, false};
+    private boolean states[] = {false, false, false, false, false};
 
     public Lights() {
 
@@ -113,6 +115,26 @@ public class Lights extends BaseModule {
         return states[3];
     }
 
+    public void toggle4(Arguments arguments) {
+        if (states[4]) {
+            toggle4off(arguments);
+        } else {
+            toggle4on(arguments);
+        }
+    }
+
+    public void toggle4off(Arguments arguments) {
+        if (action(SWITCH4OFF, arguments.getCode()) == 200) {
+            states[4] = false;
+        }
+    }
+
+    public void toggle4on(Arguments arguments) {
+        if (action(SWITCH4ON, arguments.getCode()) == 200) {
+            states[4] = true;
+        }
+    }
+
     private synchronized int action(String action, String code) {
         try {
             URL url = new URL(ROOT_URL + action + "?" + code);
@@ -140,7 +162,7 @@ public class Lights extends BaseModule {
 
     @Override
     public Response getResponse() {
-        return new LightsResponse(states[1], states[2], states[3]);
+        return new LightsResponse(states[1], states[2], states[3], states[4]);
     }
 
     @Override
@@ -148,7 +170,8 @@ public class Lights extends BaseModule {
         String result =
                 (states[1] ? "1, " : "") +
                         (states[2] ? "2, " : "") +
-                        (states[3] ? "3, " : "");
+                        (states[3] ? "3, " : "") +
+                        (states[4] ? "4, " : "");
         if (result.isEmpty())
             return "The lights are turned off.";
         return "The following lights are turned on: " + result + ".";

@@ -13,11 +13,14 @@ public class LightsResponse extends Response {
     private final boolean light2;
     @SerializedName("3")
     private final boolean light3;
+    @SerializedName("4")
+    private final boolean light4;
 
-    public LightsResponse(boolean light1, boolean light2, boolean light3) {
+    public LightsResponse(boolean light1, boolean light2, boolean light3, boolean light4) {
         this.light1 = light1;
         this.light2 = light2;
         this.light3 = light3;
+        this.light4 = light4;
     }
 
     public boolean isLight1() {
@@ -30,5 +33,9 @@ public class LightsResponse extends Response {
 
     public boolean isLight3() {
         return light3;
+    }
+
+    public boolean isLight4() {
+        return light4;
     }
 }
