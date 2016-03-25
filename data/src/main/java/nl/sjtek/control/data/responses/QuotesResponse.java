@@ -8,6 +8,7 @@ public class QuotesResponse extends Response {
     private final String quote;
 
     public QuotesResponse(String quote) {
+        type = this.getClass().getCanonicalName();
         this.quote = quote;
     }
 

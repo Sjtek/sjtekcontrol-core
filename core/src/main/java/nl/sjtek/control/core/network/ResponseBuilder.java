@@ -1,9 +1,11 @@
 package nl.sjtek.control.core.network;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import nl.sjtek.control.core.modules.BaseModule;
 import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.data.responses.Response;
+import nl.sjtek.control.data.responses.ResponseAdapter;
 import nl.sjtek.control.data.settings.DataCollection;
 
 import java.util.HashMap;
@@ -24,7 +26,11 @@ public class ResponseBuilder {
             Response response = entry.getValue().getResponse();
             responseMap.put(entry.getKey(), response);
         }
-        return new Gson().toJson(responseMap);
+        Gson gson = new GsonBuilder()
+                .registerTypeHierarchyAdapter(Response.class, new ResponseAdapter())
+                .setPrettyPrinting()
+                .create();
+        return gson.toJson(responseMap);
     }
 
     public static String createData() {

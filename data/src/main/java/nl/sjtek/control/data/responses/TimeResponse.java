@@ -8,6 +8,7 @@ public class TimeResponse extends Response {
     private final String serverTime;
 
     public TimeResponse(String serverTime) {
+        type = this.getClass().getCanonicalName();
         this.serverTime = serverTime;
     }
 

@@ -10,12 +10,13 @@ public class MusicResponse extends Response {
     private final Song song;
     private final int volume;
     @SerializedName("state")
-    private final String status;
+    private final State state;
 
     public MusicResponse(Song song, int volume, String status) {
+        type = this.getClass().getCanonicalName();
         this.song = song;
         this.volume = volume;
-        this.status = status;
+        this.state = State.valueOf(status);
     }
 
     public Song getSong() {
@@ -26,8 +27,15 @@ public class MusicResponse extends Response {
         return volume;
     }
 
-    public String getStatus() {
-        return status;
+    public State getState() {
+        return state;
+    }
+
+    public enum State {
+        ERROR,
+        STATUS_PLAYING,
+        STATUS_STOPPED,
+        STATUS_PAUSED
     }
 
     public static class Song {

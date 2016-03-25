@@ -1,9 +1,11 @@
 package nl.sjtek.control.data.responses;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -24,9 +26,13 @@ public class ResponseCollection {
     private final Map<String, Response> responseMap;
 
     public ResponseCollection(String jsonString) {
-        Type type = new TypeToken<Map<String, String>>() {
+        Type type = new TypeToken<HashMap<String, Response>>() {
         }.getType();
-        responseMap = new Gson().fromJson(jsonString, type);
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Response.class, new ResponseAdapter())
+                .setPrettyPrinting()
+                .create();
+        responseMap = gson.fromJson(jsonString, type);
     }
 
     public LightsResponse getLights() {

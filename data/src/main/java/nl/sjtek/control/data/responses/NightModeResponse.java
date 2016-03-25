@@ -9,6 +9,7 @@ public class NightModeResponse extends Response {
     private final String nextDisable;
 
     public NightModeResponse(boolean enabled, String nextDisable) {
+        type = this.getClass().getCanonicalName();
         this.enabled = enabled;
         this.nextDisable = nextDisable;
     }

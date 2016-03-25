@@ -12,6 +12,7 @@ public class SonarrResponse extends Response {
     private final Map<String, Disk> diskUsage;
 
     public SonarrResponse(List<Episode> upcoming, Map<String, Disk> diskUsage) {
+        type = this.getClass().getCanonicalName();
         this.upcoming = upcoming;
         this.diskUsage = diskUsage;
     }

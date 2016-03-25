@@ -12,6 +12,7 @@ public class TemperatureResponse extends Response {
     private final String icon;
 
     public TemperatureResponse(float outside, float inside, float humidity, String description, String icon) {
+        type = this.getClass().getCanonicalName();
         this.outside = outside;
         this.inside = inside;
         this.humidity = humidity;

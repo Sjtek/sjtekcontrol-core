@@ -1,5 +1,7 @@
 package nl.sjtek.control.data.settings;
 
+import com.google.gson.Gson;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +24,10 @@ public class DataCollection {
         for (Map.Entry<String, User> entry : users.entrySet()) {
             this.playlists.put(entry.getKey(), entry.getValue().getPlaylistSet());
         }
+    }
+
+    public static DataCollection fromJson(String data) {
+        return new Gson().fromJson(data, DataCollection.class);
     }
 
     public Map<String, PlaylistSet> getPlaylists() {
