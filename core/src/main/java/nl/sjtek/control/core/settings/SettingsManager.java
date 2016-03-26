@@ -22,13 +22,20 @@ public class SettingsManager {
     private final QuotesSettings quotes;
     private final LastFMSettings lastFM;
     private final Map<String, User> users;
+    private final ScreenSettings screen;
 
-    public SettingsManager(MusicSettings music, TVSettings tv, QuotesSettings quotes, LastFMSettings lastFM, Map<String, User> users) {
+    public SettingsManager(MusicSettings music,
+                           TVSettings tv,
+                           QuotesSettings quotes,
+                           LastFMSettings lastFM,
+                           Map<String, User> users,
+                           ScreenSettings screen) {
         this.music = music;
         this.tv = tv;
         this.quotes = quotes;
         this.lastFM = lastFM;
         this.users = users;
+        this.screen = screen;
     }
 
     public static SettingsManager getInstance() {
@@ -98,6 +105,10 @@ public class SettingsManager {
 
     public LastFMSettings getLastFM() {
         return lastFM;
+    }
+
+    public ScreenSettings getScreen() {
+        return screen;
     }
 
     @Override

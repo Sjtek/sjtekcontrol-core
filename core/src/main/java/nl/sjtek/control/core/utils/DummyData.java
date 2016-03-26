@@ -18,7 +18,8 @@ public class DummyData {
                 getDefaultTV(),
                 getDefaultQuotes(),
                 getDefaultLastFM(),
-                getDefaultUsers()
+                getDefaultUsers(),
+                getDefaultScreen()
         );
     }
 
@@ -59,6 +60,14 @@ public class DummyData {
                 "",
                 "/var/sjtekcontrol/lastfm/artists.json",
                 "/var/sjtekcontrol/lastfm/albums.json"
+        );
+    }
+
+    private static ScreenSettings getDefaultScreen() {
+        return new ScreenSettings(
+                "Sjtek Enterprises",
+                "",
+                ""
         );
     }
 
