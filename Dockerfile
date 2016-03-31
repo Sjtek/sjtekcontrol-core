@@ -1,3 +1,8 @@
-FROM whhoesj/sjtek-base:latest
+FROM java:8
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y pulseaudio espeak curl mpc
+COPY speak.sh /usr/bin/speak
+RUN chmod +x /usr/bin/speak
+
 COPY core/build/libs/core.jar /usr/bin/SjtekControl.jar
 CMD ["java", "-jar", "/usr/bin/SjtekControl.jar"]

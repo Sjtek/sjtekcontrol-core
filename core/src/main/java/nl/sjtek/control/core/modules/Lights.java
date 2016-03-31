@@ -21,7 +21,7 @@ public class Lights extends BaseModule {
     private static final String SWITCH4ON = "switch-4-on";
     private static final String SWITCH4OFF = "switch-4-off";
 
-    private static final String ROOT_URL = "http://192.168.0.70/cgi-bin/";
+    private static final String ROOT_URL = "http://10.10.0.2/cgi-bin/";
 
     private boolean states[] = {false, false, false, false, false};
 
@@ -140,6 +140,7 @@ public class Lights extends BaseModule {
             URL url = new URL(ROOT_URL + action + "?" + code);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
+            System.out.println("GET - " + url);
             connection.connect();
             int responseCode = connection.getResponseCode();
             if (responseCode == 200) {
