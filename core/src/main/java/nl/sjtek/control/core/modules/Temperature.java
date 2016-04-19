@@ -17,7 +17,7 @@ public class Temperature extends BaseModule {
     private static final int DELAY_INSIDE = 300000;
     private static final int DELAY_OUTSIDE = 3600000;
     private static final String WEATHER_URL_OUTSIDE = "http://3ddev.nl/watson/api/weather.php?city=Son";
-    private static final String WEATHER_URL_INSIDE = "http://192.168.0.70/cgi-bin/temp";
+    private static final String WEATHER_URL_INSIDE = "http://10.10.0.2/cgi-bin/temp";
 
     private float tempInside = 0;
     private int tempOutside = -100;
