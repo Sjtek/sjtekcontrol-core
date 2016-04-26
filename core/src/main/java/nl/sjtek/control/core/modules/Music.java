@@ -26,7 +26,7 @@ public class Music extends BaseModule {
     private MusicResponse musicResponse;
 
     /**
-     * Connect to an MPD server on an host with port port.
+     * Connect to the default MPD server.
      *
      * @throws UnknownHostException
      * @throws MPDConnectionException
@@ -35,6 +35,21 @@ public class Music extends BaseModule {
         MPD.Builder builder = new MPD.Builder();
         builder.server(SettingsManager.getInstance().getMusic().getMpdHost());
         builder.port(SettingsManager.getInstance().getMusic().getMpdPort());
+        mpd = builder.build();
+    }
+
+    /**
+     * Connect to an MPD server with a hostname and port;
+     *
+     * @param host Hostname for the MPD server
+     * @param port Port for the MPD server
+     * @throws UnknownHostException
+     * @throws MPDConnectionException
+     */
+    public Music(String host, int port) throws UnknownHostException, MPDConnectionException {
+        MPD.Builder builder = new MPD.Builder();
+        builder.server(host);
+        builder.port(port);
         mpd = builder.build();
     }
 
