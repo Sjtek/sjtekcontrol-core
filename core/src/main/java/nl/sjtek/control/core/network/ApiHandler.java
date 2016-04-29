@@ -27,13 +27,25 @@ public class ApiHandler implements HttpHandler {
         System.out.print("Loading modules:");
 
         System.out.println(" - music");
-        Music musicNaspoleon = null;
+        Music musicNaspoleon;
+        Music musicWouter;
+
         try {
             musicNaspoleon = new Music();
         } catch (UnknownHostException e) {
             e.printStackTrace();
+            musicNaspoleon = null;
         }
+
+        try {
+            musicWouter = new Music("10.10.0.4", 6600);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            musicWouter = null;
+        }
+
         modules.put("music", musicNaspoleon);
+        if (musicWouter != null) modules.put("music-wouter", musicWouter);
 
         System.out.println(" - lights");
         modules.put("lights", new Lights());

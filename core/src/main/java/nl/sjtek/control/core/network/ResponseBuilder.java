@@ -23,6 +23,7 @@ public class ResponseBuilder {
     public static String create(Map<String, BaseModule> map) {
         Map<String, Response> responseMap = new HashMap<>();
         for (Map.Entry<String, BaseModule> entry : map.entrySet()) {
+            if (entry.getKey().equals("music-wouter")) continue;
             Response response = entry.getValue().getResponse();
             responseMap.put(entry.getKey(), response);
         }
