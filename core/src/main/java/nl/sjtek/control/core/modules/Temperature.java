@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -105,7 +106,7 @@ public class Temperature extends BaseModule {
             tempOutside = parseOutside(download(WEATHER_URL_OUTSIDE));
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_PATH, true))) {
-                String data = String.format("%s;%.2f;%.2f;\n",
+                String data = String.format(Locale.GERMAN, "%s;%.2f;%.2f;\n",
                         Calendar.getInstance().getTime().toString(), tempInside, tempOutside);
                 writer.write(data);
             } catch (IOException e) {
