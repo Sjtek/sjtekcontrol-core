@@ -5,10 +5,7 @@ import nl.sjtek.control.data.responses.TemperatureResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
@@ -96,6 +93,27 @@ public class Temperature extends BaseModule {
         } catch (IOException e) {
             return "";
         }
+    }
+
+    public String getLogData() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        String rowTemplate = "[\"%s\", %s, %s]";
+        try (BufferedReader reader = new BufferedReader(new FileReader(LOG_PATH))) {
+            String line;
+            String prefix = "";
+            while ((line = reader.readLine()) != null) {
+                String row[] = line.split(";");
+                builder.append(prefix);
+                prefix = ",";
+                builder.append(String.format(rowTemplate, row[0], row[1].replace(',', '.'), row[2].replace(',', '.')));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        builder.append("]");
+        return builder.toString();
     }
 
     private class UpdateTask extends TimerTask {

@@ -118,6 +118,10 @@ public class ApiHandler implements HttpHandler {
                         responseType = ResponseType.DATA;
                         responseCode = 200;
                         break;
+                    case "temp-log":
+                        responseType = ResponseType.TEMP_LOG;
+                        responseCode = 200;
+                        break;
                     default:
                         String methodString = splittedPath[3];
 
@@ -151,6 +155,9 @@ public class ApiHandler implements HttpHandler {
                     break;
                 case DATA:
                     response = ResponseBuilder.createData();
+                    break;
+                case TEMP_LOG:
+                    response = getTemperature().getLogData();
                     break;
                 default:
                     response = "{ }";
@@ -254,6 +261,7 @@ public class ApiHandler implements HttpHandler {
         DEFAULT,
         CLEAN,
         SETTINGS,
-        DATA
+        DATA,
+        TEMP_LOG,
     }
 }
