@@ -35,6 +35,9 @@ public class ResponseBuilder {
     }
 
     public static String createData() {
-        return new Gson().toJson(new DataCollection(SettingsManager.getInstance().getUsers()));
+        return new Gson().toJson(new DataCollection(
+                SettingsManager.getInstance().getUsers(),
+                SettingsManager.getInstance().getQuotes().getQuotes()
+        ));
     }
 }
