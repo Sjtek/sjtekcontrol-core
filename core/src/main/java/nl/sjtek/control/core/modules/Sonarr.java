@@ -18,11 +18,11 @@ import java.util.*;
  */
 public class Sonarr extends BaseModule {
 
-    private static final String BASE_URL = "https://sjtek.nl/sonarr/api";
+    private static final String BASE_URL = "http://sonarr:8989/sonarr/api";
     private static final String URL_CALENDAR = BASE_URL + "/calendar";
     private static final String URL_DISKSPACE = BASE_URL + "/diskspace";
     private static final String API_KEY = "dd7673bf95f047c88fd5746d7e04113d";
-    private static final int INTERVAL = 3600000;
+    private static final int INTERVAL = 1800000;
 
     private List<SonarrResponse.Episode> upcoming = new ArrayList<>();
     private Map<String, SonarrResponse.Disk> disks = new HashMap<>();
