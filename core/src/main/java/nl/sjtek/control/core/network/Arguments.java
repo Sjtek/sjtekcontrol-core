@@ -17,6 +17,7 @@ public class Arguments {
     private String cardId = null;
     private User user = SettingsManager.getInstance().getDefaultUser();
     private String code = "";
+    private String rgb = "";
 
     public Arguments() {
 
@@ -44,6 +45,8 @@ public class Arguments {
                 user = SettingsManager.getInstance().getUser(value);
             } else if ("code".equals(name)) {
                 code = value;
+            } else if ("rgb".equals(name)) {
+                rgb = value;
             }
         }
     }
@@ -134,6 +137,15 @@ public class Arguments {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getRgb() {
+        return rgb;
+    }
+
+    public Arguments setRgb(String rgb) {
+        this.rgb = rgb;
+        return this;
     }
 
     @Override

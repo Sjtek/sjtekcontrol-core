@@ -21,7 +21,8 @@ public class Lights extends BaseModule {
     private static final String SWITCH4ON = "switch-4-on";
     private static final String SWITCH4OFF = "switch-4-off";
 
-    private static final String ROOT_URL = "http://10.10.0.2/cgi-bin/";
+    private static final String ROOT_URL_NORMAL = "http://10.10.0.2/cgi-bin/";
+    private static final String ROOT_URL_RGB = "http://10.10.0.4/cgi-bin/";
 
     private boolean states[] = {false, false, false, false, false};
 
@@ -100,13 +101,17 @@ public class Lights extends BaseModule {
     }
 
     public void toggle3off(Arguments arguments) {
-        if (action(SWITCH3OFF, arguments.getCode()) == 200) {
+        if (!arguments.getRgb().isEmpty() && action(arguments.getRgb()) == 200) {
+            states[3] = false;
+        } else if (action(SWITCH3OFF, arguments.getCode()) == 200) {
             states[3] = false;
         }
     }
 
     public void toggle3on(Arguments arguments) {
-        if (action(SWITCH3ON, arguments.getCode()) == 200) {
+        if (!arguments.getRgb().isEmpty() && action(arguments.getRgb()) == 200) {
+            states[3] = true;
+        } else if (action(SWITCH3ON, arguments.getCode()) == 200) {
             states[3] = true;
         }
     }
@@ -136,8 +141,16 @@ public class Lights extends BaseModule {
     }
 
     private synchronized int action(String action, String code) {
+        return send(ROOT_URL_NORMAL, action, code);
+    }
+
+    private synchronized int action(String rgb) {
+        return send(ROOT_URL_RGB, "led", rgb);
+    }
+
+    private int send(String urlString, String action, String argument) {
         try {
-            URL url = new URL(ROOT_URL + action + "?" + code);
+            URL url = new URL(urlString + action + "?" + argument);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             System.out.println("GET - " + url);
