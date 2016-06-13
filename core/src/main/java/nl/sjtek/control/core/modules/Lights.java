@@ -22,7 +22,7 @@ public class Lights extends BaseModule {
     private static final String SWITCH4OFF = "switch-4-off";
 
     private static final String ROOT_URL_NORMAL = "http://10.10.0.2/cgi-bin/";
-    private static final String ROOT_URL_RGB = "http://10.10.0.4/cgi-bin/";
+    private static final String ROOT_URL_RGB = "http://10.10.0.4:8000/";
 
     private boolean states[] = {false, false, false, false, false};
 
@@ -101,17 +101,13 @@ public class Lights extends BaseModule {
     }
 
     public void toggle3off(Arguments arguments) {
-        if (!arguments.getRgb().isEmpty() && action(arguments.getRgb()) == 200) {
-            states[3] = false;
-        } else if (action(SWITCH3OFF, arguments.getCode()) == 200) {
+        if (actionLedStrip(arguments, false) == 200) {
             states[3] = false;
         }
     }
 
     public void toggle3on(Arguments arguments) {
-        if (!arguments.getRgb().isEmpty() && action(arguments.getRgb()) == 200) {
-            states[3] = true;
-        } else if (action(SWITCH3ON, arguments.getCode()) == 200) {
+        if (actionLedStrip(arguments, true) == 200) {
             states[3] = true;
         }
     }
@@ -144,8 +140,16 @@ public class Lights extends BaseModule {
         return send(ROOT_URL_NORMAL, action, code);
     }
 
-    private synchronized int action(String rgb) {
-        return send(ROOT_URL_RGB, "led", rgb);
+    private synchronized int actionLedStrip(Arguments arguments, boolean state) {
+        if (!arguments.getRgb().isEmpty()) {
+            return send(ROOT_URL_RGB, "led", "rgb=" + arguments.getRgb());
+        } else if (!arguments.getCode().isEmpty()) {
+            return send(ROOT_URL_RGB, "led", "code=" + arguments.getCode());
+        } else if (state) {
+            return send(ROOT_URL_RGB, "led", "rgb=255,50,0");
+        } else {
+            return send(ROOT_URL_RGB, "led", "rgb=0,0,0");
+        }
     }
 
     private int send(String urlString, String action, String argument) {
