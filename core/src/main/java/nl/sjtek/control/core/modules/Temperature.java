@@ -20,8 +20,8 @@ public class Temperature extends BaseModule {
     private static final String WEATHER_URL_INSIDE = "http://10.10.0.2/cgi-bin/temp";
     private static final String LOG_PATH = "/var/sjtekcontrol/log.csv";
 
-    private float tempInside = 0;
-    private float tempOutside = -100;
+    private int tempInside = 0;
+    private int tempOutside = -100;
     private float humidity = 0;
     private String description = "error";
     private String icon = "";
@@ -120,11 +120,11 @@ public class Temperature extends BaseModule {
 
         @Override
         public void run() {
-            tempInside = parseInside(download(WEATHER_URL_INSIDE));
-            tempOutside = parseOutside(download(WEATHER_URL_OUTSIDE));
+            tempInside = (int) parseInside(download(WEATHER_URL_INSIDE));
+            tempOutside = (int) parseOutside(download(WEATHER_URL_OUTSIDE));
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_PATH, true))) {
-                String data = String.format(Locale.GERMAN, "%s;%.2f;%.2f;\n",
+                String data = String.format(Locale.GERMAN, "%s;%d;%d;\n",
                         Calendar.getInstance().getTime().toString(), tempInside, tempOutside);
                 writer.write(data);
             } catch (IOException e) {
