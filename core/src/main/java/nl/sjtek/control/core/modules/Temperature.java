@@ -8,18 +8,19 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class Temperature extends BaseModule {
 
-    private static final int UPDATE_DELAY = 600000;
+    private static final int UPDATE_DELAY = 1800000;
     private static final String WEATHER_URL_OUTSIDE = "http://3ddev.nl/watson/api/weather.php?city=Son";
     private static final String WEATHER_URL_INSIDE = "http://10.10.0.2/cgi-bin/temp";
     private static final String LOG_PATH = "/var/sjtekcontrol/log.csv";
 
+    private int errorsOutside = 0;
+    private int errorsInside = 0;
     private int tempInside = 0;
     private int tempOutside = -100;
     private float humidity = 0;
@@ -41,32 +42,43 @@ public class Temperature extends BaseModule {
         return "The temperature inside is " + tempInside + " degrees, and outside " + tempOutside + " degrees.";
     }
 
-    private float parseOutside(String response) {
+    private void parseOutside(String response) {
         if (!response.isEmpty()) {
             try {
                 JSONObject jsonObject = new JSONObject(response);
-                float temp = jsonObject.getLong("temp");
-                humidity = jsonObject.getLong("humidity");
-                description = jsonObject.getString("description");
-                icon = jsonObject.getString("icon");
-                return temp;
-            } catch (JSONException e) {
-                return -101;
+                float tempOutside = jsonObject.getLong("temp");
+                float humidity = jsonObject.getLong("humidity");
+                String description = jsonObject.getString("description");
+                String icon = jsonObject.getString("icon");
+
+                this.tempOutside = (int) tempOutside;
+                this.humidity = humidity;
+                this.description = description;
+                this.icon = icon;
+                errorsOutside = 0;
+                return;
+            } catch (JSONException ignored) {
             }
-        } else {
-            return -102;
+        }
+        System.out.println("Temperature outside error: " + response);
+        errorsOutside++;
+        if (errorsOutside > 1) {
+            tempOutside = -100;
         }
     }
 
-    private float parseInside(String response) {
+    private void parseInside(String response) {
         if (!response.isEmpty()) {
             try {
-                return Float.valueOf(response);
-            } catch (NumberFormatException e) {
-                return -101;
+                this.tempInside = Integer.valueOf(response);
+                errorsInside = 0;
+                return;
+            } catch (NumberFormatException ignored) {
             }
-        } else {
-            return -102;
+        }
+        errorsInside++;
+        if (errorsInside > 1) {
+            tempInside = -100;
         }
     }
 
@@ -120,12 +132,16 @@ public class Temperature extends BaseModule {
 
         @Override
         public void run() {
-            tempInside = (int) parseInside(download(WEATHER_URL_INSIDE));
-            tempOutside = (int) parseOutside(download(WEATHER_URL_OUTSIDE));
+            parseInside(download(WEATHER_URL_INSIDE));
+            parseOutside(download(WEATHER_URL_OUTSIDE));
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_PATH, true))) {
+                TimeZone tz = TimeZone.getTimeZone("UTC");
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
+                df.setTimeZone(tz);
+                String nowAsISO = df.format(new Date());
                 String data = String.format(Locale.GERMAN, "%s;%d;%d;\n",
-                        Calendar.getInstance().getTime().toString(), tempInside, tempOutside);
+                        nowAsISO, tempInside, tempOutside);
                 writer.write(data);
             } catch (IOException e) {
                 e.printStackTrace();
