@@ -30,10 +30,12 @@ public class NightMode extends BaseModule {
         ApiHandler.getInstance().getMusic().pause(new Arguments());
         if (arguments.useVoice()) Speech.speak("Entering night mode");
         enabled = true;
+        dataChanged();
     }
 
     public void disable(Arguments arguments) {
         enabled = false;
+        dataChanged();
         if (arguments.useVoice()) Speech.speak("Disabling night mode. Good morning");
     }
 

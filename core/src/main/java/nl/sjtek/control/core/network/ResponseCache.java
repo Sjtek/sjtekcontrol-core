@@ -20,6 +20,7 @@ public class ResponseCache implements OnDataUpdatedListener {
 
     public void addModule(String key, BaseModule module) {
         module.setDataUpdatedListener(this);
+        responseMap.put(key, module.getResponse());
     }
 
     public void addModules(Map<String, BaseModule> modules) {

@@ -6,6 +6,8 @@ import nl.sjtek.control.data.responses.Response;
 import org.json.JSONArray;
 
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by wouter on 24-11-15.
@@ -13,9 +15,16 @@ import java.util.Random;
 public class Quotes extends BaseModule {
 
     private Random random = new Random();
+    private Timer timer = new Timer();
 
     public Quotes(String key) {
         super(key);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                dataChanged();
+            }
+        }, 0, 5 * 1000);
     }
 
     public String getAll() {

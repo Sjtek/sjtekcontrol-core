@@ -149,7 +149,7 @@ public class ApiHandler implements HttpHandler {
         if (responseCode == 200) {
             switch (responseType) {
                 case DEFAULT:
-                    response = ResponseBuilder.create(modules);
+                    response = cache.toJson();
                     break;
                 case CLEAN:
                     response = "{ }";

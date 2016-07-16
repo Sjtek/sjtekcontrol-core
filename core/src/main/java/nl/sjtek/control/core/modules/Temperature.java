@@ -142,6 +142,7 @@ public class Temperature extends BaseModule {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            dataChanged();
         }
     }
 }

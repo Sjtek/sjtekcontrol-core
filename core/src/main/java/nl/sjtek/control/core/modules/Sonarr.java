@@ -51,6 +51,7 @@ public class Sonarr extends BaseModule {
             e.printStackTrace();
             this.upcoming = new ArrayList<>();
         }
+        dataChanged();
     }
 
     private void parseDiskSpace(String jsonString) {
@@ -64,6 +65,7 @@ public class Sonarr extends BaseModule {
                 disks.put(name, disk);
             }
         }
+        dataChanged();
     }
 
     @Override
