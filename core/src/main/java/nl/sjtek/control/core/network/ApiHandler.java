@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,20 +34,20 @@ public class ApiHandler implements HttpHandler {
 
         try {
             musicNaspoleon = new Music("music");
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException | URISyntaxException e) {
             e.printStackTrace();
             musicNaspoleon = null;
         }
 
-        try {
-            musicWouter = new Music("music-wouter", "10.10.0.4", 6600);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            musicWouter = null;
-        }
+//        try {
+//            musicWouter = new Music("music-wouter", "10.10.0.4", 6600);
+//        } catch (UnknownHostException | URISyntaxException e) {
+//            e.printStackTrace();
+//            musicWouter = null;
+//        }
 
         modules.put("music", musicNaspoleon);
-        if (musicWouter != null) modules.put("music-wouter", musicWouter);
+//        if (musicWouter != null) modules.put("music-wouter", musicWouter);
 
         System.out.println(" - lights");
         modules.put("lights", new Lights("lights"));

@@ -14,16 +14,25 @@ import org.bff.javampd.player.Player;
 import org.bff.javampd.server.MPD;
 import org.bff.javampd.server.MPDConnectionException;
 import org.bff.javampd.song.MPDSong;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 @SuppressWarnings({"UnusedParameters", "unused"})
 public class Music extends BaseModule {
 
+    private final String host;
+    private final int port;
     private MPD mpd = null;
     private MusicResponse musicResponse;
+    private WSUpdateListener updateListener;
 
     /**
      * Connect to the default MPD server.
@@ -31,12 +40,16 @@ public class Music extends BaseModule {
      * @throws UnknownHostException
      * @throws MPDConnectionException
      */
-    public Music(String key) throws UnknownHostException, MPDConnectionException {
+    public Music(String key) throws UnknownHostException, MPDConnectionException, URISyntaxException {
         super(key);
         MPD.Builder builder = new MPD.Builder();
-        builder.server(SettingsManager.getInstance().getMusic().getMpdHost());
-        builder.port(SettingsManager.getInstance().getMusic().getMpdPort());
+        this.host = SettingsManager.getInstance().getMusic().getMpdHost();
+        this.port = SettingsManager.getInstance().getMusic().getMpdPort();
+        builder.server(this.host);
+        builder.port(port);
         mpd = builder.build();
+        updateListener = new WSUpdateListener(this.host, this.port);
+        updateListener.connect();
     }
 
     /**
@@ -47,12 +60,16 @@ public class Music extends BaseModule {
      * @throws UnknownHostException
      * @throws MPDConnectionException
      */
-    public Music(String key, String host, int port) throws UnknownHostException, MPDConnectionException {
+    public Music(String key, String host, int port) throws UnknownHostException, MPDConnectionException, URISyntaxException {
         super(key);
         MPD.Builder builder = new MPD.Builder();
+        this.host = host;
+        this.port = port;
         builder.server(host);
         builder.port(port);
         mpd = builder.build();
+        updateListener = new WSUpdateListener(this.host, this.port);
+        updateListener.connect();
     }
 
     /**
@@ -383,6 +400,51 @@ public class Music extends BaseModule {
                     new MusicResponse.Song(artist, title, album, timeTotal, timeElapsed, albumArt, artistArt),
                     volume, status
             );
+        }
+    }
+
+    private class WSUpdateListener extends WebSocketClient {
+        private static final String URL_TEMPLATE = "ws://%s:%d/mopidy/ws";
+
+        private long lastEvent = 0;
+        private Timer timer = new Timer();
+
+        public WSUpdateListener(String host, int port) throws URISyntaxException {
+            super(new URI(String.format(URL_TEMPLATE, host, 6680)));
+        }
+
+        @Override
+        public void onOpen(ServerHandshake handshakedata) {
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    WSUpdateListener.this.send("{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"core.playback.get_state\"}");
+                }
+            }, 30000, 30000);
+        }
+
+        @Override
+        public void onMessage(String message) {
+            if (!message.contains("jsonrpc")) {
+                if (!(message.equals("{\"event\": \"tracklist_changed\"}"))) {
+                    if (System.currentTimeMillis() - lastEvent > 40) {
+                        System.out.println((System.currentTimeMillis() - lastEvent) + " - " + message);
+                        lastEvent = System.currentTimeMillis();
+                        dataChanged();
+                    }
+                }
+            }
+
+        }
+
+        @Override
+        public void onClose(int code, String reason, boolean remote) {
+            System.out.println(this.getClass().getSimpleName() + " onClose: " + code + " " + reason);
+        }
+
+        @Override
+        public void onError(Exception ex) {
+            System.out.println(this.getClass().getSimpleName() + " onError: " + ex.getMessage());
         }
     }
 }
