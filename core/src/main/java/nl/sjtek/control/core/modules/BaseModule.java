@@ -22,8 +22,12 @@ public abstract class BaseModule {
     }
 
     protected void dataChanged() {
+        dataChanged(true);
+    }
+
+    protected void dataChanged(boolean send) {
         if (dataUpdatedListener != null) {
-            dataUpdatedListener.onUpdate(this, key);
+            dataUpdatedListener.onUpdate(this, key, send);
         }
     }
 

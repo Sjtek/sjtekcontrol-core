@@ -38,7 +38,7 @@ public class ResponseCache implements OnDataUpdatedListener {
     }
 
     @Override
-    public void onUpdate(BaseModule module, String key) {
+    public void onUpdate(BaseModule module, String key, boolean send) {
         this.responseMap.put(key, module.getResponse());
     }
 }

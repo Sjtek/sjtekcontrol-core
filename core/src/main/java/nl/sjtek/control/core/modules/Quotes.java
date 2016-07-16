@@ -22,7 +22,7 @@ public class Quotes extends BaseModule {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                dataChanged();
+                dataChanged(false);
             }
         }, 0, 5 * 1000);
     }
