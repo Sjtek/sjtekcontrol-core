@@ -31,7 +31,8 @@ public class Music extends BaseModule {
      * @throws UnknownHostException
      * @throws MPDConnectionException
      */
-    public Music() throws UnknownHostException, MPDConnectionException {
+    public Music(String key) throws UnknownHostException, MPDConnectionException {
+        super(key);
         MPD.Builder builder = new MPD.Builder();
         builder.server(SettingsManager.getInstance().getMusic().getMpdHost());
         builder.port(SettingsManager.getInstance().getMusic().getMpdPort());
@@ -46,7 +47,8 @@ public class Music extends BaseModule {
      * @throws UnknownHostException
      * @throws MPDConnectionException
      */
-    public Music(String host, int port) throws UnknownHostException, MPDConnectionException {
+    public Music(String key, String host, int port) throws UnknownHostException, MPDConnectionException {
+        super(key);
         MPD.Builder builder = new MPD.Builder();
         builder.server(host);
         builder.port(port);

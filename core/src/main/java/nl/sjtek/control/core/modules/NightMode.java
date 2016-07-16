@@ -20,7 +20,8 @@ public class NightMode extends BaseModule {
     private Timer timer;
     private Date nextDisable = Calendar.getInstance().getTime();
 
-    public NightMode() {
+    public NightMode(String key) {
+        super(key);
         this.timer = new Timer();
         schedule();
     }

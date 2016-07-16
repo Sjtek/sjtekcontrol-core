@@ -27,7 +27,8 @@ public class Sonarr extends BaseModule {
     private List<SonarrResponse.Episode> upcoming = new ArrayList<>();
     private Map<String, SonarrResponse.Disk> disks = new HashMap<>();
 
-    public Sonarr() {
+    public Sonarr(String key) {
+        super(key);
         new Timer().scheduleAtFixedRate(new UpdateTask(), 0, INTERVAL);
     }
 

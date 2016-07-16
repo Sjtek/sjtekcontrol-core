@@ -22,6 +22,7 @@ public class ApiHandler implements HttpHandler {
     public static final String CONTEXT = "/api";
     private static ApiHandler instance = new ApiHandler();
     private Map<String, BaseModule> modules = new HashMap<>();
+    private ResponseCache cache;
 
     private ApiHandler() {
         System.out.print("Loading modules:");
@@ -31,14 +32,14 @@ public class ApiHandler implements HttpHandler {
         Music musicWouter;
 
         try {
-            musicNaspoleon = new Music();
+            musicNaspoleon = new Music("music");
         } catch (UnknownHostException e) {
             e.printStackTrace();
             musicNaspoleon = null;
         }
 
         try {
-            musicWouter = new Music("10.10.0.4", 6600);
+            musicWouter = new Music("music-wouter", "10.10.0.4", 6600);
         } catch (UnknownHostException e) {
             e.printStackTrace();
             musicWouter = null;
@@ -48,21 +49,24 @@ public class ApiHandler implements HttpHandler {
         if (musicWouter != null) modules.put("music-wouter", musicWouter);
 
         System.out.println(" - lights");
-        modules.put("lights", new Lights());
+        modules.put("lights", new Lights("lights"));
         System.out.println(" - temperature");
-        modules.put("temperature", new Temperature());
+        modules.put("temperature", new Temperature("temperature"));
         System.out.println(" - tv");
-        modules.put("tv", new TV());
+        modules.put("tv", new TV("tv"));
         System.out.println(" - sonarr");
-        modules.put("sonarr", new Sonarr());
+        modules.put("sonarr", new Sonarr("sonarr"));
         System.out.println(" - quotes");
-        modules.put("quotes", new Quotes());
+        modules.put("quotes", new Quotes("quotes"));
         System.out.println(" - NFC");
-        modules.put("nfc", new NFC());
+        modules.put("nfc", new NFC("nfc"));
         System.out.println(" - NightMode");
-        modules.put("nightmode", new NightMode());
+        modules.put("nightmode", new NightMode("nightmode"));
         System.out.println(" - Time");
-        modules.put("time", new Time());
+        modules.put("time", new Time("time"));
+
+        this.cache = new ResponseCache();
+        this.cache.addModules(modules);
 
         System.out.println();
     }

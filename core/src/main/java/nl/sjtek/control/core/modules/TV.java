@@ -18,6 +18,10 @@ public class TV extends BaseModule {
     private static final String KEY = "00000";
     private static final String PROTOCOL = "roap";
 
+    public TV(String key) {
+        super(key);
+    }
+
     private String[] getArgumentsForCommand(String command) {
         return new String[]{LGCOMMANDER_PATH, "-H " + HOST, "-p " + PORT, "-P " + PROTOCOL, "-k " + KEY, "-c " + command};
     }

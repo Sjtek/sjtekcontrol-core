@@ -26,8 +26,8 @@ public class Lights extends BaseModule {
 
     private boolean states[] = {false, false, false, false, false};
 
-    public Lights() {
-
+    public Lights(String key) {
+        super(key);
     }
 
     public boolean isOn() {

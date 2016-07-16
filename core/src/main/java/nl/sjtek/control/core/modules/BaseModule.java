@@ -9,6 +9,24 @@ import nl.sjtek.control.data.responses.Response;
  */
 public abstract class BaseModule {
 
+    private final String key;
+    private OnDataUpdatedListener dataUpdatedListener;
+
+    public BaseModule(String key) {
+        this.key = key;
+    }
+
+    public BaseModule setDataUpdatedListener(OnDataUpdatedListener dataUpdatedListener) {
+        this.dataUpdatedListener = dataUpdatedListener;
+        return this;
+    }
+
+    protected void dataChanged() {
+        if (dataUpdatedListener != null) {
+            dataUpdatedListener.onUpdate(this, key);
+        }
+    }
+
     public void info(Arguments arguments) {
         if (arguments.useVoice()) Speech.speakAsync(getSummaryText());
     }
@@ -16,6 +34,7 @@ public abstract class BaseModule {
     public abstract Response getResponse();
 
     public abstract String getSummaryText();
+
 
     @Override
     public final String toString() {

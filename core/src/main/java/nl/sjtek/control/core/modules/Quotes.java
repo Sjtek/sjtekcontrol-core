@@ -14,6 +14,10 @@ public class Quotes extends BaseModule {
 
     private Random random = new Random();
 
+    public Quotes(String key) {
+        super(key);
+    }
+
     public String getAll() {
         JSONArray jsonArray = new JSONArray();
         for (String quote : SettingsManager.getInstance().getQuotes().getQuotes()) {

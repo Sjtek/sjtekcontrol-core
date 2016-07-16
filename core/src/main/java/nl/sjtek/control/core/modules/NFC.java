@@ -15,6 +15,10 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class NFC extends BaseModule {
 
+    public NFC(String key) {
+        super(key);
+    }
+
     public void read(Arguments arguments) {
         for (Map.Entry<String, User> set : SettingsManager.getInstance().getUsers().entrySet()) {
             for (String cardId : set.getValue().getNfcTags()) {
