@@ -14,13 +14,12 @@ import java.util.*;
 
 public class Temperature extends BaseModule {
 
-    private static final int UPDATE_DELAY = 1800000;
+    private static final int UPDATE_DELAY = 900000;
     private static final String WEATHER_URL_OUTSIDE = "http://3ddev.nl/watson/api/weather.php?city=Son";
     private static final String WEATHER_URL_INSIDE = "http://10.10.0.2/cgi-bin/temp";
     private static final String LOG_PATH = "/var/sjtekcontrol/log.csv";
 
     private int errorsOutside = 0;
-    private int errorsInside = 0;
     private int tempInside = 0;
     private int tempOutside = -100;
     private float humidity = 0;
@@ -70,16 +69,12 @@ public class Temperature extends BaseModule {
     private void parseInside(String response) {
         if (!response.isEmpty()) {
             try {
-                this.tempInside = Integer.valueOf(response);
-                errorsInside = 0;
+                this.tempInside = (int) (float) Float.valueOf(response);
                 return;
             } catch (NumberFormatException ignored) {
             }
         }
-        errorsInside++;
-        if (errorsInside > 1) {
-            tempInside = -100;
-        }
+        tempInside = -100;
     }
 
     private String download(String stringUrl) {
