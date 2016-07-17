@@ -140,8 +140,11 @@ public class ApiHandler implements HttpHandler {
 
                         break;
                 }
-            } catch (ArrayIndexOutOfBoundsException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | NullPointerException e) {
+            } catch (ArrayIndexOutOfBoundsException | NoSuchMethodException | IllegalAccessException | NullPointerException e) {
                 responseCode = 404;
+            } catch (InvocationTargetException e) {
+                responseCode = 500;
+                e.printStackTrace();
             }
         }
 

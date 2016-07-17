@@ -9,6 +9,8 @@ public class Page {
         switch (responseCode) {
             case 404:
                 return getNotFound();
+            case 500:
+                return getInternalServerError();
             default:
                 return getNotFound();
         }
