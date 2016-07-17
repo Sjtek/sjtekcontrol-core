@@ -32,6 +32,7 @@ public abstract class BaseModule {
     }
 
     public void info(Arguments arguments) {
+        dataChanged();
         if (arguments.useVoice()) Speech.speakAsync(getSummaryText());
     }
 
