@@ -68,6 +68,7 @@ public class ApiHandler implements HttpHandler {
         modules.put("time", new Time("time"));
 
         this.wsServer = new WSServer();
+        this.wsServer.start();
 
         this.cache = new ResponseCache();
         this.cache.addModules(modules);
