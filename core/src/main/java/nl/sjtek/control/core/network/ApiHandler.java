@@ -24,6 +24,7 @@ public class ApiHandler implements HttpHandler {
     private static ApiHandler instance = new ApiHandler();
     private Map<String, BaseModule> modules = new HashMap<>();
     private ResponseCache cache;
+    private WSServer wsServer;
 
     private ApiHandler() {
         System.out.print("Loading modules:");
@@ -66,8 +67,12 @@ public class ApiHandler implements HttpHandler {
         System.out.println(" - Time");
         modules.put("time", new Time("time"));
 
+        this.wsServer = new WSServer();
+        this.wsServer.start();
+
         this.cache = new ResponseCache();
         this.cache.addModules(modules);
+        this.cache.setBroadcastListener(this.wsServer);
 
         System.out.println();
     }
