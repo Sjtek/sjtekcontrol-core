@@ -2,7 +2,6 @@ package nl.sjtek.control.core.network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.sun.istack.internal.Nullable;
 import nl.sjtek.control.core.modules.BaseModule;
 import nl.sjtek.control.core.modules.OnDataUpdatedListener;
 import nl.sjtek.control.data.responses.Response;
@@ -20,7 +19,7 @@ public class ResponseCache implements OnDataUpdatedListener {
     private Map<String, Response> responseMap = new HashMap<>();
     private BroadcastListener broadcastListener;
 
-    public void setBroadcastListener(@Nullable BroadcastListener broadcastListener) {
+    public void setBroadcastListener(BroadcastListener broadcastListener) {
         this.broadcastListener = broadcastListener;
     }
 
