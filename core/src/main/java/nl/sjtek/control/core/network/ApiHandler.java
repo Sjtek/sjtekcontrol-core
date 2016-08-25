@@ -27,14 +27,16 @@ public class ApiHandler implements HttpHandler {
     private WSServer wsServer;
 
     private ApiHandler() {
+        this.cache = new ResponseCache();
+
         System.out.print("Loading modules:");
 
         System.out.println(" - music");
-        Music musicNaspoleon;
+        BaseModule musicNaspoleon;
         Music musicWouter;
 
         try {
-            musicNaspoleon = new Music("music");
+            musicNaspoleon = new Music("music").init();
         } catch (UnknownHostException | URISyntaxException e) {
             e.printStackTrace();
             musicNaspoleon = null;
@@ -51,28 +53,25 @@ public class ApiHandler implements HttpHandler {
 //        if (musicWouter != null) modules.put("music-wouter", musicWouter);
 
         System.out.println(" - lights");
-        modules.put("lights", new Lights("lights"));
+        modules.put("lights", new Lights("lights").init());
         System.out.println(" - temperature");
-        modules.put("temperature", new Temperature("temperature"));
+        modules.put("temperature", new Temperature("temperature").init());
         System.out.println(" - tv");
-        modules.put("tv", new TV("tv"));
+        modules.put("tv", new TV("tv").init());
         System.out.println(" - sonarr");
-        modules.put("sonarr", new Sonarr("sonarr"));
+        modules.put("sonarr", new Sonarr("sonarr").init());
         System.out.println(" - quotes");
-        modules.put("quotes", new Quotes("quotes"));
+        modules.put("quotes", new Quotes("quotes").init());
         System.out.println(" - NFC");
-        modules.put("nfc", new NFC("nfc"));
+        modules.put("nfc", new NFC("nfc").init());
         System.out.println(" - NightMode");
-        modules.put("nightmode", new NightMode("nightmode"));
+        modules.put("nightmode", new NightMode("nightmode").init());
         System.out.println(" - Time");
-        modules.put("time", new Time("time"));
+        modules.put("time", new Time("time").init());
 
         this.wsServer = new WSServer();
         this.wsServer.start();
 
-        this.cache = new ResponseCache();
-        this.cache.addModules(modules);
-        this.cache.setBroadcastListener(this.wsServer);
 
         System.out.println();
     }

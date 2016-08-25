@@ -1,34 +1,26 @@
 package nl.sjtek.control.core.modules;
 
+import nl.sjtek.control.core.events.Bus;
+import nl.sjtek.control.core.events.DataChangedEvent;
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.utils.Speech;
 import nl.sjtek.control.data.responses.Response;
 
-/**
- * Created by wouter on 11-12-15.
- */
+
 public abstract class BaseModule {
 
     private final String key;
-    private OnDataUpdatedListener dataUpdatedListener;
 
     public BaseModule(String key) {
         this.key = key;
     }
 
-    public BaseModule setDataUpdatedListener(OnDataUpdatedListener dataUpdatedListener) {
-        this.dataUpdatedListener = dataUpdatedListener;
-        return this;
-    }
-
-    protected void dataChanged() {
+    final void dataChanged() {
         dataChanged(true);
     }
 
-    protected void dataChanged(boolean send) {
-        if (dataUpdatedListener != null) {
-            dataUpdatedListener.onUpdate(this, key, send);
-        }
+    final void dataChanged(boolean send) {
+        Bus.post(new DataChangedEvent(key, getResponse(), send));
     }
 
     public void info(Arguments arguments) {
@@ -40,6 +32,10 @@ public abstract class BaseModule {
 
     public abstract String getSummaryText();
 
+    public final BaseModule init() {
+        dataChanged(false);
+        return this;
+    }
 
     @Override
     public final String toString() {

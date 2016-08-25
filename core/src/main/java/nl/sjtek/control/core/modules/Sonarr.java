@@ -86,7 +86,7 @@ public class Sonarr extends BaseModule {
         }
     }
 
-    private void update() {
+    private void updateData() {
         parseCalendar(download(URL_CALENDAR));
         parseDiskSpace(download(URL_DISKSPACE));
     }
@@ -124,7 +124,7 @@ public class Sonarr extends BaseModule {
 
         @Override
         public void run() {
-            update();
+            updateData();
         }
     }
 }

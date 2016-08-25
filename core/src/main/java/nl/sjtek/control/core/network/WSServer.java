@@ -1,17 +1,22 @@
 package nl.sjtek.control.core.network;
 
+import com.google.common.eventbus.Subscribe;
+import nl.sjtek.control.core.events.BroadcastEvent;
+import nl.sjtek.control.core.events.Bus;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
 
-public class WSServer extends WebSocketServer implements BroadcastListener {
+
+public class WSServer extends WebSocketServer {
 
     private static final int PORT = 8001;
 
     public WSServer() {
         super(new InetSocketAddress(PORT));
+        Bus.regsiter(this);
     }
 
     private synchronized void sendUpdate(String data) {
@@ -22,7 +27,6 @@ public class WSServer extends WebSocketServer implements BroadcastListener {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-
     }
 
     @Override
@@ -40,9 +44,9 @@ public class WSServer extends WebSocketServer implements BroadcastListener {
 
     }
 
-    @Override
-    public void onBroadcast(String data) {
-        new DataSender(data).start();
+    @Subscribe
+    public void onBroadcast(BroadcastEvent event) {
+        new DataSender(event.getData()).start();
     }
 
     private class DataSender extends Thread {
