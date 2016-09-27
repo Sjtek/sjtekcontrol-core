@@ -27,7 +27,8 @@ public class Sonarr extends BaseModule {
     private List<SonarrResponse.Episode> upcoming = new ArrayList<>();
     private Map<String, SonarrResponse.Disk> disks = new HashMap<>();
 
-    public Sonarr() {
+    public Sonarr(String key) {
+        super(key);
         new Timer().scheduleAtFixedRate(new UpdateTask(), 0, INTERVAL);
     }
 
@@ -50,6 +51,7 @@ public class Sonarr extends BaseModule {
             e.printStackTrace();
             this.upcoming = new ArrayList<>();
         }
+        dataChanged();
     }
 
     private void parseDiskSpace(String jsonString) {
@@ -63,6 +65,7 @@ public class Sonarr extends BaseModule {
                 disks.put(name, disk);
             }
         }
+        dataChanged();
     }
 
     @Override
@@ -83,7 +86,7 @@ public class Sonarr extends BaseModule {
         }
     }
 
-    private void update() {
+    private void updateData() {
         parseCalendar(download(URL_CALENDAR));
         parseDiskSpace(download(URL_DISKSPACE));
     }
@@ -121,7 +124,7 @@ public class Sonarr extends BaseModule {
 
         @Override
         public void run() {
-            update();
+            updateData();
         }
     }
 }

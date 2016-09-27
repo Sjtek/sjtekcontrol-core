@@ -26,8 +26,8 @@ public class Lights extends BaseModule {
 
     private boolean states[] = {false, false, false, false, false};
 
-    public Lights() {
-
+    public Lights(String key) {
+        super(key);
     }
 
     public boolean isOn() {
@@ -55,12 +55,14 @@ public class Lights extends BaseModule {
     public void toggle1off(Arguments arguments) {
         if (action(SWITCH1OFF, arguments.getCode()) == 200) {
             states[1] = false;
+            dataChanged();
         }
     }
 
     public void toggle1on(Arguments arguments) {
         if (action(SWITCH1ON, arguments.getCode()) == 200) {
             states[1] = true;
+            dataChanged();
         }
     }
 
@@ -79,12 +81,14 @@ public class Lights extends BaseModule {
     public void toggle2off(Arguments arguments) {
         if (action(SWITCH2OFF, arguments.getCode()) == 200) {
             states[2] = false;
+            dataChanged();
         }
     }
 
     public void toggle2on(Arguments arguments) {
         if (action(SWITCH2ON, arguments.getCode()) == 200) {
             states[2] = true;
+            dataChanged();
         }
     }
 
@@ -103,12 +107,14 @@ public class Lights extends BaseModule {
     public void toggle3off(Arguments arguments) {
         if (actionLedStrip(arguments, false) == 200) {
             states[3] = false;
+            dataChanged();
         }
     }
 
     public void toggle3on(Arguments arguments) {
         if (actionLedStrip(arguments, true) == 200) {
             states[3] = true;
+            dataChanged();
         }
     }
 
@@ -127,12 +133,14 @@ public class Lights extends BaseModule {
     public void toggle4off(Arguments arguments) {
         if (action(SWITCH4OFF, arguments.getCode()) == 200) {
             states[4] = false;
+            dataChanged();
         }
     }
 
     public void toggle4on(Arguments arguments) {
         if (action(SWITCH4ON, arguments.getCode()) == 200) {
             states[4] = true;
+            dataChanged();
         }
     }
 

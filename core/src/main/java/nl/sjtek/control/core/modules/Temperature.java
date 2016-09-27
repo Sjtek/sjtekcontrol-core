@@ -26,7 +26,8 @@ public class Temperature extends BaseModule {
     private String description = "error";
     private String icon = "";
 
-    public Temperature() {
+    public Temperature(String key) {
+        super(key);
         Timer updateTimer = new Timer();
         updateTimer.scheduleAtFixedRate(new UpdateTask(), 0, UPDATE_DELAY);
     }
@@ -141,6 +142,7 @@ public class Temperature extends BaseModule {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            dataChanged();
         }
     }
 }

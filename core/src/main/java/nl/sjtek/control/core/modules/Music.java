@@ -11,19 +11,30 @@ import nl.sjtek.control.data.responses.Response;
 import nl.sjtek.control.data.settings.User;
 import org.bff.javampd.file.MPDFile;
 import org.bff.javampd.player.Player;
+import org.bff.javampd.server.ConnectionChangeEvent;
+import org.bff.javampd.server.ConnectionChangeListener;
 import org.bff.javampd.server.MPD;
 import org.bff.javampd.server.MPDConnectionException;
 import org.bff.javampd.song.MPDSong;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 @SuppressWarnings({"UnusedParameters", "unused"})
-public class Music extends BaseModule {
+public class Music extends BaseModule implements ConnectionChangeListener {
 
+    private final String host;
+    private final int port;
     private MPD mpd = null;
     private MusicResponse musicResponse;
+    private WSUpdateListener updateListener;
 
     /**
      * Connect to the default MPD server.
@@ -31,11 +42,8 @@ public class Music extends BaseModule {
      * @throws UnknownHostException
      * @throws MPDConnectionException
      */
-    public Music() throws UnknownHostException, MPDConnectionException {
-        MPD.Builder builder = new MPD.Builder();
-        builder.server(SettingsManager.getInstance().getMusic().getMpdHost());
-        builder.port(SettingsManager.getInstance().getMusic().getMpdPort());
-        mpd = builder.build();
+    public Music(String key) throws UnknownHostException, MPDConnectionException, URISyntaxException {
+        this(key, SettingsManager.getInstance().getMusic().getMpdHost(), SettingsManager.getInstance().getMusic().getMpdPort());
     }
 
     /**
@@ -46,11 +54,22 @@ public class Music extends BaseModule {
      * @throws UnknownHostException
      * @throws MPDConnectionException
      */
-    public Music(String host, int port) throws UnknownHostException, MPDConnectionException {
+    public Music(String key, String host, int port) throws UnknownHostException, MPDConnectionException, URISyntaxException {
+        super(key);
+
+        this.host = host;
+        this.port = port;
+
         MPD.Builder builder = new MPD.Builder();
         builder.server(host);
         builder.port(port);
         mpd = builder.build();
+
+        updateListener = new WSUpdateListener(host, port);
+        updateListener.connect();
+
+        mpd.getMonitor().addConnectionChangeListener(this);
+        mpd.getMonitor().start();
     }
 
     /**
@@ -66,6 +85,7 @@ public class Music extends BaseModule {
         } else {
             player.pause();
         }
+        dataChanged();
     }
 
     /**
@@ -82,6 +102,7 @@ public class Music extends BaseModule {
         } else {
             mpd.getPlayer().play();
         }
+        dataChanged();
     }
 
     /**
@@ -95,6 +116,7 @@ public class Music extends BaseModule {
         if (status == Player.Status.STATUS_PLAYING) {
             player.pause();
         }
+        dataChanged();
     }
 
     /**
@@ -108,6 +130,7 @@ public class Music extends BaseModule {
         } else {
             clear(new Arguments());
         }
+        dataChanged();
     }
 
     /**
@@ -133,6 +156,7 @@ public class Music extends BaseModule {
                 mpd.getPlayer().playNext();
             }
         }
+        dataChanged();
     }
 
     /**
@@ -142,6 +166,7 @@ public class Music extends BaseModule {
      */
     public void previous(Arguments arguments) {
         mpd.getPlayer().playPrevious();
+        dataChanged();
     }
 
     /**
@@ -151,6 +176,7 @@ public class Music extends BaseModule {
      */
     public void shuffle(Arguments arguments) {
         mpd.getPlaylist().shuffle();
+        dataChanged();
     }
 
     /**
@@ -160,6 +186,7 @@ public class Music extends BaseModule {
      */
     public void clear(Arguments arguments) {
         mpd.getPlaylist().clearPlaylist();
+        dataChanged();
     }
 
     /**
@@ -215,6 +242,7 @@ public class Music extends BaseModule {
         int newVolume = mpd.getPlayer().getVolume() - SettingsManager.getInstance().getMusic().getVolumeStepDown();
         if (newVolume < 0) newVolume = 0;
         mpd.getPlayer().setVolume(newVolume);
+        dataChanged();
     }
 
     /**
@@ -226,6 +254,7 @@ public class Music extends BaseModule {
         int newVolume = mpd.getPlayer().getVolume() + SettingsManager.getInstance().getMusic().getVolumeStepUp();
         if (newVolume > 100) newVolume = 100;
         mpd.getPlayer().setVolume(newVolume);
+        dataChanged();
     }
 
     /**
@@ -235,6 +264,7 @@ public class Music extends BaseModule {
      */
     public void volumeneutral(Arguments arguments) {
         mpd.getPlayer().setVolume(SettingsManager.getInstance().getMusic().getVolumeNeutral());
+        dataChanged();
     }
 
     public boolean isPlaying() {
@@ -292,6 +322,25 @@ public class Music extends BaseModule {
                 return "The music is paused.";
             default:
                 return "Unknown status";
+        }
+    }
+
+    @Override
+    public void connectionChangeEventReceived(ConnectionChangeEvent connectionChangeEvent) {
+        System.out.println("Connection changed " + connectionChangeEvent.isConnected());
+        dataChanged();
+        if (connectionChangeEvent.isConnected()) {
+            try {
+                updateListener.connect();
+            } catch (IllegalStateException e) {
+                try {
+                    updateListener = new WSUpdateListener(host, port);
+                    updateListener.connect();
+                } catch (URISyntaxException e1) {
+                    // Should not happen
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 
@@ -381,6 +430,55 @@ public class Music extends BaseModule {
                     new MusicResponse.Song(artist, title, album, timeTotal, timeElapsed, albumArt, artistArt),
                     volume, status
             );
+        }
+    }
+
+    private class WSUpdateListener extends WebSocketClient {
+        private static final String URL_TEMPLATE = "ws://%s:%d/mopidy/ws";
+
+        private long lastEvent = 0;
+        private Timer heartbeatTimer = new Timer();
+
+        public WSUpdateListener(String host, int port) throws URISyntaxException {
+            super(new URI(String.format(URL_TEMPLATE, host, 6680)));
+        }
+
+        @Override
+        public void onOpen(ServerHandshake handshakedata) {
+            System.out.println("Web socket connected");
+            heartbeatTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    WSUpdateListener.this.send("{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"core.playback.get_state\"}");
+                }
+            }, 30000, 30000);
+        }
+
+        @Override
+        public void onMessage(String message) {
+            if (!message.contains("jsonrpc")) {
+                if (!(message.equals("{\"event\": \"tracklist_changed\"}"))) {
+                    if (System.currentTimeMillis() - lastEvent > 40) {
+                        System.out.println((System.currentTimeMillis() - lastEvent) + " - " + message);
+                        lastEvent = System.currentTimeMillis();
+                        dataChanged();
+                    }
+                }
+            }
+
+        }
+
+        @Override
+        public void onClose(int code, String reason, boolean remote) {
+            System.out.println(this.getClass().getSimpleName() + " onClose: " + code + " " + reason);
+            heartbeatTimer.cancel();
+            dataChanged();
+        }
+
+        @Override
+        public void onError(Exception ex) {
+            System.out.println(this.getClass().getSimpleName() + " onError: " + ex.getMessage());
+            dataChanged();
         }
     }
 }

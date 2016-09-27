@@ -10,6 +10,10 @@ import java.util.Calendar;
  */
 public class Time extends BaseModule {
 
+    public Time(String key) {
+        super(key);
+    }
+
     @Override
     public Response getResponse() {
         return new TimeResponse(Calendar.getInstance().getTime().toString());

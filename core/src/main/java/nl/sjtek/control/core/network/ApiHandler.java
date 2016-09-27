@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,47 +23,55 @@ public class ApiHandler implements HttpHandler {
     public static final String CONTEXT = "/api";
     private static ApiHandler instance = new ApiHandler();
     private Map<String, BaseModule> modules = new HashMap<>();
+    private ResponseCache cache;
+    private WSServer wsServer;
 
     private ApiHandler() {
+        this.cache = new ResponseCache();
+
         System.out.print("Loading modules:");
 
         System.out.println(" - music");
-        Music musicNaspoleon;
+        BaseModule musicNaspoleon;
         Music musicWouter;
 
         try {
-            musicNaspoleon = new Music();
-        } catch (UnknownHostException e) {
+            musicNaspoleon = new Music("music").init();
+        } catch (UnknownHostException | URISyntaxException e) {
             e.printStackTrace();
             musicNaspoleon = null;
         }
 
-        try {
-            musicWouter = new Music("10.10.0.4", 6600);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            musicWouter = null;
-        }
+//        try {
+//            musicWouter = new Music("music-wouter", "10.10.0.4", 6600);
+//        } catch (UnknownHostException | URISyntaxException e) {
+//            e.printStackTrace();
+//            musicWouter = null;
+//        }
 
         modules.put("music", musicNaspoleon);
-        if (musicWouter != null) modules.put("music-wouter", musicWouter);
+//        if (musicWouter != null) modules.put("music-wouter", musicWouter);
 
         System.out.println(" - lights");
-        modules.put("lights", new Lights());
+        modules.put("lights", new Lights("lights").init());
         System.out.println(" - temperature");
-        modules.put("temperature", new Temperature());
+        modules.put("temperature", new Temperature("temperature").init());
         System.out.println(" - tv");
-        modules.put("tv", new TV());
+        modules.put("tv", new TV("tv").init());
         System.out.println(" - sonarr");
-        modules.put("sonarr", new Sonarr());
+        modules.put("sonarr", new Sonarr("sonarr").init());
         System.out.println(" - quotes");
-        modules.put("quotes", new Quotes());
+        modules.put("quotes", new Quotes("quotes").init());
         System.out.println(" - NFC");
-        modules.put("nfc", new NFC());
+        modules.put("nfc", new NFC("nfc").init());
         System.out.println(" - NightMode");
-        modules.put("nightmode", new NightMode());
+        modules.put("nightmode", new NightMode("nightmode").init());
         System.out.println(" - Time");
-        modules.put("time", new Time());
+        modules.put("time", new Time("time").init());
+
+        this.wsServer = new WSServer();
+        this.wsServer.start();
+
 
         System.out.println();
     }
@@ -135,8 +144,11 @@ public class ApiHandler implements HttpHandler {
 
                         break;
                 }
-            } catch (ArrayIndexOutOfBoundsException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | NullPointerException e) {
+            } catch (ArrayIndexOutOfBoundsException | NoSuchMethodException | IllegalAccessException | NullPointerException e) {
                 responseCode = 404;
+            } catch (InvocationTargetException e) {
+                responseCode = 500;
+                e.printStackTrace();
             }
         }
 
@@ -145,7 +157,7 @@ public class ApiHandler implements HttpHandler {
         if (responseCode == 200) {
             switch (responseType) {
                 case DEFAULT:
-                    response = ResponseBuilder.create(modules);
+                    response = cache.toJson();
                     break;
                 case CLEAN:
                     response = "{ }";
