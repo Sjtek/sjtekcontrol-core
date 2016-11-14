@@ -1,4 +1,4 @@
-FROM java:8-jre
+FROM openjdk:8-jre
 MAINTAINER Wouter Habets (wouterhabets@gmail.com)
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -y && \
