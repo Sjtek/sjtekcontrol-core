@@ -26,10 +26,10 @@ public class Coffee extends BaseModule {
     public Coffee() {
         super("coffee");
         requestOn = new Request.Builder()
-                .url(String.format(URL, "switch-3-on"))
+                .url(String.format(URL, "switch-4-on"))
                 .build();
         requestOff = new Request.Builder()
-                .url(String.format(URL, "switch-3-off"))
+                .url(String.format(URL, "switch-4-off"))
                 .build();
     }
 
@@ -37,7 +37,7 @@ public class Coffee extends BaseModule {
         if (isHeated()) return;
         try {
             client.newCall(requestOff).execute().body().close();
-            Thread.sleep(1000);
+            Thread.sleep(3000);
             client.newCall(requestOn).execute().body().close();
             lastTriggered = System.currentTimeMillis();
         } catch (InterruptedException | IOException e) {

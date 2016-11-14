@@ -22,6 +22,7 @@ public class ResponseCollection {
     private static final String DEFAULT_TEMPERATURE = "temperature";
     private static final String DEFAULT_TIME = "time";
     private static final String DEFAULT_TV = "tv";
+    private static final String DEFAULT_COFFEE = "coffee";
 
     private final Map<String, Response> responseMap;
 
@@ -33,6 +34,10 @@ public class ResponseCollection {
                 .setPrettyPrinting()
                 .create();
         responseMap = gson.fromJson(jsonString, type);
+    }
+
+    public Response get(String key) {
+        return responseMap.get(key);
     }
 
     public LightsResponse getLights() {
@@ -69,5 +74,9 @@ public class ResponseCollection {
 
     public TVResponse getTV() {
         return (TVResponse) responseMap.get(DEFAULT_TV);
+    }
+
+    public CoffeeResponse getCoffee() {
+        return (CoffeeResponse) responseMap.get(DEFAULT_COFFEE);
     }
 }
