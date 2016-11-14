@@ -9,6 +9,7 @@ public class CoffeeResponse extends Response {
     private final boolean heated;
 
     public CoffeeResponse(long lastTriggered, boolean heated) {
+        type = getClass().getCanonicalName();
         this.lastTriggered = lastTriggered;
         this.heated = heated;
     }
