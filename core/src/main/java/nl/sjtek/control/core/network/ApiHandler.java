@@ -68,6 +68,8 @@ public class ApiHandler implements HttpHandler {
         modules.put("nightmode", new NightMode("nightmode").init());
         System.out.println(" - Time");
         modules.put("time", new Time("time").init());
+        System.out.println(" - Coffee");
+        modules.put("coffee", new Coffee().init());
 
         this.wsServer = new WSServer();
         this.wsServer.start();
