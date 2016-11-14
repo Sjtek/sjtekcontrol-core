@@ -23,19 +23,22 @@ public class SettingsManager {
     private final LastFMSettings lastFM;
     private final Map<String, User> users;
     private final ScreenSettings screen;
+    private final WeatherSettings weather;
 
     public SettingsManager(MusicSettings music,
                            TVSettings tv,
                            QuotesSettings quotes,
                            LastFMSettings lastFM,
                            Map<String, User> users,
-                           ScreenSettings screen) {
+                           ScreenSettings screen,
+                           WeatherSettings weatherSettings) {
         this.music = music;
         this.tv = tv;
         this.quotes = quotes;
         this.lastFM = lastFM;
         this.users = users;
         this.screen = screen;
+        this.weather = weatherSettings;
     }
 
     public static SettingsManager getInstance() {
@@ -109,6 +112,10 @@ public class SettingsManager {
 
     public ScreenSettings getScreen() {
         return screen;
+    }
+
+    public WeatherSettings getWeather() {
+        return weather;
     }
 
     @Override

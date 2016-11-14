@@ -1,13 +1,15 @@
 package nl.sjtek.control.core.modules;
 
+import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.data.responses.Response;
 import nl.sjtek.control.data.responses.TemperatureResponse;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.ResponseBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -15,9 +17,11 @@ import java.util.*;
 public class Temperature extends BaseModule {
 
     private static final int UPDATE_DELAY = 900000;
-    private static final String WEATHER_URL_OUTSIDE = "http://3ddev.nl/watson/api/weather.php?city=Son";
+    private static final String WEATHER_URL_OUTSIDE = String.format("https://api.darksky.net/forecast/%s/51.5121298,5.4924242", SettingsManager.getInstance().getWeather().getApiKey());
     private static final String WEATHER_URL_INSIDE = "http://10.10.0.2/cgi-bin/temp";
     private static final String LOG_PATH = "/var/sjtekcontrol/log.csv";
+
+    private final OkHttpClient httpClient = new OkHttpClient();
 
     private int errorsOutside = 0;
     private int tempInside = 0;
@@ -45,19 +49,23 @@ public class Temperature extends BaseModule {
     private void parseOutside(String response) {
         if (!response.isEmpty()) {
             try {
+                // Powered by darksky.net :)
                 JSONObject jsonObject = new JSONObject(response);
-                float tempOutside = jsonObject.getLong("temp");
-                float humidity = jsonObject.getLong("humidity");
-                String description = jsonObject.getString("description");
-                String icon = jsonObject.getString("icon");
+                JSONObject currently = jsonObject.getJSONObject("currently");
+                float temp = currently.getLong("temperature");
+                double humidity = currently.getDouble("humidity");
+                String description = currently.getString("summary");
 
-                this.tempOutside = (int) tempOutside;
-                this.humidity = humidity;
+                temp = ((temp - 32) * 5) / 9;
+
+                this.tempOutside = (int) temp;
+                this.humidity = (float) humidity;
                 this.description = description;
-                this.icon = icon;
+                this.icon = "";
                 errorsOutside = 0;
                 return;
-            } catch (JSONException ignored) {
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
         System.out.println("Temperature outside error: " + response);
@@ -79,27 +87,21 @@ public class Temperature extends BaseModule {
     }
 
     private String download(String stringUrl) {
-        try {
-            URL url = new URL(stringUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.connect();
-            int responseCode = connection.getResponseCode();
-            System.out.println("" + responseCode + " - downloaded " + stringUrl);
-            if (responseCode == 200) {
-                InputStream inputStream = connection.getInputStream();
-                StringBuilder stringBuffer = new StringBuilder();
-                int character;
-                while ((character = inputStream.read()) != -1) {
-                    stringBuffer.append((char) character);
-                }
 
-                return new String(stringBuffer);
+        okhttp3.Response response = null;
+        try {
+            response = httpClient.newCall(new Request.Builder().url(stringUrl).build()).execute();
+            System.out.println("" + response.code() + " - downloaded " + stringUrl);
+            if (response.code() == 200) {
+                ResponseBody body = response.body();
+                return body.string();
             } else {
                 return "";
             }
         } catch (IOException e) {
             return "";
+        } finally {
+            if (response != null) response.body().close();
         }
     }
 

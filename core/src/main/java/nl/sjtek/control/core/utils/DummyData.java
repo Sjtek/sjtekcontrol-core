@@ -19,7 +19,8 @@ public class DummyData {
                 getDefaultQuotes(),
                 getDefaultLastFM(),
                 getDefaultUsers(),
-                getDefaultScreen()
+                getDefaultScreen(),
+                getDefaultWeather()
         );
     }
 
@@ -242,5 +243,9 @@ public class DummyData {
                 false, false, false
         ));
         return userSettings;
+    }
+
+    public static WeatherSettings getDefaultWeather() {
+        return new WeatherSettings("");
     }
 }
