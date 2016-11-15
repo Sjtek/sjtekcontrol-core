@@ -21,7 +21,7 @@ public class Sonarr extends BaseModule {
     private static final String BASE_URL = "https://sjtek.nl/sonarr/api";
     private static final String URL_CALENDAR = BASE_URL + "/calendar";
     private static final String URL_DISKSPACE = BASE_URL + "/diskspace";
-    private static final String API_KEY = "dd7673bf95f047c88fd5746d7e04113d";
+    private static final String API_KEY = "f2b49b091fe5428fa57eb9850c4d828c";
     private static final int INTERVAL = 900000;
 
     private List<SonarrResponse.Episode> upcoming = new ArrayList<>();
