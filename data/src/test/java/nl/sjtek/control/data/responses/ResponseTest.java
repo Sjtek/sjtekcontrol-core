@@ -1,8 +1,8 @@
 package nl.sjtek.control.data.responses;
 
 import nl.sjtek.control.data.settings.DataCollection;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,7 +12,6 @@ import java.io.Serializable;
 /**
  * Created by wouter on 15-11-16.
  */
-@Test
 public class ResponseTest {
 
     private static final String exampleResponse = "{\"tv\":{\"type\":\"nl.sjtek.control.data.responses.TVResponse\"},\"music\":{\"song\":{\"artist\":\"The Wombats\",\"title\":\"Give Me A Try\",\"album\":\"Give Me A Try\",\"total\":228,\"elapsed\":4,\"albumArt\":\"http://img2-ak.lst.fm/i/u/81f0cdaa584545bcc52f6d6d2770e626.png\",\"artistArt\":\"http://img2-ak.lst.fm/i/u/63cea570523f4cf0cc1b4c5a58f49c0f.png\"},\"volume\":7,\"state\":\"STATUS_PAUSED\",\"type\":\"nl.sjtek.control.data.responses.MusicResponse\"},\"sonarr\":{\"upcoming\":[],\"diskUsage\":{\"/tv\":{\"free\":783348334592,\"total\":877085790208},\"/\":{\"free\":86269571072,\"total\":98294312960}},\"type\":\"nl.sjtek.control.data.responses.SonarrResponse\"},\"coffee\":{\"lastTriggered\":0,\"heated\":false,\"type\":\"nl.sjtek.control.data.responses.CoffeeResponse\"},\"temperature\":{\"outside\":8,\"inside\":20,\"humidity\":0.98,\"description\":\"Dangerously Windy and Foggy\",\"icon\":\"\",\"type\":\"nl.sjtek.control.data.responses.TemperatureResponse\"},\"nightmode\":{\"enabled\":false,\"nextDisable\":\"Wed Nov 16 07:00:00 UTC 2016\",\"type\":\"nl.sjtek.control.data.responses.NightModeResponse\"},\"nfc\":{\"type\":\"nl.sjtek.control.data.responses.NFCResponse\"},\"time\":{\"serverTime\":\"Tue Nov 15 12:01:01 UTC 2016\",\"type\":\"nl.sjtek.control.data.responses.TimeResponse\"},\"lights\":{\"1\":false,\"2\":false,\"3\":false,\"4\":false,\"type\":\"nl.sjtek.control.data.responses.LightsResponse\"},\"quotes\":{\"quote\":\"Alleen massaproductie\",\"type\":\"nl.sjtek.control.data.responses.QuotesResponse\"}}";

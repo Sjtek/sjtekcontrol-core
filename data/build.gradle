@@ -6,9 +6,5 @@ targetCompatibility = 1.7
 dependencies {
     compile 'org.json:json:20141113'
     compile 'com.google.code.gson:gson:2.4'
-    testCompile 'org.testng:testng:6.9.13.6'
-}
-
-test {
-    useTestNG()
+    testCompile 'junit:junit:4.12'
 }
