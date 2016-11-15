@@ -7,6 +7,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by wouter on 14-11-16.
@@ -20,8 +22,16 @@ public class Coffee extends BaseModule {
 
     private final Request requestOn;
     private final Request requestOff;
+    private final TimerTask resetTask = new TimerTask() {
+        @Override
+        public void run() {
+            dataChanged(true);
+        }
+    };
 
     private long lastTriggered;
+
+    private Timer resetTimer = new Timer();
 
     public Coffee() {
         super("coffee");
@@ -40,6 +50,7 @@ public class Coffee extends BaseModule {
             Thread.sleep(3000);
             client.newCall(requestOn).execute().body().close();
             lastTriggered = System.currentTimeMillis();
+            resetTimer.schedule(resetTask, HEAT_DELAY + 2000);
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
