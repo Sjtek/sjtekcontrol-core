@@ -1,5 +1,6 @@
 package nl.sjtek.control.data.responses;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ public class SonarrResponse extends Response {
         return diskUsage;
     }
 
-    public static class Episode {
+    public static class Episode implements Serializable {
         private final String seriesTitle;
         private final String episodeName;
         private final String airDate;
@@ -67,7 +68,7 @@ public class SonarrResponse extends Response {
         }
     }
 
-    public static class Disk {
+    public static class Disk implements Serializable {
         private final double free;
         private final double total;
 

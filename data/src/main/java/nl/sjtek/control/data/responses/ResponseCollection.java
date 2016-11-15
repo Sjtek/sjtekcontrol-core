@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +12,7 @@ import java.util.Map;
 /**
  * Created by wouter on 29-1-16.
  */
-public class ResponseCollection {
+public class ResponseCollection implements Serializable {
 
     private static final String DEFAULT_LIGHTS = "lights";
     private static final String DEFAULT_MUSIC = "music";

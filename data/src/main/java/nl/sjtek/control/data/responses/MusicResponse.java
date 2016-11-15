@@ -2,6 +2,8 @@ package nl.sjtek.control.data.responses;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by wouter on 28-1-16.
  */
@@ -38,7 +40,7 @@ public class MusicResponse extends Response {
         STATUS_PAUSED
     }
 
-    public static class Song {
+    public static class Song implements Serializable {
         private final String artist;
         private final String title;
         private final String album;

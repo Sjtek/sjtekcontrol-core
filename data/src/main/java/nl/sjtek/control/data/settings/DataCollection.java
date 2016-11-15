@@ -2,15 +2,14 @@ package nl.sjtek.control.data.settings;
 
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Created by wouter on 29-1-16.
  */
-public class DataCollection {
+public class DataCollection implements Serializable {
 
     private final Map<String, PlaylistSet> playlists;
     private final Map<String, User> users;
