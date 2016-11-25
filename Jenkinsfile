@@ -12,7 +12,8 @@ node {
     }
 
     stage('Test') {
-    	sh './gradlew :data:test'
+    	sh 'rm -vf data/build/test-results/*xml' 
+        sh './gradlew :data:test'
     	junit 'data/build/test-results/*.xml'
     }
 
