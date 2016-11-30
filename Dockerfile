@@ -2,9 +2,9 @@ FROM openjdk:8-jre
 MAINTAINER Wouter Habets (wouterhabets@gmail.com)
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y pulseaudio espeak curl mpc
-COPY speak.sh /usr/bin/speak
-RUN chmod +x /usr/bin/speak
+    DEBIAN_FRONTEND=noninteractive apt-get install -y mpc
+#COPY speak.sh /usr/bin/speak
+#RUN chmod +x /usr/bin/speak
 
 EXPOSE 8000 8001
 

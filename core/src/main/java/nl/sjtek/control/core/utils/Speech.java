@@ -1,9 +1,7 @@
 package nl.sjtek.control.core.utils;
 
 import nl.sjtek.control.core.modules.BaseModule;
-import nl.sjtek.control.core.network.ApiHandler;
 
-import java.io.IOException;
 import java.util.Map;
 
 public class Speech {
@@ -73,23 +71,23 @@ public class Speech {
     }
 
     public static synchronized void speak(String text) {
-        if (ApiHandler.getInstance().getNightMode().isEnabled()) {
-            System.out.println("NightMode enabled, speech disabled.");
-            return;
-        }
-        if (text == null || text.isEmpty()) return;
-
-        String[] command = new String[]{"/usr/bin/speak", "\"" + text + "\""};
-        for (String string : command) {
-            System.out.print(string + " ");
-        }
-        System.out.println();
-
-        try {
-            Executor.execute(command);
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+//        if (ApiHandler.getInstance().getNightMode().isEnabled()) {
+//            System.out.println("NightMode enabled, speech disabled.");
+//            return;
+//        }
+//        if (text == null || text.isEmpty()) return;
+//
+//        String[] command = new String[]{"/usr/bin/speak", "\"" + text + "\""};
+//        for (String string : command) {
+//            System.out.print(string + " ");
+//        }
+//        System.out.println();
+//
+//        try {
+//            Executor.execute(command);
+//        } catch (IOException | InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public static void speakAsync(String text) {
