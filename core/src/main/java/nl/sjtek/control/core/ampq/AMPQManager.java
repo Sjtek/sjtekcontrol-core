@@ -2,14 +2,11 @@ package nl.sjtek.control.core.ampq;
 
 import com.google.common.eventbus.Subscribe;
 import com.rabbitmq.client.*;
-import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.events.DataChangedEvent;
 import nl.sjtek.control.core.network.ResponseCache;
-import nl.sjtek.control.data.ampq.events.ActionEvent;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -80,13 +77,13 @@ public class AMPQManager {
 
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-            try {
-                ObjectInputStream inputStream = new ObjectInputStream(new ByteInputStream(body, body.length));
-                ActionEvent action = (ActionEvent) inputStream.readObject();
-                System.out.println(action.toString());
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                ObjectInputStream inputStream = new ObjectInputStream(new ByteInputStream(body, body.length));
+//                ActionEvent action = (ActionEvent) inputStream.readObject();
+//                System.out.println(action.toString());
+//            } catch (ClassNotFoundException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
