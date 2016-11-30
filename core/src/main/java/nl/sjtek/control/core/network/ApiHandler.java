@@ -2,6 +2,7 @@ package nl.sjtek.control.core.network;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import nl.sjtek.control.core.ampq.AMPQManager;
 import nl.sjtek.control.core.modules.*;
 import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.core.utils.Personalise;
@@ -23,11 +24,10 @@ public class ApiHandler implements HttpHandler {
     public static final String CONTEXT = "/api";
     private static ApiHandler instance = new ApiHandler();
     private Map<String, BaseModule> modules = new HashMap<>();
-    private ResponseCache cache;
     private WSServer wsServer;
+    private AMPQManager AMPQManager;
 
     private ApiHandler() {
-        this.cache = new ResponseCache();
 
         System.out.print("Loading modules:");
 
@@ -77,6 +77,7 @@ public class ApiHandler implements HttpHandler {
         this.wsServer = new WSServer();
         this.wsServer.start();
 
+        AMPQManager = new AMPQManager();
 
         System.out.println();
     }
@@ -162,7 +163,7 @@ public class ApiHandler implements HttpHandler {
         if (responseCode == 200) {
             switch (responseType) {
                 case DEFAULT:
-                    response = cache.toJson();
+                    response = ResponseCache.getInstance().toJson();
                     break;
                 case CLEAN:
                     response = "{ }";

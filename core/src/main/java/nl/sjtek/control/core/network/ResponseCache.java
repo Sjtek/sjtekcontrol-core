@@ -15,10 +15,15 @@ import java.util.Map;
 
 public class ResponseCache {
 
+    private static ResponseCache instance = new ResponseCache();
     private Map<String, Response> responseMap = new HashMap<>();
 
-    public ResponseCache() {
+    private ResponseCache() {
         Bus.regsiter(this);
+    }
+
+    public synchronized static ResponseCache getInstance() {
+        return instance;
     }
 
     public String toJson() {
