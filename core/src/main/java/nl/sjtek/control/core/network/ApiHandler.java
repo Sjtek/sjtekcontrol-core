@@ -29,6 +29,8 @@ public class ApiHandler implements HttpHandler {
 
     private ApiHandler() {
 
+        ResponseCache.getInstance();
+
         System.out.print("Loading modules:");
 
         System.out.println(" - music");
