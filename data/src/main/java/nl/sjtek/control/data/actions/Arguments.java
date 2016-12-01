@@ -157,9 +157,6 @@ public class Arguments implements Serializable {
 
     }
 
-    /**
-     * {@see #build()}
-     */
     @Override
     public String toString() {
         return build();
