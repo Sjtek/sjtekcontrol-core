@@ -57,7 +57,7 @@ public enum Action implements ActionInterface {
         TOGGLE_4_OFF("/toggle4off");
 
 
-        private static final String BASE = API_BASE + "/lights";
+        private static final String BASE = "/lights";
         private final String path;
 
         Light(String urlAction) {
@@ -71,7 +71,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getUrl() {
-            return BASE + path;
+            return API_BASE + BASE + path;
         }
 
         @Override
@@ -98,7 +98,7 @@ public enum Action implements ActionInterface {
         INFO("/info?voice"),
         START("/start");
 
-        private static final String BASE = API_BASE + "/music";
+        private static final String BASE = "/music";
         private final String path;
 
         Music(String urlAction) {
@@ -112,7 +112,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getUrl() {
-            return BASE + path;
+            return API_BASE + BASE + path;
         }
 
         @Override
@@ -130,7 +130,7 @@ public enum Action implements ActionInterface {
         VOLUME_RAISE("/volumeraise");
 
 
-        private static final String BASE = API_BASE + "/tv";
+        private static final String BASE = "/tv";
         private final String path;
 
         TV(String urlAction) {
@@ -144,7 +144,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getUrl() {
-            return BASE + path;
+            return API_BASE + BASE + path;
         }
 
         @Override
@@ -159,7 +159,7 @@ public enum Action implements ActionInterface {
     public enum Coffee implements ActionInterface {
         START("/start");
 
-        private static final String BASE = API_BASE + "/coffee";
+        private static final String BASE = "/coffee";
         private final String path;
 
         Coffee(String urlAction) {
@@ -173,7 +173,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getUrl() {
-            return BASE + path;
+            return API_BASE + BASE + path;
         }
 
         @Override
@@ -189,7 +189,7 @@ public enum Action implements ActionInterface {
         ENABLE("/enable"),
         DISABLE("/disable");
 
-        private static final String BASE = API_BASE + "/nightmode";
+        private static final String BASE = "/nightmode";
         private final String path;
 
         NightMode(String urlAction) {
@@ -203,7 +203,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getUrl() {
-            return BASE + path;
+            return API_BASE + BASE + path;
         }
 
         @Override
@@ -223,7 +223,7 @@ public enum Action implements ActionInterface {
         MODE_NEW_YEAR("/newyear"),
         REFRESH("/refresh");
 
-        private static final String BASE = API_BASE + "/screen";
+        private static final String BASE = "/screen";
         private final String path;
 
         Screen(String urlAction) {
@@ -237,7 +237,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getUrl() {
-            return BASE + path;
+            return API_BASE + BASE + path;
         }
 
         @Override
