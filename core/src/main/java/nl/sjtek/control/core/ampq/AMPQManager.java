@@ -14,6 +14,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class AMPQManager {
 
+    private static final String EXCHANGE_UPDATES = "updates";
     private static final String QUEUE_UPDATE = "update";
     private static final String QUEUE_ACTION = "actions";
     private Channel channelAction;
@@ -34,6 +35,7 @@ public class AMPQManager {
     @Subscribe
     public void onUpdate(DataChangedEvent event) {
         if (!event.shouldPushToClients()) return;
+        System.out.println("Sending update");
         send(ResponseCache.getInstance().toJson());
     }
 
@@ -44,15 +46,17 @@ public class AMPQManager {
         factory.setPassword("yolo");
         connection = factory.newConnection();
         channelUpdate = connection.createChannel();
-        channelUpdate.queueDeclare(QUEUE_UPDATE, false, false, false, null);
+        channelUpdate.exchangeDeclare(EXCHANGE_UPDATES, "fanout");
+//        channelUpdate.queueDeclare(QUEUE_UPDATE, false, false, false, null);
         channelAction = connection.createChannel();
         channelAction.queueDeclare(QUEUE_ACTION, false, false, false, null);
         channelAction.basicConsume(QUEUE_ACTION, true, new ActionConsumer(channelAction));
+        System.out.println("Connected to broker.");
     }
 
     private void send(String message) {
         try {
-            channelUpdate.basicPublish("", QUEUE_UPDATE, null, message.getBytes());
+            channelUpdate.basicPublish(EXCHANGE_UPDATES, "", null, message.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
