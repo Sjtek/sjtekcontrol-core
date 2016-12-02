@@ -45,6 +45,7 @@ public class AMPQManager {
         factory.setHost("10.10.0.1");
         factory.setUsername("core");
         factory.setPassword("yolo");
+        factory.setAutomaticRecoveryEnabled(true);
         connection = factory.newConnection();
         channelUpdate = connection.createChannel();
         channelUpdate.exchangeDeclare(EXCHANGE_UPDATES, "fanout");
