@@ -1,12 +1,15 @@
 package nl.sjtek.control.core.network;
 
+import com.google.common.eventbus.Subscribe;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import nl.sjtek.control.core.ampq.AMPQManager;
+import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.modules.*;
 import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.core.utils.Personalise;
 import nl.sjtek.control.core.utils.Speech;
+import nl.sjtek.control.data.actions.ActionInterface;
 import nl.sjtek.control.data.settings.User;
 
 import java.io.IOException;
@@ -76,6 +79,8 @@ public class ApiHandler implements HttpHandler {
         System.out.println(" - Screen");
         modules.put("screen", new Screen("screen").init());
 
+        Bus.regsiter(this);
+
         this.wsServer = new WSServer();
         this.wsServer.start();
 
@@ -90,15 +95,36 @@ public class ApiHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-        long start = System.currentTimeMillis();
-        int responseCode = 0;
         Arguments arguments = new Arguments(httpExchange.getRequestURI().getQuery());
         String fullPath = httpExchange.getRequestURI().getPath().toLowerCase();
         System.out.println();
         System.out.println(httpExchange.getRemoteAddress().toString() + " | " +
                 httpExchange.getRequestURI().getPath() + " | " +
                 httpExchange.getRequestURI().getQuery());
-        String splittedPath[] = fullPath.split("/");
+
+        ExecuteResult executeResult = executePath(fullPath, arguments);
+        String response = executeResult.getResponseText();
+
+        httpExchange.sendResponseHeaders(executeResult.getResponseCode(), response.getBytes().length);
+        OutputStream outputStream = httpExchange.getResponseBody();
+        outputStream.write(response.getBytes());
+        outputStream.close();
+    }
+
+    @Subscribe
+    public ExecuteResult executePath(ActionInterface action) {
+        return executePath(CONTEXT + action.getPath());
+    }
+
+    public ExecuteResult executePath(String path) {
+        return executePath(path, new Arguments());
+    }
+
+    public ExecuteResult executePath(String path, Arguments arguments) {
+        long start = System.currentTimeMillis();
+        int responseCode = 0;
+
+        String splittedPath[] = path.split("/");
 
         ResponseType responseType = ResponseType.DEFAULT;
 
@@ -188,10 +214,8 @@ public class ApiHandler implements HttpHandler {
 
         long stop = System.currentTimeMillis();
         System.out.println("Response " + responseCode + " " + responseType + " " + (stop - start) + "ms");
-        httpExchange.sendResponseHeaders(responseCode, response.getBytes().length);
-        OutputStream outputStream = httpExchange.getResponseBody();
-        outputStream.write(response.getBytes());
-        outputStream.close();
+
+        return new ExecuteResult(responseCode, response);
     }
 
     private void execute(Arguments arguments, String methodString, BaseModule executor)
@@ -283,5 +307,23 @@ public class ApiHandler implements HttpHandler {
         SETTINGS,
         DATA,
         TEMP_LOG,
+    }
+
+    private class ExecuteResult {
+        private final int responseCode;
+        private final String responseText;
+
+        public ExecuteResult(int responseCode, String responseText) {
+            this.responseCode = responseCode;
+            this.responseText = responseText;
+        }
+
+        public int getResponseCode() {
+            return responseCode;
+        }
+
+        public String getResponseText() {
+            return responseText;
+        }
     }
 }
