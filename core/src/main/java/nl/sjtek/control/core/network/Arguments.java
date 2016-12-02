@@ -18,6 +18,7 @@ public class Arguments {
     private User user = SettingsManager.getInstance().getDefaultUser();
     private String code = "";
     private String rgb = "";
+    private boolean noShuffle = false;
 
     public Arguments() {
 
@@ -47,6 +48,8 @@ public class Arguments {
                 code = value;
             } else if ("rgb".equals(name)) {
                 rgb = value;
+            } else if ("noshuffle".equals(name)) {
+                noShuffle = true;
             }
         }
     }
@@ -146,6 +149,14 @@ public class Arguments {
     public Arguments setRgb(String rgb) {
         this.rgb = rgb;
         return this;
+    }
+
+    public boolean isNoShuffle() {
+        return noShuffle;
+    }
+
+    public void setNoShuffle(boolean noShuffle) {
+        this.noShuffle = noShuffle;
     }
 
     @Override

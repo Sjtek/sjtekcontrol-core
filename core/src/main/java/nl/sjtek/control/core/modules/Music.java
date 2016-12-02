@@ -229,7 +229,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
             mpd.getPlaylist().addFileOrDirectory(tt);
         }
 
-        shuffle(dummyArguments);
+        if (!arguments.isNoShuffle()) shuffle(dummyArguments);
         play(dummyArguments);
     }
 
