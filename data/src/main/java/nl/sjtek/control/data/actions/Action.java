@@ -66,7 +66,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getPath() {
-            return path;
+            return BASE + path;
         }
 
         @Override
@@ -107,7 +107,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getPath() {
-            return path;
+            return BASE + path;
         }
 
         @Override
@@ -139,7 +139,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getPath() {
-            return path;
+            return BASE + path;
         }
 
         @Override
@@ -168,7 +168,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getPath() {
-            return path;
+            return BASE + path;
         }
 
         @Override
@@ -198,7 +198,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getPath() {
-            return path;
+            return BASE + path;
         }
 
         @Override
@@ -232,7 +232,7 @@ public enum Action implements ActionInterface {
 
         @Override
         public String getPath() {
-            return path;
+            return BASE + path;
         }
 
         @Override
