@@ -17,6 +17,7 @@ public class Arguments implements Serializable {
     private boolean useVoice;
     private String user;
     private String url;
+    private boolean noShuffle;
 
     public Arguments() {
 
@@ -112,12 +113,32 @@ public class Arguments implements Serializable {
     }
 
     /**
+     * Check if shuffle is disabled.
+     *
+     * @return Is shuffle disabled
+     */
+    public boolean isNoShuffle() {
+        return noShuffle;
+    }
+
+    /**
+     * Disable shuffle when starting a playlist.
+     *
+     * @param noShuffle Should disable shuffle
+     */
+    public Arguments setNoShuffle(boolean noShuffle) {
+        this.noShuffle = noShuffle;
+        return this;
+    }
+
+    /**
      * Build the arguments to a url encoded string for the url.
      *
      * @return Url encoded arguments
      */
     public String build() {
         List<String> argumentsList = new ArrayList<>();
+        if (noShuffle) argumentsList.add("noshuffle");
         if (useVoice) argumentsList.add("voice");
         if (!isEmpty(url)) argumentsList.add("url=" + url);
         argumentsList.add("user=" + (isEmpty(user) ? "default" : user));

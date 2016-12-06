@@ -26,6 +26,20 @@ public class ArgumentsTest {
     }
 
     @Test
+    public void setNoShuffle() throws Exception {
+        assertEquals(new Arguments().setNoShuffle(true).build(), "?noshuffle&user=default");
+        assertEquals(new Arguments().setNoShuffle(false).build(), EMPTY);
+    }
+
+    @Test
+    public void isNoShuffle() throws Exception {
+        Arguments noShuffle = new Arguments().setNoShuffle(true);
+        Arguments withShuffle = new Arguments().setNoShuffle(false);
+        assertEquals(noShuffle.isNoShuffle(), true);
+        assertEquals(withShuffle.isNoShuffle(), false);
+    }
+
+    @Test
     public void setUseVoice() throws Exception {
         assertEquals(new Arguments().setUseVoice(true).build(), "?voice&user=default");
         assertEquals(new Arguments().setUseVoice(false).build(), EMPTY);
@@ -64,8 +78,9 @@ public class ArgumentsTest {
                         .setUrl(TEST_URL)
                         .setUseVoice(true)
                         .setUser("wouter")
+                        .setNoShuffle(true)
                         .build(),
-                "?voice&url=" + TEST_URL_ENCODED + "&user=wouter");
+                "?noshuffle&voice&url=" + TEST_URL_ENCODED + "&user=wouter");
     }
 
     @Test
@@ -74,7 +89,8 @@ public class ArgumentsTest {
                         .setUrl(TEST_URL)
                         .setUseVoice(true)
                         .setUser("wouter")
+                        .setNoShuffle(true)
                         .toString(),
-                "?voice&url=" + TEST_URL_ENCODED + "&user=wouter");
+                "?noshuffle&voice&url=" + TEST_URL_ENCODED + "&user=wouter");
     }
 }
