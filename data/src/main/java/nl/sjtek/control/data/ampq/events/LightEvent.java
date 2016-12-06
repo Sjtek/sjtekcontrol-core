@@ -5,7 +5,8 @@ package nl.sjtek.control.data.ampq.events;
  */
 public class LightEvent {
 
-    private static final String MESSAGE_TEMPLATE = "%02d;%01d;%03d;%03d;%03d";
+    private static final String MESSAGE_TEMPLATE_RGB = "%02d;%01d;%03d;%03d;%03d";
+    private static final String MESSAGE_TEMPLATE_STATE = "%02d;%01d";
 
     private final int id;
     private final boolean state;
@@ -98,7 +99,11 @@ public class LightEvent {
 
     @Override
     public String toString() {
-        return String.format(MESSAGE_TEMPLATE, id, (state ? 1 : 0), r, g, b);
+        if (useRgb) {
+            return String.format(MESSAGE_TEMPLATE_RGB, id, (state ? 1 : 0), r, g, b);
+        } else {
+            return String.format(MESSAGE_TEMPLATE_STATE, id, (state ? 1 : 0));
+        }
     }
 
     @Override

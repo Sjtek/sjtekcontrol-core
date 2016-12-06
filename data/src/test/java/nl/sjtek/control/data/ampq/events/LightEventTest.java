@@ -60,7 +60,7 @@ public class LightEventTest {
     @Test
     public void testMessageState() {
         LightEvent event = new LightEvent(1, false);
-        assertEquals("01;0;000;000;000", event.toString());
+        assertEquals("01;0", event.toString());
     }
 
     @Test
