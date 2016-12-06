@@ -1,6 +1,8 @@
 package nl.sjtek.control.core.modules;
 
+import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.network.Arguments;
+import nl.sjtek.control.data.ampq.events.LightEvent;
 import nl.sjtek.control.data.responses.LightsResponse;
 import nl.sjtek.control.data.responses.Response;
 
@@ -105,17 +107,25 @@ public class Lights extends BaseModule {
     }
 
     public void toggle3off(Arguments arguments) {
-        if (actionLedStrip(arguments, false) == 200) {
-            states[3] = false;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(3, false));
+        states[3] = false;
+        dataChanged();
     }
 
     public void toggle3on(Arguments arguments) {
-        if (actionLedStrip(arguments, true) == 200) {
-            states[3] = true;
-            dataChanged();
+        String rgb = arguments.getRgb();
+        if (rgb.isEmpty()) {
+            Bus.post(new LightEvent(3, true));
+        } else {
+            String[] values = rgb.split(",");
+            Bus.post(new LightEvent(3,
+                    Integer.parseInt(values[0]),
+                    Integer.parseInt(values[1]),
+                    Integer.parseInt(values[2])
+            ));
         }
+        states[3] = true;
+        dataChanged();
     }
 
     public boolean getToggle3() {

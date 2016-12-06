@@ -6,6 +6,7 @@ import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.events.DataChangedEvent;
 import nl.sjtek.control.core.network.ResponseCache;
 import nl.sjtek.control.data.actions.CustomAction;
+import nl.sjtek.control.data.ampq.events.LightEvent;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -17,9 +18,11 @@ public class AMPQManager {
 
     private static final String EXCHANGE_UPDATES = "updates";
     private static final String EXCHANGE_ACTIONS = "actions";
+    private static final String EXCHANGE_LIGHTS = "lights";
 
     private Channel channelAction;
     private Channel channelUpdate;
+    private Channel channelLights;
     private Connection connection;
 
     public AMPQManager() {
@@ -37,7 +40,20 @@ public class AMPQManager {
     public void onUpdate(DataChangedEvent event) {
         if (!event.shouldPushToClients()) return;
         System.out.println("Sending update");
-        send(ResponseCache.getInstance().toJson());
+        try {
+            channelUpdate.basicPublish(EXCHANGE_UPDATES, "", null, ResponseCache.getInstance().toJson().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Subscribe
+    public void onLightEvent(LightEvent lightEvent) {
+        try {
+            channelLights.basicPublish(EXCHANGE_LIGHTS, "", null, lightEvent.toString().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void connect() throws IOException, TimeoutException {
@@ -47,8 +63,12 @@ public class AMPQManager {
         factory.setPassword("yolo");
         factory.setAutomaticRecoveryEnabled(true);
         connection = factory.newConnection();
+
         channelUpdate = connection.createChannel();
         channelUpdate.exchangeDeclare(EXCHANGE_UPDATES, "fanout");
+
+        channelLights = connection.createChannel();
+        channelLights.exchangeDeclare(EXCHANGE_LIGHTS, "fanout");
 
         channelAction = connection.createChannel();
         channelAction.exchangeDeclare(EXCHANGE_ACTIONS, "fanout");
@@ -58,17 +78,11 @@ public class AMPQManager {
         System.out.println("Connected to broker.");
     }
 
-    private void send(String message) {
-        try {
-            channelUpdate.basicPublish(EXCHANGE_UPDATES, "", null, message.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void disconnect() throws IOException, TimeoutException {
         channelUpdate.close();
         channelAction.close();
+        channelLights.close();
         connection.close();
     }
 
