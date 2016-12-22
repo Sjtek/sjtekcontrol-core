@@ -100,6 +100,7 @@ public class AMPQManager {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
             String path = new String(body);
+            if (path.equals("ping")) return;
             System.out.println("Received AMPQ action: " + path);
             Bus.post(new CustomAction(path));
         }
