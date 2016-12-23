@@ -1,5 +1,6 @@
 package nl.sjtek.control.core.modules;
 
+import nl.sjtek.control.core.network.ApiHandler;
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.utils.Speech;
 import nl.sjtek.control.data.responses.Response;
@@ -18,6 +19,7 @@ public class Screen extends BaseModule {
     private final String header = "Sjtek Enterprises presents:";
     private final String title = "Sjtek 2016 fissa";
     private final String subtitle = "";
+    private final String playlist = "spotify:user:1133212423:playlist:42MtUpC8Zbs3LN14KXQrZK";
     private final Timer timer = new Timer();
     private final Date triggerDate;
     private ScreenResponse.State state = ScreenResponse.State.FULLSCREEN;
@@ -31,7 +33,7 @@ public class Screen extends BaseModule {
     public Screen(String key) {
         super(key);
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2017, Calendar.JANUARY, 1, 0, 0, 0);
+        calendar.set(2016, Calendar.DECEMBER, 31, 23, 0, 0);
         triggerDate = calendar.getTime();
         timer.schedule(timerTask, triggerDate);
         refresh(null);
@@ -70,6 +72,8 @@ public class Screen extends BaseModule {
         this.state = ScreenResponse.State.NEWYEAR;
         dataChanged(true);
         Speech.speakAsync("Triggered");
+        Music music = ApiHandler.getInstance().getMusic();
+        ApiHandler.getInstance().getMusic().start(new Arguments("?noshuffle&url=" + playlist), false);
     }
 
     @Override

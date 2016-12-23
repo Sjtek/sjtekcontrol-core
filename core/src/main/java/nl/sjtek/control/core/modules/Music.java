@@ -180,15 +180,24 @@ public class Music extends BaseModule implements ConnectionChangeListener {
 
     }
 
+    public void start(Arguments arguments) {
+        start(arguments, true);
+    }
+
     /**
      * Clear queue and stop player. Then add SjtekSjpeellijst and Taylor Swift, shuffle it and start playback.
      *
      * @param arguments Arguments
      */
-    public void start(Arguments arguments) {
+    public void start(Arguments arguments, boolean changeVolume) {
         Arguments dummyArguments = new Arguments();
         clear(dummyArguments);
-        volumeneutral(dummyArguments);
+
+        if (changeVolume) {
+            volumeneutral(dummyArguments);
+        } else {
+            mpd.getPlayer().setVolume(50);
+        }
 
         String path;
         boolean injectTaylorSwift;
