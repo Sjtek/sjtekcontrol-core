@@ -1,8 +1,5 @@
 package nl.sjtek.control.data.settings;
 
-import com.google.gson.Gson;
-import org.json.JSONObject;
-
 import java.util.Map;
 
 /**
@@ -24,9 +21,5 @@ public class PlaylistSet extends Setting {
 
     public String getDefaultPlaylist() {
         return playlists.get(defaultPlaylist);
-    }
-
-    public JSONObject toJson() {
-        return new JSONObject(new Gson().toJson(this));
     }
 }
