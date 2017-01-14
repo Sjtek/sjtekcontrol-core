@@ -10,3 +10,16 @@ This is the core API for Sjtek control. An application to control some smart hom
 This projects contains two modules. `core` contains the API and `data` contains a client side library.
 
 An example of the API can be seen [here](https://sjtek.nl/api.info).
+
+## Clients
+* **Android**
+  https://github.com/Sjtek/sjtekclient-android
+
+* **iOS**
+  https://github.com/Sjtek/sjtekclient-ios
+
+* **Web**
+  https://github.com/Sjtek/sjtekclient-web
+
+* **ESP2866**
+  https://github.com/Sjtek/sjtekclient-button
