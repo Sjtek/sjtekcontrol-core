@@ -2,7 +2,6 @@ package nl.sjtek.control.core.modules;
 
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.settings.SettingsManager;
-import nl.sjtek.control.core.utils.Executor;
 import nl.sjtek.control.core.utils.lastfm.Album;
 import nl.sjtek.control.core.utils.lastfm.Artist;
 import nl.sjtek.control.core.utils.lastfm.LastFM;
@@ -19,7 +18,6 @@ import org.bff.javampd.song.MPDSong;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -139,23 +137,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
      * @param arguments Arguments
      */
     public void next(Arguments arguments) {
-        if (arguments.getUrl() == null || arguments.getUrl().isEmpty()) {
-            mpd.getPlayer().playNext();
-        } else {
-            try {
-                String command =
-                        "/usr/bin/mpc"
-                                + " -h "
-                                + SettingsManager.getInstance().getMusic().getMpdHost()
-                                + " insert "
-                                + arguments.getUrl();
-                Executor.execute(command);
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                mpd.getPlayer().playNext();
-            }
-        }
+        mpd.getPlayer().playNext();
         dataChanged();
     }
 
@@ -198,15 +180,24 @@ public class Music extends BaseModule implements ConnectionChangeListener {
 
     }
 
+    public void start(Arguments arguments) {
+        start(arguments, true);
+    }
+
     /**
      * Clear queue and stop player. Then add SjtekSjpeellijst and Taylor Swift, shuffle it and start playback.
      *
      * @param arguments Arguments
      */
-    public void start(Arguments arguments) {
+    public void start(Arguments arguments, boolean changeVolume) {
         Arguments dummyArguments = new Arguments();
         clear(dummyArguments);
-        volumeneutral(dummyArguments);
+
+        if (changeVolume) {
+            volumeneutral(dummyArguments);
+        } else {
+            mpd.getPlayer().setVolume(50);
+        }
 
         String path;
         boolean injectTaylorSwift;
