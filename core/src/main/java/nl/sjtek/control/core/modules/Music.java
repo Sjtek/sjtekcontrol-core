@@ -8,6 +8,9 @@ import nl.sjtek.control.core.utils.lastfm.LastFM;
 import nl.sjtek.control.data.responses.MusicResponse;
 import nl.sjtek.control.data.responses.Response;
 import nl.sjtek.control.data.settings.User;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.bff.javampd.file.MPDFile;
 import org.bff.javampd.player.Player;
 import org.bff.javampd.server.ConnectionChangeEvent;
@@ -18,6 +21,7 @@ import org.bff.javampd.song.MPDSong;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -64,7 +68,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
         mpd = builder.build();
 
         updateListener = new WSUpdateListener(host, port);
-        updateListener.connect();
+        updateListener.tryConnect();
 
         mpd.getMonitor().addConnectionChangeListener(this);
         mpd.getMonitor().start();
@@ -426,12 +430,19 @@ public class Music extends BaseModule implements ConnectionChangeListener {
 
     private class WSUpdateListener extends WebSocketClient {
         private static final String URL_TEMPLATE = "ws://%s:%d/mopidy/ws";
-
+        private final String host;
+        private final int port;
         private long lastEvent = 0;
         private Timer heartbeatTimer = new Timer();
 
         public WSUpdateListener(String host, int port) throws URISyntaxException {
             super(new URI(String.format(URL_TEMPLATE, host, 6680)));
+            this.host = host;
+            this.port = port;
+        }
+
+        public void tryConnect() {
+            new PingThread().start();
         }
 
         @Override
@@ -443,6 +454,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
                     WSUpdateListener.this.send("{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"core.playback.get_state\"}");
                 }
             }, 30000, 30000);
+            dataChanged();
         }
 
         @Override
@@ -470,6 +482,35 @@ public class Music extends BaseModule implements ConnectionChangeListener {
         public void onError(Exception ex) {
             System.out.println(this.getClass().getSimpleName() + " onError: " + ex.getMessage());
             dataChanged();
+        }
+
+        private class PingThread extends Thread {
+            @Override
+            public void run() {
+                super.run();
+                OkHttpClient okHttpClient = new OkHttpClient();
+
+                boolean connected = false;
+                while (true) {
+                    okhttp3.Response response = null;
+                    try {
+                        Call call = okHttpClient.newCall(new Request.Builder().url("http://" + host + ":" + 6680 + "/mopidy").build());
+                        response = call.execute();
+                        if (response.isSuccessful()) {
+                            WSUpdateListener.this.connect();
+                            return;
+                        }
+
+                        Thread.sleep(1000);
+                    } catch (IOException | InterruptedException e) {
+                        System.out.println("Connection to Mopidy failed on" + host + " (" + e.getMessage() + ")");
+                    } finally {
+                        if (response != null) {
+                            response.body().close();
+                        }
+                    }
+                }
+            }
         }
     }
 }
