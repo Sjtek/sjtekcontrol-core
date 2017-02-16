@@ -494,6 +494,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
                 while (true) {
                     okhttp3.Response response = null;
                     try {
+                        Thread.sleep(1000);
                         Call call = okHttpClient.newCall(new Request.Builder().url("http://" + host + ":" + 6680 + "/mopidy").build());
                         response = call.execute();
                         if (response.isSuccessful()) {
@@ -501,7 +502,6 @@ public class Music extends BaseModule implements ConnectionChangeListener {
                             return;
                         }
 
-                        Thread.sleep(1000);
                     } catch (IOException | InterruptedException e) {
                         System.out.println("Connection to Mopidy failed on" + host + " (" + e.getMessage() + ")");
                     } finally {
