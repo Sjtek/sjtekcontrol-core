@@ -5,6 +5,8 @@ import com.rabbitmq.client.*;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.events.DataChangedEvent;
 import nl.sjtek.control.core.network.ResponseCache;
+import nl.sjtek.control.data.actions.CustomAction;
+import nl.sjtek.control.data.ampq.events.LightEvent;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -15,10 +17,12 @@ import java.util.concurrent.TimeoutException;
 public class AMPQManager {
 
     private static final String EXCHANGE_UPDATES = "updates";
-    private static final String QUEUE_UPDATE = "update";
-    private static final String QUEUE_ACTION = "actions";
+    private static final String EXCHANGE_ACTIONS = "actions";
+    private static final String EXCHANGE_LIGHTS = "lights";
+
     private Channel channelAction;
     private Channel channelUpdate;
+    private Channel channelLights;
     private Connection connection;
 
     public AMPQManager() {
@@ -36,7 +40,20 @@ public class AMPQManager {
     public void onUpdate(DataChangedEvent event) {
         if (!event.shouldPushToClients()) return;
         System.out.println("Sending update");
-        send(ResponseCache.getInstance().toJson());
+        try {
+            channelUpdate.basicPublish(EXCHANGE_UPDATES, "", null, ResponseCache.getInstance().toJson().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Subscribe
+    public void onLightEvent(LightEvent lightEvent) {
+        try {
+            channelLights.basicPublish(EXCHANGE_LIGHTS, "", null, lightEvent.toString().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void connect() throws IOException, TimeoutException {
@@ -44,27 +61,28 @@ public class AMPQManager {
         factory.setHost("10.10.0.1");
         factory.setUsername("core");
         factory.setPassword("yolo");
+        factory.setAutomaticRecoveryEnabled(true);
         connection = factory.newConnection();
+
         channelUpdate = connection.createChannel();
         channelUpdate.exchangeDeclare(EXCHANGE_UPDATES, "fanout");
-//        channelUpdate.queueDeclare(QUEUE_UPDATE, false, false, false, null);
+
+        channelLights = connection.createChannel();
+        channelLights.exchangeDeclare(EXCHANGE_LIGHTS, "fanout");
+
         channelAction = connection.createChannel();
-        channelAction.queueDeclare(QUEUE_ACTION, false, false, false, null);
-        channelAction.basicConsume(QUEUE_ACTION, true, new ActionConsumer(channelAction));
+        channelAction.exchangeDeclare(EXCHANGE_ACTIONS, "fanout");
+        String updateQueueName = channelAction.queueDeclare().getQueue();
+        channelAction.queueBind(updateQueueName, EXCHANGE_ACTIONS, "");
+        channelAction.basicConsume(updateQueueName, true, new ActionConsumer(channelAction));
         System.out.println("Connected to broker.");
     }
 
-    private void send(String message) {
-        try {
-            channelUpdate.basicPublish(EXCHANGE_UPDATES, "", null, message.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void disconnect() throws IOException, TimeoutException {
         channelUpdate.close();
         channelAction.close();
+        channelLights.close();
         connection.close();
     }
 
@@ -81,13 +99,10 @@ public class AMPQManager {
 
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-//            try {
-//                ObjectInputStream inputStream = new ObjectInputStream(new ByteInputStream(body, body.length));
-//                ActionEvent action = (ActionEvent) inputStream.readObject();
-//                System.out.println(action.toString());
-//            } catch (ClassNotFoundException e) {
-//                e.printStackTrace();
-//            }
+            String path = new String(body);
+            if (path.equals("ping")) return;
+            System.out.println("Received AMPQ action: " + path);
+            Bus.post(new CustomAction(path));
         }
     }
 
