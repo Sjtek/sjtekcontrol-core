@@ -55,17 +55,15 @@ public class Lights extends BaseModule {
     }
 
     public void toggle1off(Arguments arguments) {
-        if (action(SWITCH1OFF, arguments.getCode()) == 200) {
-            states[1] = false;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(1, false));
+        states[1] = false;
+        dataChanged();
     }
 
     public void toggle1on(Arguments arguments) {
-        if (action(SWITCH1ON, arguments.getCode()) == 200) {
-            states[1] = true;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(1, true));
+        states[1] = true;
+        dataChanged();
     }
 
     public boolean getToggle1() {
@@ -81,17 +79,15 @@ public class Lights extends BaseModule {
     }
 
     public void toggle2off(Arguments arguments) {
-        if (action(SWITCH2OFF, arguments.getCode()) == 200) {
-            states[2] = false;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(2, false));
+        states[2] = false;
+        dataChanged();
     }
 
     public void toggle2on(Arguments arguments) {
-        if (action(SWITCH2ON, arguments.getCode()) == 200) {
-            states[2] = true;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(2, true));
+        states[2] = true;
+        dataChanged();
     }
 
     public boolean getToggle2() {
@@ -141,23 +137,23 @@ public class Lights extends BaseModule {
     }
 
     public void toggle4off(Arguments arguments) {
-        if (action(SWITCH4OFF, arguments.getCode()) == 200) {
-            states[4] = false;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(4, false));
+        states[4] = false;
+        dataChanged();
     }
 
     public void toggle4on(Arguments arguments) {
-        if (action(SWITCH4ON, arguments.getCode()) == 200) {
-            states[4] = true;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(4, true));
+        states[4] = true;
+        dataChanged();
     }
 
+    @Deprecated
     private synchronized int action(String action, String code) {
         return send(ROOT_URL_NORMAL, action, code);
     }
 
+    @Deprecated
     private synchronized int actionLedStrip(Arguments arguments, boolean state) {
         if (!arguments.getRgb().isEmpty()) {
             return send(ROOT_URL_RGB, "led", "rgb=" + arguments.getRgb());
@@ -170,6 +166,7 @@ public class Lights extends BaseModule {
         }
     }
 
+    @Deprecated
     private int send(String urlString, String action, String argument) {
         try {
             URL url = new URL(urlString + action + "?" + argument);
