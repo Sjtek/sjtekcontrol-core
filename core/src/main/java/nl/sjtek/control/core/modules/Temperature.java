@@ -1,6 +1,9 @@
 package nl.sjtek.control.core.modules;
 
+import com.google.common.eventbus.Subscribe;
+import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.settings.SettingsManager;
+import nl.sjtek.control.data.ampq.events.TemperatureEvent;
 import nl.sjtek.control.data.responses.Response;
 import nl.sjtek.control.data.responses.TemperatureResponse;
 import okhttp3.OkHttpClient;
@@ -20,6 +23,7 @@ public class Temperature extends BaseModule {
     private static final String WEATHER_URL_OUTSIDE = String.format("https://api.darksky.net/forecast/%s/51.5121298,5.4924242", SettingsManager.getInstance().getWeather().getApiKey());
     private static final String WEATHER_URL_INSIDE = "http://10.10.0.2/cgi-bin/temp";
     private static final String LOG_PATH = "/var/sjtekcontrol/log.csv";
+    private static final int ID_INSIDE = 1;
 
     private final OkHttpClient httpClient = new OkHttpClient();
 
@@ -32,6 +36,7 @@ public class Temperature extends BaseModule {
 
     public Temperature(String key) {
         super(key);
+        Bus.regsiter(this);
         Timer updateTimer = new Timer();
         updateTimer.scheduleAtFixedRate(new UpdateTask(), 0, UPDATE_DELAY);
     }
@@ -44,6 +49,15 @@ public class Temperature extends BaseModule {
     @Override
     public String getSummaryText() {
         return "The temperature inside is " + tempInside + " degrees, and outside " + tempOutside + " degrees.";
+    }
+
+    @Subscribe
+    public void onTemperatureEvent(TemperatureEvent event) {
+        switch (event.getId()) {
+            case ID_INSIDE:
+                tempInside = (int) event.getTemperature();
+                break;
+        }
     }
 
     private void parseOutside(String response) {
@@ -75,6 +89,7 @@ public class Temperature extends BaseModule {
         }
     }
 
+    @Deprecated
     private void parseInside(String response) {
         if (!response.isEmpty()) {
             try {
@@ -130,7 +145,7 @@ public class Temperature extends BaseModule {
 
         @Override
         public void run() {
-            parseInside(download(WEATHER_URL_INSIDE));
+            // parseInside(download(WEATHER_URL_INSIDE));
             parseOutside(download(WEATHER_URL_OUTSIDE));
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_PATH, true))) {
