@@ -82,7 +82,7 @@ public class AMPQManager {
         channelTemperature.exchangeDeclare(EXCHANGE_TEMPERATURE, "fanout");
         String temperatureQueueName = channelTemperature.queueDeclare().getQueue();
         channelTemperature.queueBind(temperatureQueueName, EXCHANGE_TEMPERATURE, "");
-        channelTemperature.basicConsume(temperatureQueueName, new TemperatureConsumer(channelTemperature));
+        channelTemperature.basicConsume(temperatureQueueName, true, new TemperatureConsumer(channelTemperature));
 
 
         System.out.println("Connected to broker.");
@@ -109,7 +109,9 @@ public class AMPQManager {
 
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-            Bus.post(new TemperatureEvent(new String(body)));
+            TemperatureEvent temperatureEvent = new TemperatureEvent(new String(body));
+            System.out.println(temperatureEvent.toString());
+            Bus.post(temperatureEvent);
         }
     }
 
