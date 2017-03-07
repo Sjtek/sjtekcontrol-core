@@ -110,7 +110,6 @@ public class AMPQManager {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
             TemperatureEvent temperatureEvent = new TemperatureEvent(new String(body));
-            System.out.println(temperatureEvent.toString());
             Bus.post(temperatureEvent);
         }
     }

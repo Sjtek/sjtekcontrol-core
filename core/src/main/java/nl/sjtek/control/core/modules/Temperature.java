@@ -53,7 +53,6 @@ public class Temperature extends BaseModule {
 
     @Subscribe
     public void onTemperatureEvent(TemperatureEvent event) {
-        System.out.println("ayyyyyy dikke aight " + event.toString());
         switch (event.getId()) {
             case ID_INSIDE:
                 tempInside = (int) event.getTemperature();
