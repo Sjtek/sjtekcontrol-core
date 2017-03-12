@@ -55,4 +55,9 @@ public class Quotes extends BaseModule {
     public String getSummaryText() {
         return getQuote();
     }
+
+    @Override
+    public boolean isEnabled(String user) {
+        return false;
+    }
 }

@@ -2,6 +2,7 @@ package nl.sjtek.control.core.modules;
 
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.network.Arguments;
+import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.data.ampq.events.LightEvent;
 import nl.sjtek.control.data.responses.LightsResponse;
 import nl.sjtek.control.data.responses.Response;
@@ -208,5 +209,11 @@ public class Lights extends BaseModule {
         if (result.isEmpty())
             return "The lights are turned off.";
         return "The following lights are turned on: " + result + ".";
+    }
+
+    @Override
+    public boolean isEnabled(String user) {
+        boolean extra = SettingsManager.getInstance().getUser(user).isCheckExtraLight();
+        return states[1] || states[2] || (extra && states[3]) || states[4];
     }
 }

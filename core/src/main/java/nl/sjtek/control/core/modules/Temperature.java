@@ -51,6 +51,11 @@ public class Temperature extends BaseModule {
         return "The temperature inside is " + tempInside + " degrees, and outside " + tempOutside + " degrees.";
     }
 
+    @Override
+    public boolean isEnabled(String user) {
+        return false;
+    }
+
     @Subscribe
     public void onTemperatureEvent(TemperatureEvent event) {
         switch (event.getId()) {

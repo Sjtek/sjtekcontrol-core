@@ -321,6 +321,11 @@ public class Music extends BaseModule implements ConnectionChangeListener {
     }
 
     @Override
+    public boolean isEnabled(String user) {
+        return musicResponse.getState() == MusicResponse.State.STATUS_PLAYING;
+    }
+
+    @Override
     public void connectionChangeEventReceived(ConnectionChangeEvent connectionChangeEvent) {
         System.out.println("Connection changed " + connectionChangeEvent.isConnected());
         dataChanged();

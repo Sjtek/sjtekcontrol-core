@@ -19,6 +19,7 @@ public class Arguments {
     private String code = "";
     private String rgb = "";
     private boolean noShuffle = false;
+    private String userName = "default";
 
     public Arguments() {
 
@@ -44,6 +45,7 @@ public class Arguments {
                 cardId = value;
             } else if ("user".equals(name)) {
                 user = SettingsManager.getInstance().getUser(value);
+                userName = value;
             } else if ("code".equals(name)) {
                 code = value;
             } else if ("rgb".equals(name)) {
@@ -157,6 +159,10 @@ public class Arguments {
 
     public void setNoShuffle(boolean noShuffle) {
         this.noShuffle = noShuffle;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 
     @Override
