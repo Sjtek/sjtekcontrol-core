@@ -27,7 +27,7 @@ public class Lights extends BaseModule {
     private static final String ROOT_URL_NORMAL = "http://10.10.0.2/cgi-bin/";
     private static final String ROOT_URL_RGB = "http://10.10.0.4:8000/";
 
-    private boolean states[] = {false, false, false, false, false};
+    private boolean states[] = new boolean[10];
 
     public Lights(String key) {
         super(key);
@@ -196,7 +196,7 @@ public class Lights extends BaseModule {
 
     @Override
     public Response getResponse() {
-        return new LightsResponse(states[1], states[2], states[3], states[4]);
+        return new LightsResponse(states[1], states[2], states[3], states[4], states[5], states[6], states[7]);
     }
 
     @Override
