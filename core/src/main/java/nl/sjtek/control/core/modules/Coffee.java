@@ -71,4 +71,9 @@ public class Coffee extends BaseModule {
     public String getSummaryText() {
         return "The coffee is " + (isHeated() ? "heated." : "not heated.");
     }
+
+    @Override
+    public boolean isEnabled(String user) {
+        return false;
+    }
 }

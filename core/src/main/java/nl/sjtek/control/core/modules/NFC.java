@@ -40,4 +40,9 @@ public class NFC extends BaseModule {
     public String getSummaryText() {
         return "There is not much to tell about the NFC module.";
     }
+
+    @Override
+    public boolean isEnabled(String user) {
+        return false;
+    }
 }

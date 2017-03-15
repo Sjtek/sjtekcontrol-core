@@ -86,6 +86,11 @@ public class Sonarr extends BaseModule {
         }
     }
 
+    @Override
+    public boolean isEnabled(String user) {
+        return false;
+    }
+
     private void updateData() {
         parseCalendar(download(URL_CALENDAR));
         parseDiskSpace(download(URL_DISKSPACE));

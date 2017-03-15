@@ -7,6 +7,8 @@ import nl.sjtek.control.core.events.DataChangedEvent;
 import nl.sjtek.control.core.network.ResponseCache;
 import nl.sjtek.control.data.actions.CustomAction;
 import nl.sjtek.control.data.ampq.events.LightEvent;
+import nl.sjtek.control.data.ampq.events.LightStateEvent;
+import nl.sjtek.control.data.ampq.events.TemperatureEvent;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -16,14 +18,17 @@ import java.util.concurrent.TimeoutException;
  */
 public class AMPQManager {
 
+    public static final String EXCHANGE_TEMPERATURE = "temperature";
     private static final String EXCHANGE_UPDATES = "updates";
     private static final String EXCHANGE_ACTIONS = "actions";
     private static final String EXCHANGE_LIGHTS = "lights";
-
+    private static final String EXCHANGE_LIGHTS_STATE = "lights_state";
     private Channel channelAction;
     private Channel channelUpdate;
     private Channel channelLights;
     private Connection connection;
+    private Channel channelTemperature;
+    private Channel channelLightsState;
 
     public AMPQManager() {
         try {
@@ -75,7 +80,20 @@ public class AMPQManager {
         String updateQueueName = channelAction.queueDeclare().getQueue();
         channelAction.queueBind(updateQueueName, EXCHANGE_ACTIONS, "");
         channelAction.basicConsume(updateQueueName, true, new ActionConsumer(channelAction));
-        System.out.println("Connected to broker.");
+
+        channelTemperature = connection.createChannel();
+        channelTemperature.exchangeDeclare(EXCHANGE_TEMPERATURE, "fanout");
+        String temperatureQueueName = channelTemperature.queueDeclare().getQueue();
+        channelTemperature.queueBind(temperatureQueueName, EXCHANGE_TEMPERATURE, "");
+        channelTemperature.basicConsume(temperatureQueueName, true, new TemperatureConsumer(channelTemperature));
+
+        channelLightsState = connection.createChannel();
+        channelLightsState.exchangeDeclare(EXCHANGE_LIGHTS_STATE, "fanout");
+        String lightsStateQueueName = channelLightsState.queueDeclare().getQueue();
+        channelLightsState.queueBind(lightsStateQueueName, EXCHANGE_LIGHTS_STATE, "");
+        channelLightsState.basicConsume(lightsStateQueueName, true, new LightStateConsumer(channelLightsState));
+
+        System.out.println("Connected to broker");
     }
 
 
@@ -84,6 +102,42 @@ public class AMPQManager {
         channelAction.close();
         channelLights.close();
         connection.close();
+    }
+
+    private static class TemperatureConsumer extends DefaultConsumer {
+
+        /**
+         * Constructs a new instance and records its association to the passed-in channel.
+         *
+         * @param channel the channel to which this consumer is attached
+         */
+        public TemperatureConsumer(Channel channel) {
+            super(channel);
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+            TemperatureEvent temperatureEvent = new TemperatureEvent(new String(body));
+            Bus.post(temperatureEvent);
+        }
+    }
+
+    private class LightStateConsumer extends DefaultConsumer {
+
+        /**
+         * Constructs a new instance and records its association to the passed-in channel.
+         *
+         * @param channel the channel to which this consumer is attached
+         */
+        public LightStateConsumer(Channel channel) {
+            super(channel);
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+            LightStateEvent event = LightStateEvent.parseMessage(new String(body));
+            if (event != null) Bus.post(event);
+        }
     }
 
     private class ActionConsumer extends DefaultConsumer {

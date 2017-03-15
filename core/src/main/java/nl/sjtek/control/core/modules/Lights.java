@@ -1,8 +1,11 @@
 package nl.sjtek.control.core.modules;
 
+import com.google.common.eventbus.Subscribe;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.network.Arguments;
+import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.data.ampq.events.LightEvent;
+import nl.sjtek.control.data.ampq.events.LightStateEvent;
 import nl.sjtek.control.data.responses.LightsResponse;
 import nl.sjtek.control.data.responses.Response;
 
@@ -10,6 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"UnusedParameters", "unused"})
 public class Lights extends BaseModule {
@@ -26,10 +32,33 @@ public class Lights extends BaseModule {
     private static final String ROOT_URL_NORMAL = "http://10.10.0.2/cgi-bin/";
     private static final String ROOT_URL_RGB = "http://10.10.0.4:8000/";
 
+    private static final long UPDATE_DELAY = 100;
+    private final ScheduledThreadPoolExecutor executor;
+    private ScheduledFuture future;
+
     private boolean states[] = new boolean[10];
 
     public Lights(String key) {
         super(key);
+        executor = new ScheduledThreadPoolExecutor(2);
+        Bus.regsiter(this);
+    }
+
+    @Subscribe
+    public void onLightStateUpdate(LightStateEvent event) {
+        states[event.getId()] = event.isEnabled();
+        delayedUpdate();
+    }
+
+    private void delayedUpdate() {
+        if (future == null || future.isCancelled() || future.isDone()) {
+            future = executor.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    dataChanged();
+                }
+            }, UPDATE_DELAY, TimeUnit.MILLISECONDS);
+        }
     }
 
     public boolean isOn() {
@@ -37,12 +66,14 @@ public class Lights extends BaseModule {
     }
 
     public void toggle(Arguments arguments) {
-        if (states[1] || states[2]) {
+        if (states[1] || states[2] || states[5]) {
             toggle1off(arguments);
             toggle2off(arguments);
+            toggle5off(arguments);
         } else {
             toggle1on(arguments);
             toggle2on(arguments);
+            toggle5on(arguments);
         }
     }
 
@@ -55,17 +86,15 @@ public class Lights extends BaseModule {
     }
 
     public void toggle1off(Arguments arguments) {
-        if (action(SWITCH1OFF, arguments.getCode()) == 200) {
-            states[1] = false;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(1, false));
+        states[1] = false;
+        dataChanged();
     }
 
     public void toggle1on(Arguments arguments) {
-        if (action(SWITCH1ON, arguments.getCode()) == 200) {
-            states[1] = true;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(1, true));
+        states[1] = true;
+        dataChanged();
     }
 
     public boolean getToggle1() {
@@ -81,17 +110,15 @@ public class Lights extends BaseModule {
     }
 
     public void toggle2off(Arguments arguments) {
-        if (action(SWITCH2OFF, arguments.getCode()) == 200) {
-            states[2] = false;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(2, false));
+        states[2] = false;
+        dataChanged();
     }
 
     public void toggle2on(Arguments arguments) {
-        if (action(SWITCH2ON, arguments.getCode()) == 200) {
-            states[2] = true;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(2, true));
+        states[2] = true;
+        dataChanged();
     }
 
     public boolean getToggle2() {
@@ -141,23 +168,71 @@ public class Lights extends BaseModule {
     }
 
     public void toggle4off(Arguments arguments) {
-        if (action(SWITCH4OFF, arguments.getCode()) == 200) {
-            states[4] = false;
-            dataChanged();
-        }
+        Bus.post(new LightEvent(4, false));
+        states[4] = false;
+        dataChanged();
     }
 
     public void toggle4on(Arguments arguments) {
-        if (action(SWITCH4ON, arguments.getCode()) == 200) {
-            states[4] = true;
-            dataChanged();
+        Bus.post(new LightEvent(4, true));
+        states[4] = true;
+        dataChanged();
+    }
+
+    public void toggle5(Arguments arguments) {
+        if (states[5]) {
+            toggle5off(arguments);
+        } else {
+            toggle5on(arguments);
         }
     }
 
+    public void toggle5on(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(5, true));
+    }
+
+    public void toggle5off(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(5, false));
+    }
+
+    public void toggle6(Arguments arguments) {
+        if (states[6]) {
+            toggle6off(arguments);
+        } else {
+            toggle6on(arguments);
+        }
+    }
+
+    public void toggle6on(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(6, true));
+    }
+
+    public void toggle6off(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(6, false));
+    }
+
+    public void toggle7(Arguments arguments) {
+        if (states[7]) {
+            toggle7off(arguments);
+        } else {
+            toggle7on(arguments);
+        }
+    }
+
+    public void toggle7on(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(7, true));
+    }
+
+    public void toggle7off(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(7, false));
+    }
+
+    @Deprecated
     private synchronized int action(String action, String code) {
         return send(ROOT_URL_NORMAL, action, code);
     }
 
+    @Deprecated
     private synchronized int actionLedStrip(Arguments arguments, boolean state) {
         if (!arguments.getRgb().isEmpty()) {
             return send(ROOT_URL_RGB, "led", "rgb=" + arguments.getRgb());
@@ -170,6 +245,7 @@ public class Lights extends BaseModule {
         }
     }
 
+    @Deprecated
     private int send(String urlString, String action, String argument) {
         try {
             URL url = new URL(urlString + action + "?" + argument);
@@ -211,5 +287,11 @@ public class Lights extends BaseModule {
         if (result.isEmpty())
             return "The lights are turned off.";
         return "The following lights are turned on: " + result + ".";
+    }
+
+    @Override
+    public boolean isEnabled(String user) {
+        boolean extra = SettingsManager.getInstance().getUser(user).isCheckExtraLight();
+        return states[1] || states[2] || (extra && states[3]) || states[4] || states[5];
     }
 }

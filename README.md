@@ -23,3 +23,6 @@ An example of the API can be seen [here](https://sjtek.nl/api.info).
 
 * **ESP2866**
   https://github.com/Sjtek/sjtekclient-button
+
+* **Pi Client**
+  https://github.com/Sjtek/sjtekcontrol-piswitch

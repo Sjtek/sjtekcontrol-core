@@ -48,6 +48,11 @@ public class TV extends BaseModule {
         return "There is not much to tell about the TV.";
     }
 
+    @Override
+    public boolean isEnabled(String user) {
+        return false;
+    }
+
     private class ExecuteThread extends Thread {
 
         private final String[] command;

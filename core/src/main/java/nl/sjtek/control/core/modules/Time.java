@@ -23,4 +23,9 @@ public class Time extends BaseModule {
     public String getSummaryText() {
         return "It's" + Calendar.getInstance().getTime().toString();
     }
+
+    @Override
+    public boolean isEnabled(String user) {
+        return false;
+    }
 }

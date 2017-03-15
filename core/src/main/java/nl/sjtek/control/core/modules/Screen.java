@@ -90,6 +90,11 @@ public class Screen extends BaseModule {
         return "Current state: " + state.toString();
     }
 
+    @Override
+    public boolean isEnabled(String user) {
+        return false;
+    }
+
     private class DiscoThread extends Thread {
         @Override
         public void run() {

@@ -39,10 +39,6 @@ public class NightMode extends BaseModule {
         if (arguments.useVoice()) Speech.speak("Disabling night mode. Good morning");
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
     @Override
     public Response getResponse() {
         return new NightModeResponse(enabled, nextDisable.toString());
@@ -51,6 +47,11 @@ public class NightMode extends BaseModule {
     @Override
     public String getSummaryText() {
         return "Night mode is " + (enabled ? "enabled" : "disabled") + ".";
+    }
+
+    @Override
+    public boolean isEnabled(String user) {
+        return false;
     }
 
     private void schedule() {

@@ -244,10 +244,11 @@ public class ApiHandler implements HttpHandler {
         Arguments dummyArguments = new Arguments();
         User user = arguments.getUser();
         boolean checkExtra = user.isCheckExtraLight();
-        if (!isOn(checkExtra)) {
+        if (!isOn(arguments.getUserName())) {
             if (arguments.useVoice()) Speech.speakAsync(Personalise.messageWelcome(user));
             lights.toggle1on(dummyArguments);
             lights.toggle2on(dummyArguments);
+            lights.toggle5on(dummyArguments);
             if (checkExtra) lights.toggle3on(dummyArguments);
             if (!nightMode.isEnabled() && user.isAutoStartMusic()) {
                 music.start(arguments);
@@ -257,6 +258,7 @@ public class ApiHandler implements HttpHandler {
             music.pause(dummyArguments);
             lights.toggle1off(dummyArguments);
             lights.toggle2off(dummyArguments);
+            lights.toggle5off(dummyArguments);
             if (checkExtra) lights.toggle3off(dummyArguments);
             tv.off(dummyArguments);
         }
@@ -295,10 +297,12 @@ public class ApiHandler implements HttpHandler {
     }
 
 
-    public boolean isOn(boolean checkExtra) {
-        Lights lights = getLights();
-        Music music = getMusic();
-        return (music.isPlaying() || (lights.getToggle1() || lights.getToggle2() || (checkExtra && lights.getToggle3())));
+    public boolean isOn(String user) {
+        for (Map.Entry<String, BaseModule> entry : modules.entrySet()) {
+            if (entry.getValue().isEnabled(user)) return true;
+        }
+
+        return false;
     }
 
     private enum ResponseType {

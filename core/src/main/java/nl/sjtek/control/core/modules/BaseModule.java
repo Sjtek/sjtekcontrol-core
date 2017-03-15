@@ -32,6 +32,12 @@ public abstract class BaseModule {
 
     public abstract String getSummaryText();
 
+    public final boolean isEnabled() {
+        return isEnabled("default");
+    }
+
+    public abstract boolean isEnabled(String user);
+
     public final BaseModule init() {
         dataChanged(false);
         return this;

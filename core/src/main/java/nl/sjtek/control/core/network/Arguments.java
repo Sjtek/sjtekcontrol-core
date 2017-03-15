@@ -1,6 +1,7 @@
 package nl.sjtek.control.core.network;
 
 import nl.sjtek.control.core.settings.SettingsManager;
+import nl.sjtek.control.data.ampq.events.LightEvent;
 import nl.sjtek.control.data.settings.User;
 import org.apache.commons.codec.Charsets;
 import org.apache.http.NameValuePair;
@@ -19,6 +20,7 @@ public class Arguments {
     private String code = "";
     private String rgb = "";
     private boolean noShuffle = false;
+    private String userName = "default";
 
     public Arguments() {
 
@@ -44,6 +46,7 @@ public class Arguments {
                 cardId = value;
             } else if ("user".equals(name)) {
                 user = SettingsManager.getInstance().getUser(value);
+                userName = value;
             } else if ("code".equals(name)) {
                 code = value;
             } else if ("rgb".equals(name)) {
@@ -151,12 +154,33 @@ public class Arguments {
         return this;
     }
 
+    public LightEvent getLightEvent(int id, boolean state) {
+        if (state) {
+            if (!rgb.isEmpty()) {
+                String[] values = rgb.split(",");
+                return new LightEvent(id,
+                        Integer.parseInt(values[0]),
+                        Integer.parseInt(values[1]),
+                        Integer.parseInt(values[2])
+                );
+            } else {
+                return new LightEvent(id, true);
+            }
+        } else {
+            return new LightEvent(id, false);
+        }
+    }
+
     public boolean isNoShuffle() {
         return noShuffle;
     }
 
     public void setNoShuffle(boolean noShuffle) {
         this.noShuffle = noShuffle;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 
     @Override
