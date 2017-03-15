@@ -7,6 +7,7 @@ import nl.sjtek.control.core.events.DataChangedEvent;
 import nl.sjtek.control.core.network.ResponseCache;
 import nl.sjtek.control.data.actions.CustomAction;
 import nl.sjtek.control.data.ampq.events.LightEvent;
+import nl.sjtek.control.data.ampq.events.LightStateEvent;
 import nl.sjtek.control.data.ampq.events.TemperatureEvent;
 
 import java.io.IOException;
@@ -21,11 +22,13 @@ public class AMPQManager {
     private static final String EXCHANGE_UPDATES = "updates";
     private static final String EXCHANGE_ACTIONS = "actions";
     private static final String EXCHANGE_LIGHTS = "lights";
+    private static final String EXCHANGE_LIGHTS_STATE = "lights_state";
     private Channel channelAction;
     private Channel channelUpdate;
     private Channel channelLights;
     private Connection connection;
     private Channel channelTemperature;
+    private Channel channelLightsState;
 
     public AMPQManager() {
         try {
@@ -84,8 +87,13 @@ public class AMPQManager {
         channelTemperature.queueBind(temperatureQueueName, EXCHANGE_TEMPERATURE, "");
         channelTemperature.basicConsume(temperatureQueueName, true, new TemperatureConsumer(channelTemperature));
 
+        channelLightsState = connection.createChannel();
+        channelLightsState.exchangeDeclare(EXCHANGE_LIGHTS_STATE, "fanout");
+        String lightsStateQueueName = channelLightsState.queueDeclare().getQueue();
+        channelLightsState.queueBind(lightsStateQueueName, EXCHANGE_LIGHTS_STATE, "");
+        channelLightsState.basicConsume(lightsStateQueueName, true, new LightStateConsumer(channelLightsState));
 
-        System.out.println("Connected to broker.");
+        System.out.println("Connected to broker");
     }
 
 
@@ -111,6 +119,24 @@ public class AMPQManager {
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
             TemperatureEvent temperatureEvent = new TemperatureEvent(new String(body));
             Bus.post(temperatureEvent);
+        }
+    }
+
+    private class LightStateConsumer extends DefaultConsumer {
+
+        /**
+         * Constructs a new instance and records its association to the passed-in channel.
+         *
+         * @param channel the channel to which this consumer is attached
+         */
+        public LightStateConsumer(Channel channel) {
+            super(channel);
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+            LightStateEvent event = LightStateEvent.parseMessage(new String(body));
+            if (event != null) Bus.post(event);
         }
     }
 

@@ -1,9 +1,11 @@
 package nl.sjtek.control.core.modules;
 
+import com.google.common.eventbus.Subscribe;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.data.ampq.events.LightEvent;
+import nl.sjtek.control.data.ampq.events.LightStateEvent;
 import nl.sjtek.control.data.responses.LightsResponse;
 import nl.sjtek.control.data.responses.Response;
 
@@ -11,6 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"UnusedParameters", "unused"})
 public class Lights extends BaseModule {
@@ -27,10 +32,33 @@ public class Lights extends BaseModule {
     private static final String ROOT_URL_NORMAL = "http://10.10.0.2/cgi-bin/";
     private static final String ROOT_URL_RGB = "http://10.10.0.4:8000/";
 
+    private static final long UPDATE_DELAY = 100;
+    private final ScheduledThreadPoolExecutor executor;
+    private ScheduledFuture future;
+
     private boolean states[] = new boolean[10];
 
     public Lights(String key) {
         super(key);
+        executor = new ScheduledThreadPoolExecutor(2);
+        Bus.regsiter(this);
+    }
+
+    @Subscribe
+    public void onLightStateUpdate(LightStateEvent event) {
+        states[event.getId()] = event.isEnabled();
+        delayedUpdate();
+    }
+
+    private void delayedUpdate() {
+        if (future == null || future.isCancelled() || future.isDone()) {
+            future = executor.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    dataChanged();
+                }
+            }, UPDATE_DELAY, TimeUnit.MILLISECONDS);
+        }
     }
 
     public boolean isOn() {
