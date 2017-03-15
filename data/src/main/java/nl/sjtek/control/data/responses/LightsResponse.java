@@ -23,6 +23,7 @@ public class LightsResponse extends Response {
     private final boolean light7;
 
     public LightsResponse(boolean light1, boolean light2, boolean light3, boolean light4, boolean light5, boolean light6, boolean light7) {
+        type = this.getClass().getCanonicalName();
         this.light1 = light1;
         this.light2 = light2;
         this.light3 = light3;
