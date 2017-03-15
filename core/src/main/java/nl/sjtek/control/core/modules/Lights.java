@@ -149,6 +149,54 @@ public class Lights extends BaseModule {
         dataChanged();
     }
 
+    public void toggle5(Arguments arguments) {
+        if (states[5]) {
+            toggle5off(arguments);
+        } else {
+            toggle5on(arguments);
+        }
+    }
+
+    public void toggle5on(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(5, true));
+    }
+
+    public void toggle5off(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(5, false));
+    }
+
+    public void toggle6(Arguments arguments) {
+        if (states[6]) {
+            toggle6off(arguments);
+        } else {
+            toggle6on(arguments);
+        }
+    }
+
+    public void toggle6on(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(6, true));
+    }
+
+    public void toggle6off(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(6, false));
+    }
+
+    public void toggle7(Arguments arguments) {
+        if (states[7]) {
+            toggle7off(arguments);
+        } else {
+            toggle7on(arguments);
+        }
+    }
+
+    public void toggle7on(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(7, true));
+    }
+
+    public void toggle7off(Arguments arguments) {
+        Bus.post(arguments.getLightEvent(7, false));
+    }
+
     @Deprecated
     private synchronized int action(String action, String code) {
         return send(ROOT_URL_NORMAL, action, code);
