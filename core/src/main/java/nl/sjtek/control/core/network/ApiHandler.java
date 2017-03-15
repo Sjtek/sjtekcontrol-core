@@ -244,10 +244,11 @@ public class ApiHandler implements HttpHandler {
         Arguments dummyArguments = new Arguments();
         User user = arguments.getUser();
         boolean checkExtra = user.isCheckExtraLight();
-        if (isOn(arguments.getUserName())) {
+        if (!isOn(arguments.getUserName())) {
             if (arguments.useVoice()) Speech.speakAsync(Personalise.messageWelcome(user));
             lights.toggle1on(dummyArguments);
             lights.toggle2on(dummyArguments);
+            lights.toggle5on(dummyArguments);
             if (checkExtra) lights.toggle3on(dummyArguments);
             if (!nightMode.isEnabled() && user.isAutoStartMusic()) {
                 music.start(arguments);
@@ -257,6 +258,7 @@ public class ApiHandler implements HttpHandler {
             music.pause(dummyArguments);
             lights.toggle1off(dummyArguments);
             lights.toggle2off(dummyArguments);
+            lights.toggle5off(dummyArguments);
             if (checkExtra) lights.toggle3off(dummyArguments);
             tv.off(dummyArguments);
         }
