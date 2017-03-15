@@ -66,12 +66,14 @@ public class Lights extends BaseModule {
     }
 
     public void toggle(Arguments arguments) {
-        if (states[1] || states[2]) {
+        if (states[1] || states[2] || states[5]) {
             toggle1off(arguments);
             toggle2off(arguments);
+            toggle5off(arguments);
         } else {
             toggle1on(arguments);
             toggle2on(arguments);
+            toggle5on(arguments);
         }
     }
 
@@ -290,6 +292,6 @@ public class Lights extends BaseModule {
     @Override
     public boolean isEnabled(String user) {
         boolean extra = SettingsManager.getInstance().getUser(user).isCheckExtraLight();
-        return states[1] || states[2] || (extra && states[3]) || states[4];
+        return states[1] || states[2] || (extra && states[3]) || states[4] || states[5];
     }
 }
