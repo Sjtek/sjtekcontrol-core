@@ -31,7 +31,7 @@ public class LightThread extends Thread {
         synchronized (client) {
             String body = String.format("{\"url\":\"%s\"}", albumArt);
             Request request = new Request.Builder()
-                    .url("http://127.0.0.1:3000/")
+                    .url("http://rgbify:3000/")
                     .post(RequestBody.create(MediaType.parse("application/json"), body))
                     .build();
             okhttp3.Response response = null;
