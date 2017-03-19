@@ -2,6 +2,7 @@ package nl.sjtek.control.core.modules;
 
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.settings.SettingsManager;
+import nl.sjtek.control.core.utils.LightThread;
 import nl.sjtek.control.core.utils.lastfm.Album;
 import nl.sjtek.control.core.utils.lastfm.Artist;
 import nl.sjtek.control.core.utils.lastfm.LastFM;
@@ -35,8 +36,10 @@ public class Music extends BaseModule implements ConnectionChangeListener {
     private final String host;
     private final int port;
     private MPD mpd = null;
-    private MusicResponse musicResponse;
     private WSUpdateListener updateListener;
+    private MusicResponse musicResponse;
+    private boolean timerRunning;
+    private boolean lights;
 
     /**
      * Connect to the default MPD server.
@@ -262,6 +265,14 @@ public class Music extends BaseModule implements ConnectionChangeListener {
         dataChanged();
     }
 
+    public void enablelights(Arguments arguments) {
+        lights = true;
+    }
+
+    public void disablelights(Arguments arguments) {
+        lights = false;
+    }
+
     public boolean isPlaying() {
         return mpd.getPlayer().getStatus() == Player.Status.STATUS_PLAYING;
     }
@@ -295,6 +306,14 @@ public class Music extends BaseModule implements ConnectionChangeListener {
             builder.setTimeElapsed(0);
             builder.setTimeTotal(0);
             builder.setStatus(status);
+        }
+
+        MusicResponse newMusic = builder.build();
+        if (lights && musicResponse != null && musicResponse.getSong() != null) {
+            String previousArt = musicResponse.getSong().getAlbumArt();
+            if (!previousArt.equals(newMusic.getSong().getAlbumArt())) {
+                LightThread.get(newMusic.getSong().getAlbumArt());
+            }
         }
         musicResponse = builder.build();
     }
