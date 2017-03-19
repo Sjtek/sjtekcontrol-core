@@ -78,6 +78,8 @@ public class ApiHandler implements HttpHandler {
         modules.put("coffee", new Coffee().init());
         System.out.println(" - Screen");
         modules.put("screen", new Screen("screen").init());
+        System.out.println(" - art");
+        modules.put("art", new Art("lights").init());
 
         Bus.regsiter(this);
 

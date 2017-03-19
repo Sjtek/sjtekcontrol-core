@@ -21,6 +21,7 @@ public class Arguments {
     private String rgb = "";
     private boolean noShuffle = false;
     private String userName = "default";
+    private int[] lights;
 
     public Arguments() {
 
@@ -53,6 +54,12 @@ public class Arguments {
                 rgb = value;
             } else if ("noshuffle".equals(name)) {
                 noShuffle = true;
+            } else if ("lights".equals(name)) {
+                String splitted[] = value.split(",");
+                lights = new int[splitted.length];
+                for (int i = 0; i < splitted.length; i++) {
+                    lights[i] = Integer.parseInt(splitted[i]);
+                }
             }
         }
     }
@@ -181,6 +188,10 @@ public class Arguments {
 
     public String getUserName() {
         return userName;
+    }
+
+    public int[] getLights() {
+        return lights;
     }
 
     @Override

@@ -16,13 +16,11 @@ public class LightThread extends Thread {
 
     private static final OkHttpClient client = new OkHttpClient();
     private final String albumArt;
+    private final int lights[];
 
-    private LightThread(String albumArt) {
+    public LightThread(String albumArt, int... lights) {
         this.albumArt = albumArt;
-    }
-
-    public static void get(String url) {
-        new LightThread(url).start();
+        this.lights = lights;
     }
 
     @Override
@@ -31,7 +29,7 @@ public class LightThread extends Thread {
         synchronized (client) {
             String body = String.format("{\"url\":\"%s\"}", albumArt);
             Request request = new Request.Builder()
-                    .url("http://rgbify:3000/")
+                    .url("http://10.10.0.1:3000/")
                     .post(RequestBody.create(MediaType.parse("application/json"), body))
                     .build();
             okhttp3.Response response = null;
@@ -42,14 +40,15 @@ public class LightThread extends Thread {
                 JSONObject rgbify = jsonObject.getJSONObject("rgbify");
                 JSONArray colorArray = rgbify.getJSONArray("dominantColor");
                 if (colorArray != null) {
-                    Bus.post(new LightEvent(1, colorArray.getInt(0), colorArray.getInt(1), colorArray.getInt(2)));
-                    Bus.post(new LightEvent(3, colorArray.getInt(0), colorArray.getInt(1), colorArray.getInt(2)));
-                    Bus.post(new LightEvent(5, colorArray.getInt(0), colorArray.getInt(1), colorArray.getInt(2)));
-                    Bus.post(new LightEvent(6, colorArray.getInt(0), colorArray.getInt(1), colorArray.getInt(2)));
-                    Bus.post(new LightEvent(7, colorArray.getInt(0), colorArray.getInt(1), colorArray.getInt(2)));
+                    int r = colorArray.getInt(0);
+                    int g = colorArray.getInt(1);
+                    int b = colorArray.getInt(2);
+                    for (int light : lights) {
+                        Bus.post(new LightEvent(light, r, g, b));
+                    }
                 }
-            } catch (Exception ignored) {
-
+            } catch (Exception e) {
+                e.printStackTrace();
             } finally {
                 if (response != null) {
                     response.body().close();
