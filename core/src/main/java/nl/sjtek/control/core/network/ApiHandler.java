@@ -3,7 +3,7 @@ package nl.sjtek.control.core.network;
 import com.google.common.eventbus.Subscribe;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import nl.sjtek.control.core.ampq.AMPQManager;
+import nl.sjtek.control.core.ampq.AMQP;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.modules.*;
 import nl.sjtek.control.core.settings.SettingsManager;
@@ -28,7 +28,7 @@ public class ApiHandler implements HttpHandler {
     private static ApiHandler instance = new ApiHandler();
     private Map<String, BaseModule> modules = new HashMap<>();
     private WSServer wsServer;
-    private AMPQManager AMPQManager;
+    private AMQP amqp;
 
     private ApiHandler() {
 
@@ -86,7 +86,7 @@ public class ApiHandler implements HttpHandler {
         this.wsServer = new WSServer();
         this.wsServer.start();
 
-        AMPQManager = new AMPQManager();
+        amqp = new AMQP();
 
         System.out.println();
     }
