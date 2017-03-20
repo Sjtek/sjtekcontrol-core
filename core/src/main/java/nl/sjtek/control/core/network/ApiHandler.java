@@ -74,8 +74,7 @@ public class ApiHandler implements HttpHandler {
         System.out.println(" - Time");
         modules.put("time", new Time("time").init());
         System.out.println(" - Coffee");
-        //TODO Fix coffee key
-        modules.put("coffee", new Coffee().init());
+        modules.put("coffee", new Coffee("coffee").init());
         System.out.println(" - Screen");
         modules.put("screen", new Screen("screen").init());
         System.out.println(" - art");
