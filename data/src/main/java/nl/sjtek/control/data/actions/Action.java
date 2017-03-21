@@ -54,7 +54,16 @@ public enum Action implements ActionInterface {
         TOGGLE_3_OFF("/toggle3off"),
         TOGGLE_4("/toggle4"),
         TOGGLE_4_ON("/toggle4on"),
-        TOGGLE_4_OFF("/toggle4off");
+        TOGGLE_4_OFF("/toggle4off"),
+        TOGGLE_5("/toggle5"),
+        TOGGLE_5_ON("/toggle5on"),
+        TOGGLE_5_OFF("/toggle5off"),
+        TOGGLE_6("/toggle6"),
+        TOGGLE_6_ON("/toggle6on"),
+        TOGGLE_6_OFF("/toggle6off"),
+        TOGGLE_7("/toggle7"),
+        TOGGLE_7_ON("/toggle7on"),
+        TOGGLE_7_OFF("/toggle7off");
 
 
         private static final String BASE = "/lights";

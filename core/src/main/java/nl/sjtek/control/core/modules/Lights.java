@@ -4,7 +4,6 @@ import com.google.common.eventbus.Subscribe;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.settings.SettingsManager;
-import nl.sjtek.control.data.ampq.events.LightEvent;
 import nl.sjtek.control.data.ampq.events.LightStateEvent;
 import nl.sjtek.control.data.responses.LightsResponse;
 import nl.sjtek.control.data.responses.Response;
@@ -86,13 +85,13 @@ public class Lights extends BaseModule {
     }
 
     public void toggle1off(Arguments arguments) {
-        Bus.post(new LightEvent(1, false));
+        Bus.post(arguments.getLightEvent(1, false));
         states[1] = false;
         dataChanged();
     }
 
     public void toggle1on(Arguments arguments) {
-        Bus.post(new LightEvent(1, true));
+        Bus.post(arguments.getLightEvent(1, true));
         states[1] = true;
         dataChanged();
     }
@@ -110,13 +109,13 @@ public class Lights extends BaseModule {
     }
 
     public void toggle2off(Arguments arguments) {
-        Bus.post(new LightEvent(2, false));
+        Bus.post(arguments.getLightEvent(2, false));
         states[2] = false;
         dataChanged();
     }
 
     public void toggle2on(Arguments arguments) {
-        Bus.post(new LightEvent(2, true));
+        Bus.post(arguments.getLightEvent(2, true));
         states[2] = true;
         dataChanged();
     }
@@ -134,23 +133,13 @@ public class Lights extends BaseModule {
     }
 
     public void toggle3off(Arguments arguments) {
-        Bus.post(new LightEvent(3, false));
+        Bus.post(arguments.getLightEvent(3, false));
         states[3] = false;
         dataChanged();
     }
 
     public void toggle3on(Arguments arguments) {
-        String rgb = arguments.getRgb();
-        if (rgb.isEmpty()) {
-            Bus.post(new LightEvent(3, true));
-        } else {
-            String[] values = rgb.split(",");
-            Bus.post(new LightEvent(3,
-                    Integer.parseInt(values[0]),
-                    Integer.parseInt(values[1]),
-                    Integer.parseInt(values[2])
-            ));
-        }
+        Bus.post(arguments.getLightEvent(3, true));
         states[3] = true;
         dataChanged();
     }
@@ -168,15 +157,11 @@ public class Lights extends BaseModule {
     }
 
     public void toggle4off(Arguments arguments) {
-        Bus.post(new LightEvent(4, false));
-        states[4] = false;
-        dataChanged();
+        Bus.post(arguments.getLightEvent(4, false));
     }
 
     public void toggle4on(Arguments arguments) {
-        Bus.post(new LightEvent(4, true));
-        states[4] = true;
-        dataChanged();
+        Bus.post(arguments.getLightEvent(4, true));
     }
 
     public void toggle5(Arguments arguments) {
@@ -292,6 +277,6 @@ public class Lights extends BaseModule {
     @Override
     public boolean isEnabled(String user) {
         boolean extra = SettingsManager.getInstance().getUser(user).isCheckExtraLight();
-        return states[1] || states[2] || (extra && states[3]) || states[4] || states[5];
+        return states[1] || states[2] || (extra && states[3]) || (extra && states[4]) || states[4] || states[5];
     }
 }

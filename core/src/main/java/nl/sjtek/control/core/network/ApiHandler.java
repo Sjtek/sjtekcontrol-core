@@ -3,7 +3,7 @@ package nl.sjtek.control.core.network;
 import com.google.common.eventbus.Subscribe;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import nl.sjtek.control.core.ampq.AMPQManager;
+import nl.sjtek.control.core.ampq.AMQP;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.modules.*;
 import nl.sjtek.control.core.settings.SettingsManager;
@@ -28,14 +28,16 @@ public class ApiHandler implements HttpHandler {
     private static ApiHandler instance = new ApiHandler();
     private Map<String, BaseModule> modules = new HashMap<>();
     private WSServer wsServer;
-    private AMPQManager AMPQManager;
+    private AMQP amqp;
 
     private ApiHandler() {
 
         ResponseCache.getInstance();
 
-        System.out.print("Loading modules:");
+        System.out.println("Loading modules:");
 
+        System.out.println(" - audio");
+        modules.put("audio", new Audio("audio").init());
         System.out.println(" - music");
         BaseModule musicNaspoleon;
         Music musicWouter;
@@ -74,17 +76,18 @@ public class ApiHandler implements HttpHandler {
         System.out.println(" - Time");
         modules.put("time", new Time("time").init());
         System.out.println(" - Coffee");
-        //TODO Fix coffee key
-        modules.put("coffee", new Coffee().init());
+        modules.put("coffee", new Coffee("coffee").init());
         System.out.println(" - Screen");
         modules.put("screen", new Screen("screen").init());
+        System.out.println(" - art");
+        modules.put("art", new Art("lights").init());
 
         Bus.regsiter(this);
 
         this.wsServer = new WSServer();
         this.wsServer.start();
 
-        AMPQManager = new AMPQManager();
+        amqp = new AMQP();
 
         System.out.println();
     }
@@ -249,7 +252,10 @@ public class ApiHandler implements HttpHandler {
             lights.toggle1on(dummyArguments);
             lights.toggle2on(dummyArguments);
             lights.toggle5on(dummyArguments);
-            if (checkExtra) lights.toggle3on(dummyArguments);
+            if (checkExtra) {
+                lights.toggle3on(dummyArguments);
+                lights.toggle4on(dummyArguments);
+            }
             if (!nightMode.isEnabled() && user.isAutoStartMusic()) {
                 music.start(arguments);
             }
@@ -259,7 +265,10 @@ public class ApiHandler implements HttpHandler {
             lights.toggle1off(dummyArguments);
             lights.toggle2off(dummyArguments);
             lights.toggle5off(dummyArguments);
-            if (checkExtra) lights.toggle3off(dummyArguments);
+            if (checkExtra) {
+                lights.toggle3off(dummyArguments);
+                lights.toggle4off(dummyArguments);
+            }
             tv.off(dummyArguments);
         }
     }

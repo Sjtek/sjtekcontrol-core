@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-alpine
+FROM openjdk:8-jre
 MAINTAINER Wouter Habets (wouterhabets@gmail.com)
 
 EXPOSE 8000 8001

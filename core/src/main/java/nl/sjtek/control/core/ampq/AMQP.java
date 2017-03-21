@@ -16,7 +16,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Created by wouter on 30-11-16.
  */
-public class AMPQManager {
+public class AMQP {
 
     public static final String EXCHANGE_TEMPERATURE = "temperature";
     private static final String EXCHANGE_UPDATES = "updates";
@@ -30,7 +30,7 @@ public class AMPQManager {
     private Channel channelTemperature;
     private Channel channelLightsState;
 
-    public AMPQManager() {
+    public AMQP() {
         try {
             connect();
         } catch (IOException e) {
@@ -93,6 +93,11 @@ public class AMPQManager {
         channelLightsState.queueBind(lightsStateQueueName, EXCHANGE_LIGHTS_STATE, "");
         channelLightsState.basicConsume(lightsStateQueueName, true, new LightStateConsumer(channelLightsState));
 
+        Channel channelTopic = connection.createChannel();
+        channelTopic.exchangeDeclare("amq.topic", "topic", true);
+        channelTopic.exchangeBind("actions", "amq.topic", "actions");
+        channelTopic.close();
+
         System.out.println("Connected to broker");
     }
 
@@ -116,7 +121,7 @@ public class AMPQManager {
         }
 
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        public void handleDelivery(String consumerTag, Envelope envelope, com.rabbitmq.client.AMQP.BasicProperties properties, byte[] body) throws IOException {
             TemperatureEvent temperatureEvent = new TemperatureEvent(new String(body));
             Bus.post(temperatureEvent);
         }
@@ -134,7 +139,7 @@ public class AMPQManager {
         }
 
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        public void handleDelivery(String consumerTag, Envelope envelope, com.rabbitmq.client.AMQP.BasicProperties properties, byte[] body) throws IOException {
             LightStateEvent event = LightStateEvent.parseMessage(new String(body));
             if (event != null) Bus.post(event);
         }
@@ -152,7 +157,7 @@ public class AMPQManager {
         }
 
         @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+        public void handleDelivery(String consumerTag, Envelope envelope, com.rabbitmq.client.AMQP.BasicProperties properties, byte[] body) throws IOException {
             String path = new String(body);
             if (path.equals("ping")) return;
             System.out.println("Received AMPQ action: " + path);

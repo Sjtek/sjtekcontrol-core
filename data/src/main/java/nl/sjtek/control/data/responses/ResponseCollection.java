@@ -24,6 +24,7 @@ public class ResponseCollection implements Serializable {
     private static final String DEFAULT_TIME = "time";
     private static final String DEFAULT_TV = "tv";
     private static final String DEFAULT_COFFEE = "coffee";
+    private static final String DEFAULT_AUDIO = "audio";
 
     private final Map<String, Response> responseMap;
 
@@ -79,5 +80,9 @@ public class ResponseCollection implements Serializable {
 
     public CoffeeResponse getCoffee() {
         return (CoffeeResponse) responseMap.get(DEFAULT_COFFEE);
+    }
+
+    public AudioResponse getAudio() {
+        return (AudioResponse) responseMap.get(DEFAULT_AUDIO);
     }
 }

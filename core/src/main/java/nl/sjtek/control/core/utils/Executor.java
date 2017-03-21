@@ -11,15 +11,13 @@ public class Executor {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void execute(String[] command) throws IOException, InterruptedException {
+    public static int execute(String[] command) throws IOException, InterruptedException {
         Process process = Runtime.getRuntime().exec(command);
         process.waitFor();
-        int exitValue = process.exitValue();
-        if (exitValue != 0) {
-            System.err.println("Exit code: " + exitValue);
-        }
+        return process.exitValue();
     }
 
+    @Deprecated
     public static void execute(String command) throws IOException, InterruptedException {
         Process process = Runtime.getRuntime().exec(command);
         process.waitFor();
