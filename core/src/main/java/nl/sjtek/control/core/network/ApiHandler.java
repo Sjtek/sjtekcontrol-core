@@ -34,8 +34,10 @@ public class ApiHandler implements HttpHandler {
 
         ResponseCache.getInstance();
 
-        System.out.print("Loading modules:");
+        System.out.println("Loading modules:");
 
+        System.out.println(" - audio");
+        modules.put("audio", new Audio("audio").init());
         System.out.println(" - music");
         BaseModule musicNaspoleon;
         Music musicWouter;

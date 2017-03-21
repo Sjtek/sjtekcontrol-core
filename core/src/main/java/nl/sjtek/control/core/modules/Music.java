@@ -1,5 +1,7 @@
 package nl.sjtek.control.core.modules;
 
+import nl.sjtek.control.core.events.AudioEvent;
+import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.core.utils.lastfm.Album;
@@ -296,6 +298,12 @@ public class Music extends BaseModule implements ConnectionChangeListener {
             builder.setTimeElapsed(0);
             builder.setTimeTotal(0);
             builder.setStatus(status);
+        }
+
+        if (status != null && status == Player.Status.STATUS_PLAYING) {
+            Bus.post(new AudioEvent(getKey(), true));
+        } else {
+            Bus.post(new AudioEvent(getKey(), false));
         }
 
         musicResponse = builder.build();

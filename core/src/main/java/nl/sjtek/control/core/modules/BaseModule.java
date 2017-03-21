@@ -43,6 +43,10 @@ public abstract class BaseModule {
         return this;
     }
 
+    public String getKey() {
+        return key;
+    }
+
     @Override
     public final String toString() {
         return super.toString();
