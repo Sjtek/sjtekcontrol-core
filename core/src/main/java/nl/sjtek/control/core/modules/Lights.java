@@ -158,14 +158,10 @@ public class Lights extends BaseModule {
 
     public void toggle4off(Arguments arguments) {
         Bus.post(arguments.getLightEvent(4, false));
-        states[4] = false;
-        dataChanged();
     }
 
     public void toggle4on(Arguments arguments) {
         Bus.post(arguments.getLightEvent(4, true));
-        states[4] = true;
-        dataChanged();
     }
 
     public void toggle5(Arguments arguments) {
@@ -281,6 +277,6 @@ public class Lights extends BaseModule {
     @Override
     public boolean isEnabled(String user) {
         boolean extra = SettingsManager.getInstance().getUser(user).isCheckExtraLight();
-        return states[1] || states[2] || (extra && states[3]) || states[4] || states[5];
+        return states[1] || states[2] || (extra && states[3]) || (extra && states[4]) || states[4] || states[5];
     }
 }
