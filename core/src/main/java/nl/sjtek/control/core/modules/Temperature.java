@@ -1,7 +1,6 @@
 package nl.sjtek.control.core.modules;
 
 import com.google.common.eventbus.Subscribe;
-import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.data.ampq.events.TemperatureEvent;
 import nl.sjtek.control.data.responses.Response;
@@ -36,7 +35,6 @@ public class Temperature extends BaseModule {
 
     public Temperature(String key) {
         super(key);
-        Bus.regsiter(this);
         Timer updateTimer = new Timer();
         updateTimer.scheduleAtFixedRate(new UpdateTask(), 0, UPDATE_DELAY);
     }

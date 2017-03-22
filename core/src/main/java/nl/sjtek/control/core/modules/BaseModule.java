@@ -1,10 +1,13 @@
 package nl.sjtek.control.core.modules;
 
+import com.google.common.eventbus.Subscribe;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.events.DataChangedEvent;
+import nl.sjtek.control.core.events.StateEvent;
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.utils.Speech;
 import nl.sjtek.control.data.responses.Response;
+import nl.sjtek.control.data.settings.User;
 
 
 public abstract class BaseModule {
@@ -13,6 +16,7 @@ public abstract class BaseModule {
 
     public BaseModule(String key) {
         this.key = key;
+        Bus.regsiter(this);
     }
 
     final void dataChanged() {
@@ -36,7 +40,18 @@ public abstract class BaseModule {
         return isEnabled("default");
     }
 
-    public abstract boolean isEnabled(String user);
+    public boolean isEnabled(String user) {
+        return false;
+    }
+
+    @Subscribe
+    public final void onStateChangeEvent(StateEvent event) {
+        onStateChanged(event.isEnabled(), event.getUser());
+    }
+
+    public void onStateChanged(boolean enabled, User user) {
+
+    }
 
     public final BaseModule init() {
         dataChanged(false);

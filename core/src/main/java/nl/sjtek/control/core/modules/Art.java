@@ -1,12 +1,12 @@
 package nl.sjtek.control.core.modules;
 
 import com.google.common.eventbus.Subscribe;
-import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.events.DataChangedEvent;
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.utils.LightThread;
 import nl.sjtek.control.data.responses.MusicResponse;
 import nl.sjtek.control.data.responses.Response;
+import nl.sjtek.control.data.settings.User;
 
 /**
  * Created by wouter on 19-3-17.
@@ -18,7 +18,6 @@ public class Art extends BaseModule {
 
     public Art(String key) {
         super(key);
-        Bus.regsiter(this);
     }
 
     @Subscribe
@@ -39,6 +38,11 @@ public class Art extends BaseModule {
         if (previousUrl != null && !previousUrl.isEmpty()) {
             new LightThread(previousUrl, this.lights);
         }
+    }
+
+    @Override
+    public void onStateChanged(boolean enabled, User user) {
+        this.lights = new int[]{0};
     }
 
     @Override

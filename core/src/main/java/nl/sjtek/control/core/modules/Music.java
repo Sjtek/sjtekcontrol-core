@@ -77,6 +77,19 @@ public class Music extends BaseModule implements ConnectionChangeListener {
         mpd.getMonitor().start();
     }
 
+    @Override
+    public void onStateChanged(boolean enabled, User user) {
+        if (enabled) {
+            if (user.isAutoStartMusic()) {
+                Arguments arguments = new Arguments();
+                arguments.setUrl(user.getDefaultPlaylist());
+                start(arguments);
+            }
+        } else {
+            pause(new Arguments());
+        }
+    }
+
     /**
      * Toggle player from PLAY to PAUSE or PAUSE to PLAY or STOPPED to PLAY.
      *

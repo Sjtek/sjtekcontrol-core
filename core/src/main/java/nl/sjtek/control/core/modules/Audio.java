@@ -29,7 +29,6 @@ public class Audio extends BaseModule {
 
     public Audio(String audio) {
         super(audio);
-        Bus.regsiter(this);
         executor = new ScheduledThreadPoolExecutor(5);
         executor.setRemoveOnCancelPolicy(true);
     }

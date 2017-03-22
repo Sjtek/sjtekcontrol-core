@@ -26,6 +26,9 @@ public class LightThread extends Thread {
     @Override
     public void run() {
         super.run();
+        if (lights == null || lights.length == 0 || (lights.length == 1 && lights[0] == 0)) {
+            return;
+        }
         synchronized (client) {
             String body = String.format("{\"url\":\"%s\"}", albumArt);
             Request request = new Request.Builder()

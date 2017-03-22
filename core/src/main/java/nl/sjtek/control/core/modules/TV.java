@@ -6,6 +6,7 @@ import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.utils.Executor;
 import nl.sjtek.control.data.responses.Response;
 import nl.sjtek.control.data.responses.TVResponse;
+import nl.sjtek.control.data.settings.User;
 
 import java.io.IOException;
 
@@ -23,6 +24,11 @@ public class TV extends BaseModule {
     public TV(String key) {
         super(key);
         new PingThread().start();
+    }
+
+    @Override
+    public void onStateChanged(boolean enabled, User user) {
+        if (!enabled) off(new Arguments());
     }
 
     private String[] getArgumentsForCommand(String command) {

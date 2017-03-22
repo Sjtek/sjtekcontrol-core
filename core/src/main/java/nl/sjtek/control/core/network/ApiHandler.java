@@ -5,12 +5,11 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import nl.sjtek.control.core.ampq.AMQP;
 import nl.sjtek.control.core.events.Bus;
+import nl.sjtek.control.core.events.StateEvent;
 import nl.sjtek.control.core.modules.*;
 import nl.sjtek.control.core.settings.SettingsManager;
-import nl.sjtek.control.core.utils.Personalise;
 import nl.sjtek.control.core.utils.Speech;
 import nl.sjtek.control.data.actions.ActionInterface;
-import nl.sjtek.control.data.settings.User;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -239,38 +238,7 @@ public class ApiHandler implements HttpHandler {
     }
 
     public synchronized void masterToggle(Arguments arguments) {
-        Lights lights = getLights();
-        Music music = getMusic();
-        NightMode nightMode = getNightMode();
-        TV tv = getTv();
-
-        Arguments dummyArguments = new Arguments();
-        User user = arguments.getUser();
-        boolean checkExtra = user.isCheckExtraLight();
-        if (!isOn(arguments.getUserName())) {
-            if (arguments.useVoice()) Speech.speakAsync(Personalise.messageWelcome(user));
-            lights.toggle1on(dummyArguments);
-            lights.toggle2on(dummyArguments);
-            lights.toggle5on(dummyArguments);
-            if (checkExtra) {
-                lights.toggle3on(dummyArguments);
-                lights.toggle4on(dummyArguments);
-            }
-            if (!nightMode.isEnabled() && user.isAutoStartMusic()) {
-                music.start(arguments);
-            }
-        } else {
-            if (arguments.useVoice()) Speech.speakAsync(Personalise.messageLeave(user));
-            music.pause(dummyArguments);
-            lights.toggle1off(dummyArguments);
-            lights.toggle2off(dummyArguments);
-            lights.toggle5off(dummyArguments);
-            if (checkExtra) {
-                lights.toggle3off(dummyArguments);
-                lights.toggle4off(dummyArguments);
-            }
-            tv.off(dummyArguments);
-        }
+        Bus.post(new StateEvent(!isOn(arguments.getUserName()), arguments.getUser()));
     }
 
     public Music getMusic() {

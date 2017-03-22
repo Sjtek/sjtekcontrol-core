@@ -7,6 +7,7 @@ import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.data.ampq.events.LightStateEvent;
 import nl.sjtek.control.data.responses.LightsResponse;
 import nl.sjtek.control.data.responses.Response;
+import nl.sjtek.control.data.settings.User;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,13 +41,35 @@ public class Lights extends BaseModule {
     public Lights(String key) {
         super(key);
         executor = new ScheduledThreadPoolExecutor(2);
-        Bus.regsiter(this);
     }
 
     @Subscribe
     public void onLightStateUpdate(LightStateEvent event) {
         states[event.getId()] = event.isEnabled();
         delayedUpdate();
+    }
+
+    @Override
+    public void onStateChanged(boolean enabled, User user) {
+        Arguments arguments = new Arguments();
+        if (enabled) {
+            toggle1on(arguments);
+            toggle2on(arguments);
+            toggle5on(arguments);
+            if (user.isCheckExtraLight()) {
+                toggle3on(arguments);
+                toggle4on(arguments);
+            }
+        } else {
+            toggle1off(arguments);
+            toggle2off(arguments);
+            toggle5off(arguments);
+            toggle7off(arguments);
+            if (user.isCheckExtraLight()) {
+                toggle3off(arguments);
+                toggle4off(arguments);
+            }
+        }
     }
 
     private void delayedUpdate() {
