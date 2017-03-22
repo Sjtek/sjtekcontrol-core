@@ -8,6 +8,7 @@ import nl.sjtek.control.core.network.ResponseCache;
 import nl.sjtek.control.data.actions.CustomAction;
 import nl.sjtek.control.data.ampq.events.LightEvent;
 import nl.sjtek.control.data.ampq.events.LightStateEvent;
+import nl.sjtek.control.data.ampq.events.SensorEvent;
 import nl.sjtek.control.data.ampq.events.TemperatureEvent;
 
 import java.io.IOException;
@@ -24,12 +25,14 @@ public class AMQP {
     private static final String EXCHANGE_LIGHTS = "lights";
     private static final String EXCHANGE_LIGHTS_STATE = "lights_state";
     private static final String EXCHANGE_TOPIC = "amq.topic";
+    private static final String EXCHANGE_SENSORS = "sensors";
     private Channel channelAction;
     private Channel channelUpdate;
     private Channel channelLights;
     private Connection connection;
     private Channel channelTemperature;
     private Channel channelLightsState;
+    private Channel channelSensors;
 
     public AMQP() {
         try {
@@ -74,10 +77,12 @@ public class AMQP {
         channelLightsState = createExchange(EXCHANGE_LIGHTS_STATE, BuiltinExchangeType.FANOUT);
         channelAction = createExchange(EXCHANGE_ACTIONS, BuiltinExchangeType.FANOUT);
         channelTemperature = createExchange(EXCHANGE_TEMPERATURE, BuiltinExchangeType.FANOUT);
+        channelSensors = createExchange(EXCHANGE_SENSORS, BuiltinExchangeType.FANOUT);
 
         addConsumer(EXCHANGE_LIGHTS_STATE, new LightStateConsumer(channelLightsState));
         addConsumer(EXCHANGE_TEMPERATURE, new TemperatureConsumer(channelTemperature));
         addConsumer(EXCHANGE_ACTIONS, new ActionConsumer(channelAction));
+        addConsumer(EXCHANGE_SENSORS, new SensorsConsumer(channelSensors));
 
         Channel channelTopic = connection.createChannel();
         channelTopic.exchangeDeclare(EXCHANGE_TOPIC, BuiltinExchangeType.TOPIC, true);
@@ -156,4 +161,15 @@ public class AMQP {
         }
     }
 
+    private class SensorsConsumer extends DefaultConsumer {
+        public SensorsConsumer(Channel channelSensors) {
+            super(channelSensors);
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, com.rabbitmq.client.AMQP.BasicProperties properties, byte[] body) throws IOException {
+            SensorEvent event = SensorEvent.parseMessage(new String(body));
+            if (event != null) Bus.post(event);
+        }
+    }
 }
