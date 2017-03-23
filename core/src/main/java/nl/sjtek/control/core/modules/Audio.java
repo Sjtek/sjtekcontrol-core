@@ -1,6 +1,7 @@
 package nl.sjtek.control.core.modules;
 
 import com.google.common.eventbus.Subscribe;
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.events.AudioEvent;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.data.ampq.events.LightEvent;
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Audio extends BaseModule {
 
+    private static final String DEBUG = Audio.class.getSimpleName();
     private static final int THRESHOLD = 1;
     private static final long DEACTIVATION_DELAY = 30;
     private static final int SWITCH_ID = 11;
@@ -48,7 +50,7 @@ public class Audio extends BaseModule {
     }
 
     private void activateAudio() {
-        System.out.println("Activating audio");
+        Log.d(DEBUG, "Activating audio");
         if (future != null) future.cancel(false);
         deactivationRunning = false;
         send(true);
@@ -56,11 +58,12 @@ public class Audio extends BaseModule {
 
     private void deactivateAudio() {
         if (deactivationRunning) return;
-        System.out.println("Audio deactivation scheduled");
+        Log.d(DEBUG, "Audio deactivation scheduled");
         deactivationRunning = true;
         future = executor.schedule(new Runnable() {
             @Override
             public void run() {
+                Log.d(DEBUG, "Audio deactivating");
                 send(false);
                 deactivationRunning = false;
                 dataChanged();
@@ -73,8 +76,7 @@ public class Audio extends BaseModule {
         activated = state;
         try {
             Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException ignored) {
         }
     }
 

@@ -1,6 +1,7 @@
 package nl.sjtek.control.core.modules;
 
 import com.google.common.eventbus.Subscribe;
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.events.DataChangedEvent;
 import nl.sjtek.control.core.events.StateEvent;
@@ -54,6 +55,7 @@ public abstract class BaseModule {
     }
 
     public final BaseModule init() {
+        Log.i(BaseModule.class.getSimpleName(), "Loaded " + getKey());
         dataChanged(false);
         return this;
     }

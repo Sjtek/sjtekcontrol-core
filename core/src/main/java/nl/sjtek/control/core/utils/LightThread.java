@@ -1,5 +1,6 @@
 package nl.sjtek.control.core.utils;
 
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.data.ampq.events.LightEvent;
 import okhttp3.MediaType;
@@ -15,6 +16,7 @@ import org.json.JSONObject;
 public class LightThread extends Thread {
 
     private static final OkHttpClient client = new OkHttpClient();
+    private static final String DEBUG = LightThread.class.getSimpleName();
     private final String albumArt;
     private final int lights[];
 
@@ -51,7 +53,7 @@ public class LightThread extends Thread {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(DEBUG, "Error", e);
             } finally {
                 if (response != null) {
                     response.body().close();

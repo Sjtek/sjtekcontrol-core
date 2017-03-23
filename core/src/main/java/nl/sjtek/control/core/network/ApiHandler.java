@@ -3,6 +3,7 @@ package nl.sjtek.control.core.network;
 import com.google.common.eventbus.Subscribe;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.ampq.AMQP;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.events.StateEvent;
@@ -15,8 +16,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +23,7 @@ import java.util.Map;
 public class ApiHandler implements HttpHandler {
 
     public static final String CONTEXT = "/api";
+    private static final String DEBUG = ApiHandler.class.getSimpleName();
     private static ApiHandler instance = new ApiHandler();
     private Map<String, BaseModule> modules = new HashMap<>();
     private WSServer wsServer;
@@ -33,52 +33,20 @@ public class ApiHandler implements HttpHandler {
 
         ResponseCache.getInstance();
 
-        System.out.println("Loading modules:");
+        Log.i(DEBUG, "Loading modules");
 
-        System.out.println(" - audio");
         modules.put("audio", new Audio("audio").init());
-        System.out.println(" - music");
-        BaseModule musicNaspoleon;
-        Music musicWouter;
-
-        try {
-            musicNaspoleon = new Music("music").init();
-        } catch (UnknownHostException | URISyntaxException e) {
-            e.printStackTrace();
-            musicNaspoleon = null;
-        }
-
-//        try {
-//            musicWouter = new Music("music-wouter", "10.10.0.4", 6600);
-//        } catch (UnknownHostException | URISyntaxException e) {
-//            e.printStackTrace();
-//            musicWouter = null;
-//        }
-
-        modules.put("music", musicNaspoleon);
-//        if (musicWouter != null) modules.put("music-wouter", musicWouter);
-
-        System.out.println(" - lights");
+        modules.put("music", new Music("music").init());
         modules.put("lights", new Lights("lights").init());
-        System.out.println(" - temperature");
         modules.put("temperature", new Temperature("temperature").init());
-        System.out.println(" - tv");
         modules.put("tv", new TV("tv").init());
-        System.out.println(" - sonarr");
         modules.put("sonarr", new Sonarr("sonarr").init());
-        System.out.println(" - quotes");
         modules.put("quotes", new Quotes("quotes").init());
-        System.out.println(" - NFC");
         modules.put("nfc", new NFC("nfc").init());
-        System.out.println(" - NightMode");
         modules.put("nightmode", new NightMode("nightmode").init());
-        System.out.println(" - Time");
         modules.put("time", new Time("time").init());
-        System.out.println(" - Coffee");
         modules.put("coffee", new Coffee("coffee").init());
-        System.out.println(" - Screen");
         modules.put("screen", new Screen("screen").init());
-        System.out.println(" - art");
         modules.put("art", new Art("lights").init());
 
         Bus.regsiter(this);
@@ -88,7 +56,7 @@ public class ApiHandler implements HttpHandler {
 
         amqp = new AMQP();
 
-        System.out.println();
+        Log.i(DEBUG, "Handler ready");
     }
 
     public static ApiHandler getInstance() {
@@ -99,10 +67,6 @@ public class ApiHandler implements HttpHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         Arguments arguments = new Arguments(httpExchange.getRequestURI().getQuery());
         String fullPath = httpExchange.getRequestURI().getPath().toLowerCase();
-        System.out.println();
-        System.out.println(httpExchange.getRemoteAddress().toString() + " | " +
-                httpExchange.getRequestURI().getPath() + " | " +
-                httpExchange.getRequestURI().getQuery());
 
         ExecuteResult executeResult = executePath(fullPath, arguments);
         String response = executeResult.getResponseText();
@@ -184,7 +148,7 @@ public class ApiHandler implements HttpHandler {
                 responseCode = 404;
             } catch (InvocationTargetException e) {
                 responseCode = 500;
-                e.printStackTrace();
+                Log.e(DEBUG, "Request error", e);
             }
         }
 
@@ -215,7 +179,7 @@ public class ApiHandler implements HttpHandler {
         }
 
         long stop = System.currentTimeMillis();
-        System.out.println("Response " + responseCode + " " + responseType + " " + (stop - start) + "ms");
+        Log.i(DEBUG, path + "?" + arguments.getQuery() + " - " + (stop - start) + "ms");
 
         return new ExecuteResult(responseCode, response);
     }

@@ -54,8 +54,7 @@ public class Coffee extends BaseModule {
             Bus.post(new LightEvent(10, false));
             try {
                 Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (InterruptedException ignored) {
             }
             Bus.post(new LightEvent(10, true));
             lastTriggered = System.currentTimeMillis();

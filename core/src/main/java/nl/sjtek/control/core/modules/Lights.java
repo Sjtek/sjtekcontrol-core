@@ -259,7 +259,6 @@ public class Lights extends BaseModule {
             URL url = new URL(urlString + action + "?" + argument);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            System.out.println("GET - " + url);
             connection.connect();
             int responseCode = connection.getResponseCode();
             if (responseCode == 200) {

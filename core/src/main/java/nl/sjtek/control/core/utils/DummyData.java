@@ -20,8 +20,8 @@ public class DummyData {
                 getDefaultLastFM(),
                 getDefaultUsers(),
                 getDefaultScreen(),
-                getDefaultWeather()
-        );
+                getDefaultWeather(),
+                getDefaultLogging());
     }
 
     private static MusicSettings getDefaultMusic() {
@@ -247,5 +247,9 @@ public class DummyData {
 
     public static WeatherSettings getDefaultWeather() {
         return new WeatherSettings("");
+    }
+
+    private static LoggingSettings getDefaultLogging() {
+        return new LoggingSettings("DEBUG", true);
     }
 }

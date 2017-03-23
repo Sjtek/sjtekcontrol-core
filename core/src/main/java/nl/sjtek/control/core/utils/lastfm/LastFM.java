@@ -1,5 +1,6 @@
 package nl.sjtek.control.core.utils.lastfm;
 
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.settings.SettingsManager;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,6 +17,8 @@ import java.net.URLEncoder;
  * Created by wouter on 21-12-15.
  */
 public class LastFM {
+
+    private static final String DEBUG = LastFM.class.getSimpleName();
 
     private static final String TAG = LastFM.class.getCanonicalName();
 
@@ -51,10 +54,10 @@ public class LastFM {
             if (artist != null) {
                 return artist;
             }
-            System.out.println("Downloading artist " + query);
+            Log.d(DEBUG, "Downloading artist" + query);
             artist = downloadArtist(query);
             cache.update(query, artist);
-            System.out.println("Downloaded artist " + artist.toString());
+            Log.d(DEBUG, "Downloaded artist" + artist.toString());
             return artist;
         }
     }
@@ -71,10 +74,10 @@ public class LastFM {
                 return album;
             }
 
-            System.out.println("Downloading album " + queryArtist + " - " + queryAlbum);
+            Log.d(DEBUG, "Downloading album" + queryArtist + " - " + queryAlbum);
             album = downloadAlbum(queryArtist, queryAlbum);
             cache.update(queryArtist, queryAlbum, album);
-            System.out.println("Downloaded album " + album.toString());
+            Log.d(DEBUG, "Downloaded album " + album.toString());
             return album;
         }
     }
@@ -83,7 +86,7 @@ public class LastFM {
         try {
             return URLEncoder.encode(input, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.e(DEBUG, "Error while encoding " + input, e);
             return "";
         }
     }
@@ -104,7 +107,7 @@ public class LastFM {
                 Image image = getImage(jsonAlbum.getJSONArray("image"));
                 return new Album(artistName, albumName, image);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(DEBUG, "Error while downloading " + queryArtist + " - " + queryAlbum, e);
                 return new Album("", "", new Image());
             }
         } else {
@@ -117,14 +120,14 @@ public class LastFM {
                 URL_ARTIST,
                 encodeString(query),
                 SettingsManager.getInstance().getLastFM().getApiKey()));
-        if (response != null && !response.isEmpty()) {
+        if (!response.isEmpty()) {
             try {
                 JSONObject jsonArtist = new JSONObject(response).getJSONObject("artist");
                 String name = jsonArtist.getString("name");
                 Image image = getImage(jsonArtist.getJSONArray("image"));
                 return new Artist(name, image);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(DEBUG, "Error while downloading artist " + query, e);
                 return new Artist("", new Image());
             }
         } else {

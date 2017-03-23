@@ -2,6 +2,7 @@ package nl.sjtek.control.core.ampq;
 
 import com.google.common.eventbus.Subscribe;
 import com.rabbitmq.client.*;
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.events.DataChangedEvent;
 import nl.sjtek.control.core.network.ResponseCache;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 public class AMQP {
 
     public static final String EXCHANGE_TEMPERATURE = "temperature";
+    private static final String DEBUG = AMQP.class.getSimpleName();
     private static final String EXCHANGE_UPDATES = "updates";
     private static final String EXCHANGE_ACTIONS = "actions";
     private static final String EXCHANGE_LIGHTS = "lights";
@@ -37,10 +39,8 @@ public class AMQP {
     public AMQP() {
         try {
             connect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
+        } catch (IOException | TimeoutException e) {
+            Log.e(DEBUG, "Connection error", e);
         }
         Bus.regsiter(this);
     }
@@ -51,7 +51,7 @@ public class AMQP {
         try {
             channelUpdate.basicPublish(EXCHANGE_UPDATES, "", null, ResponseCache.getInstance().toJson().getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(DEBUG, "Send error (" + event.getClass().getSimpleName() + ")" + e);
         }
     }
 
@@ -60,7 +60,7 @@ public class AMQP {
         try {
             channelLights.basicPublish(EXCHANGE_LIGHTS, "", null, lightEvent.toString().getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(DEBUG, "Send error (" + lightEvent.getClass().getSimpleName() + ")" + e);
         }
     }
 
@@ -89,7 +89,7 @@ public class AMQP {
         channelTopic.exchangeBind(EXCHANGE_ACTIONS, EXCHANGE_TOPIC, EXCHANGE_ACTIONS);
         channelTopic.close();
 
-        System.out.println("Connected to broker");
+        Log.i(DEBUG, "Connected to RabbitMQ");
     }
 
     private Channel createExchange(String exchange, BuiltinExchangeType type) throws IOException {
@@ -156,7 +156,6 @@ public class AMQP {
         public void handleDelivery(String consumerTag, Envelope envelope, com.rabbitmq.client.AMQP.BasicProperties properties, byte[] body) throws IOException {
             String path = new String(body);
             if (path.equals("ping")) return;
-            System.out.println("Received AMPQ action: " + path);
             Bus.post(new CustomAction(path));
         }
     }

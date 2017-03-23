@@ -1,5 +1,6 @@
 package nl.sjtek.control.core.modules;
 
+import io.habets.javautils.Log;
 import nl.sjtek.control.data.responses.Response;
 import nl.sjtek.control.data.responses.SonarrResponse;
 import org.json.JSONArray;
@@ -23,6 +24,7 @@ public class Sonarr extends BaseModule {
     private static final String URL_DISKSPACE = BASE_URL + "/diskspace";
     private static final String API_KEY = "f2b49b091fe5428fa57eb9850c4d828c";
     private static final int INTERVAL = 900000;
+    private static final String DEBUG = Sonarr.class.getSimpleName();
 
     private List<SonarrResponse.Episode> upcoming = new ArrayList<>();
     private Map<String, SonarrResponse.Disk> disks = new HashMap<>();
@@ -48,7 +50,7 @@ public class Sonarr extends BaseModule {
                 this.upcoming.add(new SonarrResponse.Episode(seriesTitle, episodeName, airDate, airDateUTC, seasonInt, episodeInt));
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(DEBUG, "Calendar parse error", e);
             this.upcoming = new ArrayList<>();
         }
         dataChanged();
@@ -56,14 +58,18 @@ public class Sonarr extends BaseModule {
 
     private void parseDiskSpace(String jsonString) {
         disks.clear();
-        JSONArray jsonArray = new JSONArray(jsonString);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
-            String name = jsonObject.getString("path");
-            if (name.equals("/") || name.equals("/tv")) {
-                SonarrResponse.Disk disk = new SonarrResponse.Disk(jsonObject.getDouble("freeSpace"), jsonObject.getDouble("totalSpace"));
-                disks.put(name, disk);
+        try {
+            JSONArray jsonArray = new JSONArray(jsonString);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                String name = jsonObject.getString("path");
+                if (name.equals("/") || name.equals("/tv")) {
+                    SonarrResponse.Disk disk = new SonarrResponse.Disk(jsonObject.getDouble("freeSpace"), jsonObject.getDouble("totalSpace"));
+                    disks.put(name, disk);
+                }
             }
+        } catch (JSONException e) {
+            Log.e(DEBUG, "Disk parse error", e);
         }
         dataChanged();
     }
@@ -115,13 +121,13 @@ public class Sonarr extends BaseModule {
                     bufOut.write(buffer, 0, n);
                 }
 
-                System.out.println("" + responseCode + " - downloaded " + urlString);
+                Log.d(DEBUG, "" + responseCode + " - downloaded " + urlString);
                 return new String(bufOut.toByteArray());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(DEBUG, "Download error", e);
         }
-        System.out.println("" + responseCode + " - downloaded " + urlString);
+        Log.e(DEBUG, "" + responseCode + " - downloaded " + urlString);
         return "";
     }
 

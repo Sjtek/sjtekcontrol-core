@@ -11,6 +11,7 @@ import java.util.List;
 
 public class Arguments {
 
+    private final String query;
     private boolean useVoice = false;
     private String url = "";
     private String text = null;
@@ -24,13 +25,15 @@ public class Arguments {
     private int[] lights;
 
     public Arguments() {
-
+        this.query = "";
     }
 
     public Arguments(String query) {
         if (query == null || query.isEmpty()) {
+            this.query = "";
             return;
         }
+        this.query = query;
         List<NameValuePair> nameValuePairs = URLEncodedUtils.parse(query, Charsets.UTF_8);
         for (NameValuePair nameValuePair : nameValuePairs) {
             String name = nameValuePair.getName();
@@ -197,6 +200,10 @@ public class Arguments {
     @Override
     public String toString() {
         return "Voice: " + useVoice + " Url: " + url + " Stream: " + streamType + " Text: " + text;
+    }
+
+    public String getQuery() {
+        return query;
     }
 
     public enum StreamType {

@@ -1,5 +1,6 @@
 package nl.sjtek.control.core.modules;
 
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.events.AudioEvent;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.network.Arguments;
@@ -34,6 +35,7 @@ import java.util.TimerTask;
 @SuppressWarnings({"UnusedParameters", "unused"})
 public class Music extends BaseModule implements ConnectionChangeListener {
 
+    private static final String DEBUG = Music.class.getSimpleName();
     private final String host;
     private final int port;
     private MPD mpd = null;
@@ -47,7 +49,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
      * @throws UnknownHostException
      * @throws MPDConnectionException
      */
-    public Music(String key) throws UnknownHostException, MPDConnectionException, URISyntaxException {
+    public Music(String key) {
         this(key, SettingsManager.getInstance().getMusic().getMpdHost(), SettingsManager.getInstance().getMusic().getMpdPort());
     }
 
@@ -59,22 +61,26 @@ public class Music extends BaseModule implements ConnectionChangeListener {
      * @throws UnknownHostException
      * @throws MPDConnectionException
      */
-    public Music(String key, String host, int port) throws UnknownHostException, MPDConnectionException, URISyntaxException {
+    public Music(String key, String host, int port) {
         super(key);
 
         this.host = host;
         this.port = port;
 
-        MPD.Builder builder = new MPD.Builder();
-        builder.server(host);
-        builder.port(port);
-        mpd = builder.build();
+        try {
+            MPD.Builder builder = new MPD.Builder();
+            builder.server(host);
+            builder.port(port);
+            mpd = builder.build();
 
-        updateListener = new WSUpdateListener(host, port);
-        updateListener.tryConnect();
+            updateListener = new WSUpdateListener(host, port);
+            updateListener.tryConnect();
 
-        mpd.getMonitor().addConnectionChangeListener(this);
-        mpd.getMonitor().start();
+            mpd.getMonitor().addConnectionChangeListener(this);
+            mpd.getMonitor().start();
+        } catch (UnknownHostException | URISyntaxException e) {
+            Log.e(DEBUG, "Failed to connect", e);
+        }
     }
 
     @Override
@@ -296,7 +302,6 @@ public class Music extends BaseModule implements ConnectionChangeListener {
                 song = null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
             song = null;
         }
         if (song != null) {
@@ -350,7 +355,6 @@ public class Music extends BaseModule implements ConnectionChangeListener {
 
     @Override
     public void connectionChangeEventReceived(ConnectionChangeEvent connectionChangeEvent) {
-        System.out.println("Connection changed " + connectionChangeEvent.isConnected());
         dataChanged();
         if (connectionChangeEvent.isConnected()) {
             try {
@@ -361,7 +365,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
                     updateListener.connect();
                 } catch (URISyntaxException e1) {
                     // Should not happen
-                    e1.printStackTrace();
+                    Log.e(DEBUG, "Impossible error", e1);
                 }
             }
         }
@@ -458,6 +462,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
 
     private class WSUpdateListener extends WebSocketClient {
         private static final String URL_TEMPLATE = "ws://%s:%d/mopidy/ws";
+        private final String DEBUG = WSUpdateListener.class.getSimpleName();
         private final String host;
         private final int port;
         private long lastEvent = 0;
@@ -475,7 +480,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
 
         @Override
         public void onOpen(ServerHandshake handshakedata) {
-            System.out.println("Web socket connected");
+            Log.i(DEBUG, "Connected");
             heartbeatTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -490,7 +495,6 @@ public class Music extends BaseModule implements ConnectionChangeListener {
             if (!message.contains("jsonrpc")) {
                 if (!(message.equals("{\"event\": \"tracklist_changed\"}"))) {
                     if (System.currentTimeMillis() - lastEvent > 40) {
-                        System.out.println((System.currentTimeMillis() - lastEvent) + " - " + message);
                         lastEvent = System.currentTimeMillis();
                         dataChanged();
                     }
@@ -501,14 +505,14 @@ public class Music extends BaseModule implements ConnectionChangeListener {
 
         @Override
         public void onClose(int code, String reason, boolean remote) {
-            System.out.println(this.getClass().getSimpleName() + " onClose: " + code + " " + reason);
+            Log.e(DEBUG, "onClose: " + code + " " + reason);
             heartbeatTimer.cancel();
             dataChanged();
         }
 
         @Override
         public void onError(Exception ex) {
-            System.out.println(this.getClass().getSimpleName() + " onError: " + ex.getMessage());
+            Log.e(DEBUG, "onError", ex);
             dataChanged();
         }
 
@@ -531,7 +535,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
                         }
 
                     } catch (IOException | InterruptedException e) {
-                        System.out.println("Connection to Mopidy failed on" + host + " (" + e.getMessage() + ")");
+                        Log.d(DEBUG, "Connection to Mopidy failed on" + host + " (" + e.getMessage() + ")");
                     } finally {
                         if (response != null) {
                             response.body().close();

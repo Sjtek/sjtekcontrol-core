@@ -1,6 +1,7 @@
 package nl.sjtek.control.core;
 
 import com.sun.net.httpserver.HttpServer;
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.network.ApiHandler;
 import nl.sjtek.control.core.settings.SettingsManager;
 
@@ -12,23 +13,24 @@ public class SjtekControl {
     private ApiHandler apiHandler;
 
     public SjtekControl() {
-        System.out.println("Starting SjtekControl");
-        System.out.println("Loading settings:");
+        long start = System.currentTimeMillis();
         SettingsManager.getInstance().reload();
-        System.out.println("Starting SjtekAPI");
         this.apiHandler = ApiHandler.getInstance();
+        long end = System.currentTimeMillis();
+        Log.i("SjtekControl", "Loaded in " + (end - start) + "ms");
     }
 
     public static void main(String args[]) throws IOException {
+        Log.setLevel(Log.Level.DEBUG);
+        Log.setListener(new Log.PrintListener(false));
         new SjtekControl().start();
     }
 
     public void start() throws IOException {
-        System.out.print("Starting server... ");
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
         server.createContext(ApiHandler.CONTEXT, apiHandler);
         server.setExecutor(null);
-        System.out.println("on port 8000");
+        Log.i("SjtekControl", "Starting server on port 8000");
         server.start();
     }
 }
