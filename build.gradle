@@ -4,9 +4,10 @@ version '3.0'
 allprojects {
     repositories {
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
 }
 
 task wrapper(type: Wrapper) {
-        gradleVersion = '2.10'
+        gradleVersion = '3.4.1'
 }
