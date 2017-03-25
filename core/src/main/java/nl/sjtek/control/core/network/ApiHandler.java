@@ -47,7 +47,8 @@ public class ApiHandler implements HttpHandler {
         modules.put("time", new Time("time").init());
         modules.put("coffee", new Coffee("coffee").init());
         modules.put("screen", new Screen("screen").init());
-        modules.put("art", new Art("lights").init());
+        modules.put("art", new Art("art").init());
+        modules.put("motion", new Motion("motion").init());
 
         Bus.regsiter(this);
 
