@@ -299,6 +299,6 @@ public class Lights extends BaseModule {
     @Override
     public boolean isEnabled(String user) {
         boolean extra = SettingsManager.getInstance().getUser(user).isCheckExtraLight();
-        return states[1] || states[2] || (extra && states[3]) || (extra && states[4]) || states[5];
+        return states[1] || states[2] || (extra && states[3]) || (extra && states[4]);
     }
 }

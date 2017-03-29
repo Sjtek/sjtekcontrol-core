@@ -6,8 +6,11 @@ import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.data.ampq.events.LightEvent;
 import nl.sjtek.control.data.ampq.events.SensorEvent;
 import nl.sjtek.control.data.responses.Response;
+import nl.sjtek.control.data.settings.User;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -20,20 +23,35 @@ import java.util.concurrent.TimeUnit;
 public class Motion extends BaseModule {
 
     private static final int HOUR_DISABLE = 1;
-    private static final int HOUR_ENABLE = 9;
+    private static final int HOUR_ENABLE = 18;
     private final String DEBUG = MotionHandler.class.getSimpleName();
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(5);
     private final Map<Integer, MotionHandler> handlerMap = new HashMap<>();
+    private long timeDisabled = 0;
 
     public Motion(String key) {
         super(key);
-//        handlerMap.put(1, new MotionHandler(5, 2));
-//        handlerMap.put(2, new MotionHandler(7, 2));
+        handlerMap.put(1, new MotionHandler(5, 2));
+        handlerMap.put(2, new MotionHandler(7, 2));
         Bus.regsiter(this);
+    }
+
+    @Override
+    public void onStateChanged(boolean enabled, User user) {
+        if (enabled) {
+            handlerMap.forEach((integer, motionHandler) -> motionHandler.onMotion());
+        } else {
+            timeDisabled = System.currentTimeMillis();
+        }
     }
 
     @Subscribe
     public void onSensorEvent(SensorEvent event) {
+        if (System.currentTimeMillis() - timeDisabled < 10000) {
+            Log.d(DEBUG, "Motion disabled");
+            return;
+        }
+
         if (event.getType() == SensorEvent.Type.MOTION) {
             MotionHandler handler = handlerMap.get(event.getId());
             if (handler != null) handler.onMotion();
@@ -41,9 +59,12 @@ public class Motion extends BaseModule {
     }
 
     private boolean shouldTurnOn() {
-        LocalDateTime dateTime = LocalDateTime.now();
+        Instant now = Instant.now();
+        ZoneId zoneId = ZoneId.of("Europe/Amsterdam");
+        ZonedDateTime dateTime = ZonedDateTime.ofInstant(now, zoneId);
         int hour = dateTime.getHour();
-        return hour < HOUR_DISABLE && hour > HOUR_ENABLE;
+        Log.d(DEBUG, "Light allowed: hour:" + hour + " hour<HOUR_DISABLED:" + (hour < HOUR_DISABLE) + " hour>HOUR_ENABLE" + (hour > HOUR_ENABLE));
+        return hour < HOUR_DISABLE || hour > HOUR_ENABLE;
     }
 
     @Override
@@ -70,9 +91,12 @@ public class Motion extends BaseModule {
 
         public void onMotion() {
             if (shouldTurnOn()) {
+                Log.d(DEBUG, "Motion for light 1, light allowed");
                 if (future != null) future.cancel(false);
                 future = executor.schedule(this::turnOff, delay, TimeUnit.MINUTES);
                 if (!state) turnOn();
+            } else {
+                Log.d(DEBUG, "Motion for light 1, light not allowed");
             }
         }
 
