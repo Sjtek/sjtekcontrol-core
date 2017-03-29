@@ -37,7 +37,6 @@ public class Music extends BaseModule implements ConnectionChangeListener {
 
     private static final String DEBUG = Music.class.getSimpleName();
     private final String host;
-    private final int port;
     private MPD mpd = null;
     private WSUpdateListener updateListener;
     private MusicResponse musicResponse;
@@ -50,30 +49,28 @@ public class Music extends BaseModule implements ConnectionChangeListener {
      * @throws MPDConnectionException
      */
     public Music(String key) {
-        this(key, SettingsManager.getInstance().getMusic().getMpdHost(), SettingsManager.getInstance().getMusic().getMpdPort());
+        this(key, SettingsManager.getInstance().getMusic().getMpdHost());
     }
 
     /**
      * Connect to an MPD server with a hostname and port;
      *
      * @param host Hostname for the MPD server
-     * @param port Port for the MPD server
      * @throws UnknownHostException
      * @throws MPDConnectionException
      */
-    public Music(String key, String host, int port) {
+    public Music(String key, String host) {
         super(key);
 
         this.host = host;
-        this.port = port;
 
         try {
             MPD.Builder builder = new MPD.Builder();
             builder.server(host);
-            builder.port(port);
+            builder.port(6600);
             mpd = builder.build();
 
-            updateListener = new WSUpdateListener(host, port);
+            updateListener = new WSUpdateListener(host);
             updateListener.tryConnect();
 
             mpd.getMonitor().addConnectionChangeListener(this);
@@ -361,7 +358,7 @@ public class Music extends BaseModule implements ConnectionChangeListener {
                 updateListener.connect();
             } catch (IllegalStateException e) {
                 try {
-                    updateListener = new WSUpdateListener(host, port);
+                    updateListener = new WSUpdateListener(host);
                     updateListener.connect();
                 } catch (URISyntaxException e1) {
                     // Should not happen
@@ -464,14 +461,12 @@ public class Music extends BaseModule implements ConnectionChangeListener {
         private static final String URL_TEMPLATE = "ws://%s:%d/mopidy/ws";
         private final String DEBUG = WSUpdateListener.class.getSimpleName();
         private final String host;
-        private final int port;
         private long lastEvent = 0;
         private Timer heartbeatTimer = new Timer();
 
-        public WSUpdateListener(String host, int port) throws URISyntaxException {
+        public WSUpdateListener(String host) throws URISyntaxException {
             super(new URI(String.format(URL_TEMPLATE, host, 6680)));
             this.host = host;
-            this.port = port;
         }
 
         public void tryConnect() {
