@@ -219,6 +219,10 @@ public class Lights extends BaseModule {
         Bus.post(arguments.getLightEvent(6, false));
     }
 
+    public boolean getToggle6() {
+        return states[6];
+    }
+
     public void toggle7(Arguments arguments) {
         if (states[7]) {
             toggle7off(arguments);

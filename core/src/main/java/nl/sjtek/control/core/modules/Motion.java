@@ -3,6 +3,7 @@ package nl.sjtek.control.core.modules;
 import com.google.common.eventbus.Subscribe;
 import io.habets.javautils.Log;
 import nl.sjtek.control.core.events.Bus;
+import nl.sjtek.control.core.network.ApiHandler;
 import nl.sjtek.control.data.ampq.events.LightEvent;
 import nl.sjtek.control.data.ampq.events.SensorEvent;
 import nl.sjtek.control.data.responses.Response;
@@ -59,6 +60,9 @@ public class Motion extends BaseModule {
     }
 
     private boolean shouldTurnOn() {
+        Lights lights = ApiHandler.getInstance().getLights();
+        if (lights.getToggle1() || lights.getToggle2() || lights.getToggle6()) return false;
+
         Instant now = Instant.now();
         ZoneId zoneId = ZoneId.of("Europe/Amsterdam");
         ZonedDateTime dateTime = ZonedDateTime.ofInstant(now, zoneId);
