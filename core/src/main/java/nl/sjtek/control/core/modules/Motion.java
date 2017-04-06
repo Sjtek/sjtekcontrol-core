@@ -23,8 +23,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class Motion extends BaseModule {
 
-    private static final int HOUR_DISABLE = 1;
-    private static final int HOUR_ENABLE = 18;
     private final String DEBUG = MotionHandler.class.getSimpleName();
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(5);
     private final Map<Integer, MotionHandler> handlerMap = new HashMap<>();
@@ -61,14 +59,13 @@ public class Motion extends BaseModule {
 
     private boolean shouldTurnOn() {
         Lights lights = ApiHandler.getInstance().getLights();
-        if (lights.getToggle1() || lights.getToggle2() || lights.getToggle6()) return false;
+        if (lights.getToggle1() || lights.getToggle6()) return false;
 
         Instant now = Instant.now();
         ZoneId zoneId = ZoneId.of("Europe/Amsterdam");
         ZonedDateTime dateTime = ZonedDateTime.ofInstant(now, zoneId);
         int hour = dateTime.getHour();
-        Log.d(DEBUG, "Light allowed: hour:" + hour + " hour<HOUR_DISABLED:" + (hour < HOUR_DISABLE) + " hour>HOUR_ENABLE" + (hour > HOUR_ENABLE));
-        return hour < HOUR_DISABLE || hour > HOUR_ENABLE;
+        return hour >= 20 || hour <= 1 || hour == 6 || hour == 7;
     }
 
     @Override
