@@ -59,7 +59,7 @@ public class Motion extends BaseModule {
 
     private boolean shouldTurnOn() {
         Lights lights = ApiHandler.getInstance().getLights();
-        if (lights.getToggle1() || lights.getToggle6()) return false;
+        if (lights.getToggle1()) return false;
 
         Instant now = Instant.now();
         ZoneId zoneId = ZoneId.of("Europe/Amsterdam");
