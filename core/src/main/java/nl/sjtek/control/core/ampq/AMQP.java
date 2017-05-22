@@ -137,7 +137,13 @@ public class AMQP {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, com.rabbitmq.client.AMQP.BasicProperties properties, byte[] body) throws IOException {
             LightStateEvent event = LightStateEvent.parseMessage(new String(body));
-            if (event != null) Bus.post(event);
+            if (event != null) {
+                if (event.getId() < 0) {
+                    Log.e(AMQP.class.getSimpleName(), "Received light state for invalid light: " + event.getId());
+                } else {
+                    Bus.post(event);
+                }
+            }
         }
     }
 
