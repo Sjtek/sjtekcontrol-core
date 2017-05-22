@@ -17,7 +17,7 @@ public class TV extends BaseModule {
     // https://github.com/ypid/lgcommander
 
     private static final String LGCOMMANDER_PATH = "/usr/bin/lgcommander";
-    private static final String HOST = "10.10.0.3";
+    private static final String HOST = "10.10.0.20";
     private static final int PORT = 8080;
     private static final String KEY = "00000";
     private static final String PROTOCOL = "roap";
