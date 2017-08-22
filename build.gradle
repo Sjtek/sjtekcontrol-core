@@ -1,12 +1,19 @@
-group 'nl.sjtek.control'
-version '3.0'
+version '5.0-SNAPSHOT'
 
-allprojects {
+buildscript {
+    ext.kotlin_version = '1.1.4-2'
+
     repositories {
-        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
-task wrapper(type: Wrapper) {
-        gradleVersion = '2.10'
+allprojects {
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
 }
