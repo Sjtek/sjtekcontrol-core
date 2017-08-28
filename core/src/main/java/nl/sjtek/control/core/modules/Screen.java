@@ -142,8 +142,8 @@ public class Screen extends BaseModule {
                     Thread.sleep(500);
                 }
 
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (InterruptedException ignored) {
+
             }
             Bus.post(new LightEvent(3, 255, 150, 0));
         }

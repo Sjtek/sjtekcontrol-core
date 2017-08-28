@@ -2,12 +2,14 @@ package nl.sjtek.control.core.ampq;
 
 import com.google.common.eventbus.Subscribe;
 import com.rabbitmq.client.*;
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.events.DataChangedEvent;
 import nl.sjtek.control.core.network.ResponseCache;
 import nl.sjtek.control.data.actions.CustomAction;
 import nl.sjtek.control.data.ampq.events.LightEvent;
 import nl.sjtek.control.data.ampq.events.LightStateEvent;
+import nl.sjtek.control.data.ampq.events.SensorEvent;
 import nl.sjtek.control.data.ampq.events.TemperatureEvent;
 
 import java.io.IOException;
@@ -19,24 +21,26 @@ import java.util.concurrent.TimeoutException;
 public class AMQP {
 
     public static final String EXCHANGE_TEMPERATURE = "temperature";
+    private static final String DEBUG = AMQP.class.getSimpleName();
     private static final String EXCHANGE_UPDATES = "updates";
     private static final String EXCHANGE_ACTIONS = "actions";
     private static final String EXCHANGE_LIGHTS = "lights";
     private static final String EXCHANGE_LIGHTS_STATE = "lights_state";
+    private static final String EXCHANGE_TOPIC = "amq.topic";
+    private static final String EXCHANGE_SENSORS = "sensors";
     private Channel channelAction;
     private Channel channelUpdate;
     private Channel channelLights;
     private Connection connection;
     private Channel channelTemperature;
     private Channel channelLightsState;
+    private Channel channelSensors;
 
     public AMQP() {
         try {
             connect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
+        } catch (IOException | TimeoutException e) {
+            Log.e(DEBUG, "Connection error", e);
         }
         Bus.regsiter(this);
     }
@@ -44,11 +48,10 @@ public class AMQP {
     @Subscribe
     public void onUpdate(DataChangedEvent event) {
         if (!event.shouldPushToClients()) return;
-        System.out.println("Sending update");
         try {
             channelUpdate.basicPublish(EXCHANGE_UPDATES, "", null, ResponseCache.getInstance().toJson().getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(DEBUG, "Send error (" + event.getClass().getSimpleName() + ")" + e);
         }
     }
 
@@ -57,7 +60,7 @@ public class AMQP {
         try {
             channelLights.basicPublish(EXCHANGE_LIGHTS, "", null, lightEvent.toString().getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(DEBUG, "Send error (" + lightEvent.getClass().getSimpleName() + ")" + e);
         }
     }
 
@@ -69,44 +72,37 @@ public class AMQP {
         factory.setAutomaticRecoveryEnabled(true);
         connection = factory.newConnection();
 
-        channelUpdate = connection.createChannel();
-        channelUpdate.exchangeDeclare(EXCHANGE_UPDATES, "fanout");
+        channelUpdate = createExchange(EXCHANGE_UPDATES, BuiltinExchangeType.FANOUT);
+        channelLights = createExchange(EXCHANGE_LIGHTS, BuiltinExchangeType.FANOUT);
+        channelLightsState = createExchange(EXCHANGE_LIGHTS_STATE, BuiltinExchangeType.FANOUT);
+        channelAction = createExchange(EXCHANGE_ACTIONS, BuiltinExchangeType.FANOUT);
+        channelTemperature = createExchange(EXCHANGE_TEMPERATURE, BuiltinExchangeType.FANOUT);
+        channelSensors = createExchange(EXCHANGE_SENSORS, BuiltinExchangeType.FANOUT);
 
-        channelLights = connection.createChannel();
-        channelLights.exchangeDeclare(EXCHANGE_LIGHTS, "fanout");
-
-        channelAction = connection.createChannel();
-        channelAction.exchangeDeclare(EXCHANGE_ACTIONS, "fanout");
-        String updateQueueName = channelAction.queueDeclare().getQueue();
-        channelAction.queueBind(updateQueueName, EXCHANGE_ACTIONS, "");
-        channelAction.basicConsume(updateQueueName, true, new ActionConsumer(channelAction));
-
-        channelTemperature = connection.createChannel();
-        channelTemperature.exchangeDeclare(EXCHANGE_TEMPERATURE, "fanout");
-        String temperatureQueueName = channelTemperature.queueDeclare().getQueue();
-        channelTemperature.queueBind(temperatureQueueName, EXCHANGE_TEMPERATURE, "");
-        channelTemperature.basicConsume(temperatureQueueName, true, new TemperatureConsumer(channelTemperature));
-
-        channelLightsState = connection.createChannel();
-        channelLightsState.exchangeDeclare(EXCHANGE_LIGHTS_STATE, "fanout");
-        String lightsStateQueueName = channelLightsState.queueDeclare().getQueue();
-        channelLightsState.queueBind(lightsStateQueueName, EXCHANGE_LIGHTS_STATE, "");
-        channelLightsState.basicConsume(lightsStateQueueName, true, new LightStateConsumer(channelLightsState));
+        addConsumer(EXCHANGE_LIGHTS_STATE, new LightStateConsumer(channelLightsState));
+        addConsumer(EXCHANGE_TEMPERATURE, new TemperatureConsumer(channelTemperature));
+        addConsumer(EXCHANGE_ACTIONS, new ActionConsumer(channelAction));
+        addConsumer(EXCHANGE_SENSORS, new SensorsConsumer(channelSensors));
 
         Channel channelTopic = connection.createChannel();
-        channelTopic.exchangeDeclare("amq.topic", "topic", true);
-        channelTopic.exchangeBind("actions", "amq.topic", "actions");
+        channelTopic.exchangeDeclare(EXCHANGE_TOPIC, BuiltinExchangeType.TOPIC, true);
+        channelTopic.exchangeBind(EXCHANGE_ACTIONS, EXCHANGE_TOPIC, EXCHANGE_ACTIONS);
         channelTopic.close();
 
-        System.out.println("Connected to broker");
+        Log.i(DEBUG, "Connected to RabbitMQ");
     }
 
+    private Channel createExchange(String exchange, BuiltinExchangeType type) throws IOException {
+        Channel channel = connection.createChannel();
+        channel.exchangeDeclare(exchange, type);
+        return channel;
+    }
 
-    private void disconnect() throws IOException, TimeoutException {
-        channelUpdate.close();
-        channelAction.close();
-        channelLights.close();
-        connection.close();
+    private void addConsumer(String exchange, DefaultConsumer consumer) throws IOException {
+        Channel channel = consumer.getChannel();
+        String queueName = channel.queueDeclare().getQueue();
+        channel.queueBind(queueName, exchange, "");
+        channel.basicConsume(queueName, true, consumer);
     }
 
     private static class TemperatureConsumer extends DefaultConsumer {
@@ -141,7 +137,13 @@ public class AMQP {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, com.rabbitmq.client.AMQP.BasicProperties properties, byte[] body) throws IOException {
             LightStateEvent event = LightStateEvent.parseMessage(new String(body));
-            if (event != null) Bus.post(event);
+            if (event != null) {
+                if (event.getId() < 0) {
+                    Log.e(AMQP.class.getSimpleName(), "Received light state for invalid light: " + event.getId());
+                } else {
+                    Bus.post(event);
+                }
+            }
         }
     }
 
@@ -160,9 +162,19 @@ public class AMQP {
         public void handleDelivery(String consumerTag, Envelope envelope, com.rabbitmq.client.AMQP.BasicProperties properties, byte[] body) throws IOException {
             String path = new String(body);
             if (path.equals("ping")) return;
-            System.out.println("Received AMPQ action: " + path);
             Bus.post(new CustomAction(path));
         }
     }
 
+    private class SensorsConsumer extends DefaultConsumer {
+        public SensorsConsumer(Channel channelSensors) {
+            super(channelSensors);
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, com.rabbitmq.client.AMQP.BasicProperties properties, byte[] body) throws IOException {
+            SensorEvent event = SensorEvent.parseMessage(new String(body));
+            if (event != null) Bus.post(event);
+        }
+    }
 }

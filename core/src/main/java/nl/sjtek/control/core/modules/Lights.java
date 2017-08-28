@@ -7,6 +7,7 @@ import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.data.ampq.events.LightStateEvent;
 import nl.sjtek.control.data.responses.LightsResponse;
 import nl.sjtek.control.data.responses.Response;
+import nl.sjtek.control.data.settings.User;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,13 +41,35 @@ public class Lights extends BaseModule {
     public Lights(String key) {
         super(key);
         executor = new ScheduledThreadPoolExecutor(2);
-        Bus.regsiter(this);
     }
 
     @Subscribe
     public void onLightStateUpdate(LightStateEvent event) {
         states[event.getId()] = event.isEnabled();
         delayedUpdate();
+    }
+
+    @Override
+    public void onStateChanged(boolean enabled, User user) {
+        Arguments arguments = new Arguments();
+        if (enabled) {
+            toggle1on(arguments);
+            toggle2on(arguments);
+            toggle5on(arguments);
+            if (user.isCheckExtraLight()) {
+                toggle3on(arguments);
+                toggle4on(arguments);
+            }
+        } else {
+            toggle1off(arguments);
+            toggle2off(arguments);
+            toggle5off(arguments);
+            toggle7off(arguments);
+            if (user.isCheckExtraLight()) {
+                toggle3off(arguments);
+                toggle4off(arguments);
+            }
+        }
     }
 
     private void delayedUpdate() {
@@ -196,6 +219,10 @@ public class Lights extends BaseModule {
         Bus.post(arguments.getLightEvent(6, false));
     }
 
+    public boolean getToggle6() {
+        return states[6];
+    }
+
     public void toggle7(Arguments arguments) {
         if (states[7]) {
             toggle7off(arguments);
@@ -236,7 +263,6 @@ public class Lights extends BaseModule {
             URL url = new URL(urlString + action + "?" + argument);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            System.out.println("GET - " + url);
             connection.connect();
             int responseCode = connection.getResponseCode();
             if (responseCode == 200) {
@@ -277,6 +303,6 @@ public class Lights extends BaseModule {
     @Override
     public boolean isEnabled(String user) {
         boolean extra = SettingsManager.getInstance().getUser(user).isCheckExtraLight();
-        return states[1] || states[2] || (extra && states[3]) || (extra && states[4]) || states[4] || states[5];
+        return states[1] || states[2] || (extra && states[3]) || (extra && states[4]);
     }
 }

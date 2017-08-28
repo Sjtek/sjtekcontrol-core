@@ -12,9 +12,9 @@ node {
     }
 
     stage('Test') {
-    	sh 'rm -vf data/build/test-results/*xml' 
+    	sh 'rm -vf data/build/test-results/test/*xml'
         sh './gradlew :data:test'
-    	junit 'data/build/test-results/*.xml'
+    	junit 'data/build/test-results/test/*.xml'
     }
 
     stage('Javadocs') {

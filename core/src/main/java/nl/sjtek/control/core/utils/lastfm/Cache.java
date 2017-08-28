@@ -2,6 +2,7 @@ package nl.sjtek.control.core.utils.lastfm;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.core.utils.FileUtils;
 
@@ -13,6 +14,8 @@ import java.util.Map;
  * Created by wouter on 21-12-15.
  */
 public class Cache {
+
+    private static final String DEBUG = Cache.class.getSimpleName();
 
     private static final String TAG = Cache.class.getCanonicalName();
 
@@ -34,7 +37,7 @@ public class Cache {
                 artistHolder = gson.fromJson(artistString, ArtistHolder.class);
                 albumHolder = gson.fromJson(albumString, AlbumHolder.class);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(DEBUG, "Reload error", e);
             } finally {
 
                 if (artistHolder == null) {
@@ -61,7 +64,7 @@ public class Cache {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             FileUtils.writeFile(SettingsManager.getInstance().getLastFM().getCachePathArtists(), gson.toJson(artistHolder));
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(DEBUG, "Save artists error", e);
         }
     }
 
@@ -70,7 +73,7 @@ public class Cache {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             FileUtils.writeFile(SettingsManager.getInstance().getLastFM().getCachePathAlbum(), gson.toJson(albumHolder));
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(DEBUG, "Save albums error", e);
         }
     }
 

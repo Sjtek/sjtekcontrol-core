@@ -1,6 +1,7 @@
 package nl.sjtek.control.core.settings;
 
 import com.google.gson.Gson;
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.utils.DummyData;
 import nl.sjtek.control.core.utils.FileUtils;
 import nl.sjtek.control.data.settings.*;
@@ -15,8 +16,10 @@ import java.util.Map;
 public class SettingsManager {
 
     private static final String DEFAULT_PATH = "/var/sjtekcontrol/config.json";
+    private static final String DEBUG = SettingsManager.class.getSimpleName();
     private static SettingsManager instance = DummyData.getSettingsManager();
 
+    private final LoggingSettings logging;
     private final MusicSettings music;
     private final TVSettings tv;
     private final QuotesSettings quotes;
@@ -31,7 +34,8 @@ public class SettingsManager {
                            LastFMSettings lastFM,
                            Map<String, User> users,
                            ScreenSettings screen,
-                           WeatherSettings weatherSettings) {
+                           WeatherSettings weatherSettings,
+                           LoggingSettings logging) {
         this.music = music;
         this.tv = tv;
         this.quotes = quotes;
@@ -39,6 +43,7 @@ public class SettingsManager {
         this.users = users;
         this.screen = screen;
         this.weather = weatherSettings;
+        this.logging = logging;
     }
 
     public static SettingsManager getInstance() {
@@ -54,32 +59,32 @@ public class SettingsManager {
     }
 
     public void reload(String path) {
-        System.out.println();
-        System.out.println("Reloading settings...");
+        Log.i(SettingsManager.class.getSimpleName(), "");
         SettingsManager newSettingsManager;
         try {
             String jsonString = FileUtils.readFile(path);
             if (!jsonString.isEmpty()) {
                 newSettingsManager = new Gson().fromJson(jsonString, this.getClass());
-                System.out.println("Reload completed.");
+                Log.i(DEBUG, "Settings reloaded (" + path + ")");
             } else {
-                System.out.println("Reload error. Data is empty.");
                 throw new IOException("Data empty");
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Reload error. File not found");
+            Log.e(DEBUG, "Could not load settings", e);
             try {
                 FileUtils.writeFile(path, dump());
             } catch (IOException ignored) {
             }
             newSettingsManager = DummyData.getSettingsManager();
         } catch (IOException e) {
-            System.out.println("Reload error. IOException");
-            e.printStackTrace();
+            Log.e(DEBUG, "Reload error", e);
             newSettingsManager = DummyData.getSettingsManager();
         }
 
         instance = newSettingsManager;
+        Log.setListener(new Log.PrintListener(instance.getLoggingSettings().isPrintStackTrace()));
+        Log.setLevel(Log.Level.valueOf(instance.getLoggingSettings().getLevel()));
+        Log.i(DEBUG, "Log level " + instance.getLoggingSettings().getLevel() + " PrintStackTrace " + instance.getLoggingSettings().isPrintStackTrace());
     }
 
     public MusicSettings getMusic() {
@@ -116,6 +121,10 @@ public class SettingsManager {
 
     public WeatherSettings getWeather() {
         return weather;
+    }
+
+    public LoggingSettings getLoggingSettings() {
+        return logging;
     }
 
     @Override

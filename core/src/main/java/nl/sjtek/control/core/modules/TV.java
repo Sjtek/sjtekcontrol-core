@@ -1,11 +1,13 @@
 package nl.sjtek.control.core.modules;
 
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.events.AudioEvent;
 import nl.sjtek.control.core.events.Bus;
 import nl.sjtek.control.core.network.Arguments;
 import nl.sjtek.control.core.utils.Executor;
 import nl.sjtek.control.data.responses.Response;
 import nl.sjtek.control.data.responses.TVResponse;
+import nl.sjtek.control.data.settings.User;
 
 import java.io.IOException;
 
@@ -15,14 +17,20 @@ public class TV extends BaseModule {
     // https://github.com/ypid/lgcommander
 
     private static final String LGCOMMANDER_PATH = "/usr/bin/lgcommander";
-    private static final String HOST = "10.10.0.3";
+    private static final String HOST = "10.10.0.20";
     private static final int PORT = 8080;
     private static final String KEY = "00000";
     private static final String PROTOCOL = "roap";
+    private static final String DEBUG = TV.class.getSimpleName();
 
     public TV(String key) {
         super(key);
         new PingThread().start();
+    }
+
+    @Override
+    public void onStateChanged(boolean enabled, User user) {
+        if (!enabled) off(new Arguments());
     }
 
     private String[] getArgumentsForCommand(String command) {
@@ -82,7 +90,7 @@ public class TV extends BaseModule {
                         }
                     }
                 } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(DEBUG, "Error while pinging", e);
                 }
             }
         }
@@ -102,7 +110,7 @@ public class TV extends BaseModule {
             try {
                 Executor.execute(command);
             } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
+                Log.e(DEBUG, "Failed to execute command", e);
             }
         }
     }

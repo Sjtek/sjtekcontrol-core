@@ -1,7 +1,7 @@
 package nl.sjtek.control.core.modules;
 
 import com.google.common.eventbus.Subscribe;
-import nl.sjtek.control.core.events.Bus;
+import io.habets.javautils.Log;
 import nl.sjtek.control.core.settings.SettingsManager;
 import nl.sjtek.control.data.ampq.events.TemperatureEvent;
 import nl.sjtek.control.data.responses.Response;
@@ -24,6 +24,7 @@ public class Temperature extends BaseModule {
     private static final String WEATHER_URL_INSIDE = "http://10.10.0.2/cgi-bin/temp";
     private static final String LOG_PATH = "/var/sjtekcontrol/log.csv";
     private static final int ID_INSIDE = 1;
+    private static final String DEBUG = Temperature.class.getSimpleName();
 
     private final OkHttpClient httpClient = new OkHttpClient();
 
@@ -36,7 +37,6 @@ public class Temperature extends BaseModule {
 
     public Temperature(String key) {
         super(key);
-        Bus.regsiter(this);
         Timer updateTimer = new Timer();
         updateTimer.scheduleAtFixedRate(new UpdateTask(), 0, UPDATE_DELAY);
     }
@@ -85,10 +85,9 @@ public class Temperature extends BaseModule {
                 errorsOutside = 0;
                 return;
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(DEBUG, "Temperature parse error", e);
             }
         }
-        System.out.println("Temperature outside error: " + response);
         errorsOutside++;
         if (errorsOutside > 1) {
             tempOutside = -100;
@@ -112,7 +111,6 @@ public class Temperature extends BaseModule {
         okhttp3.Response response = null;
         try {
             response = httpClient.newCall(new Request.Builder().url(stringUrl).build()).execute();
-            System.out.println("" + response.code() + " - downloaded " + stringUrl);
             if (response.code() == 200) {
                 ResponseBody body = response.body();
                 return body.string();
@@ -120,6 +118,7 @@ public class Temperature extends BaseModule {
                 return "";
             }
         } catch (IOException e) {
+            Log.e(DEBUG, "Download error", e);
             return "";
         } finally {
             if (response != null) response.body().close();
@@ -140,7 +139,7 @@ public class Temperature extends BaseModule {
                 builder.append(String.format(rowTemplate, row[0], row[1].replace(',', '.'), row[2].replace(',', '.')));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(DEBUG, "Failed to get log data", e);
         }
 
         builder.append("]");
@@ -163,7 +162,7 @@ public class Temperature extends BaseModule {
                         nowAsISO, tempInside, tempOutside);
                 writer.write(data);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(DEBUG, "Failed to write log data", e);
             }
             dataChanged();
         }
