@@ -17,16 +17,6 @@ import spark.Spark.path
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.MutableMap
-import kotlin.collections.associate
-import kotlin.collections.filter
-import kotlin.collections.find
-import kotlin.collections.first
-import kotlin.collections.forEach
-import kotlin.collections.mapOf
-import kotlin.collections.mutableMapOf
 import kotlin.collections.set
 
 
@@ -132,7 +122,7 @@ class Lights(key: String) : Module(key) {
             val id = input.toInt()
             lamps[id]
         } catch (e: NumberFormatException) {
-            lamps.values.first {
+            lamps.values.find {
                 it.name == input
             }
         }
