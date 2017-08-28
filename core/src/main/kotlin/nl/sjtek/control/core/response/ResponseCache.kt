@@ -19,6 +19,7 @@ object ResponseCache {
     private val responses: MutableMap<String, Response> = mutableMapOf()
     var json: String = "{}"
         private set
+    private var previousJson: String = "{}"
     private var emitter: FlowableEmitter<Module>? = null
 
     init {
@@ -26,9 +27,14 @@ object ResponseCache {
             emitter = e
         }, BackpressureStrategy.LATEST)
                 .debounce(1, TimeUnit.SECONDS)
-                .subscribe {
-                    logger.info("Broadcasting update")
-                    Bus.post(BroadcastEvent(json))
+                .subscribe { module ->
+                    if (json != previousJson) {
+                        previousJson = json
+                        logger.info("Broadcasting update (${module.key})")
+                        Bus.post(BroadcastEvent(json))
+                    } else {
+                        logger.info("Not broadcasting, not updated (${module.key}")
+                    }
                 }
     }
 
