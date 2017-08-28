@@ -13,6 +13,7 @@ import nl.sjtek.control.core.events.AudioEvent
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.NightModeEvent
 import nl.sjtek.control.core.events.ToggleEvent
+import nl.sjtek.control.core.get
 import nl.sjtek.control.core.net.MopidyWebSocket
 import nl.sjtek.control.core.response.ResponseCache
 import nl.sjtek.control.core.settings.SettingsManager
@@ -22,9 +23,7 @@ import nl.sjtek.control.core.settings.getDefaultPlaylist
 import nl.sjtek.control.data.response.Music
 import nl.sjtek.control.data.response.Response
 import org.slf4j.LoggerFactory
-import spark.Spark.get
 import spark.Spark.path
-import spark.kotlin.get
 import java.lang.Exception
 
 class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener, EventListener {
@@ -47,14 +46,14 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
 
     override fun initSpark() {
         path("/music") {
-            get("/noSatisfaction") {}
-            get("/play") { mopidy.play() }
-            get("/pause") { mopidy.pause() }
-            get("/toggle") { mopidy.toggle() }
-            get("/next") { mopidy.next() }
-            get("/previous") { mopidy.previous() }
-            get("/clear") { mopidy.clear() }
-            get("/shuffle") { mopidy.shuffle() }
+            get("/noSatisfaction") { _, _ -> }
+            get("/play") { _, _ -> mopidy.play() }
+            get("/pause") { _, _ -> mopidy.pause() }
+            get("/toggle") { _, _ -> mopidy.toggle() }
+            get("/next") { _, _ -> mopidy.next() }
+            get("/previous") { _, _ -> mopidy.previous() }
+            get("/clear") { _, _ -> mopidy.clear() }
+            get("/shuffle") { _, _ -> mopidy.shuffle() }
             get("/start", this::startMusic)
             get("/volume", this::volume)
         }

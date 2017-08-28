@@ -2,9 +2,9 @@ package nl.sjtek.control.core.modules
 
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.SwitchEvent
+import nl.sjtek.control.core.get
 import nl.sjtek.control.data.response.Coffee
 import nl.sjtek.control.data.response.Response
-import spark.Spark.get
 import spark.Spark.path
 import java.util.*
 import kotlin.concurrent.schedule

@@ -38,6 +38,12 @@ object ResponseCache {
                 }
     }
 
+    fun getKeys(keys: List<String>): String {
+        val result = responses.filter { it.key in keys }
+        return gson.toJson(result)
+    }
+
+    @Synchronized
     fun post(module: Module, broadcast: Boolean = false) {
         responses.put(module.key, module.response)
         json = gson.toJson(responses)

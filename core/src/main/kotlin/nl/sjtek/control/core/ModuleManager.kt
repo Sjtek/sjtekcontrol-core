@@ -16,6 +16,7 @@ object ModuleManager {
     private val settings = Settings()
     private val logger = LoggerFactory.getLogger(javaClass)
     private val modules: Map<String, Module> = mapOf(
+            "base" to Base("base"),
             "lights" to Lights("lights"),
             "nightmode" to NightMode("nightmode"),
             "tv" to TV("tv"),
@@ -39,9 +40,10 @@ object ModuleManager {
                     it.value.initSpark()
                 }
             }
-            after("/api/*") { ->
-                response.header("Content-Type", "application/json")
-                response.body(ResponseCache.json)
+            after {
+                if (response.body() == null) {
+                    logger.warn("Empty body")
+                }
             }
         }
     }

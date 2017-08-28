@@ -5,16 +5,29 @@ import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.MotionSensorEvent
 import nl.sjtek.control.core.events.SwitchEvent
 import nl.sjtek.control.core.events.SwitchStateEvent
+import nl.sjtek.control.core.get
 import nl.sjtek.control.core.response.ResponseCache
 import nl.sjtek.control.core.settings.User
 import nl.sjtek.control.core.settings.UserManager
 import nl.sjtek.control.data.response.Lights
 import nl.sjtek.control.data.response.Response
 import spark.QueryParamsMap
-import spark.Spark.*
+import spark.Spark.halt
+import spark.Spark.path
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.MutableMap
+import kotlin.collections.associate
+import kotlin.collections.filter
+import kotlin.collections.find
+import kotlin.collections.first
+import kotlin.collections.forEach
+import kotlin.collections.mapOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.set
 
 
 class Lights(key: String) : Module(key) {
