@@ -10,7 +10,7 @@ import io.habets.mopidy.base.net.events.TrackPlaybackStateEvent
 import io.habets.mopidy.base.net.events.VolumeChangedEvent
 import nl.sjtek.control.core.net.MopidyWebSocket
 import nl.sjtek.control.core.response.ResponseCache
-import nl.sjtek.control.core.settings.Settings
+import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.core.settings.User
 import nl.sjtek.control.core.settings.UserManager
 import nl.sjtek.control.core.settings.getDefaultPlaylist
@@ -22,11 +22,11 @@ import spark.Spark.path
 import spark.kotlin.get
 import java.lang.Exception
 
-class Music(key: String, settings: Settings) : Module(key, settings), ConnectionChangedListener, ErrorListener, EventListener {
+class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener, EventListener {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val defaultVolume = settings.music.volume
-    private val mopidy: Mopidy = Mopidy(MopidyWebSocket(settings.music.url))
+    private val defaultVolume = SettingsManager.settings.music.volume
+    private val mopidy: Mopidy = Mopidy(MopidyWebSocket(SettingsManager.settings.music.url))
     override val response: Response
         get() = mopidy.toResponse()
 
@@ -110,6 +110,7 @@ class Music(key: String, settings: Settings) : Module(key, settings), Connection
     }
 
     private fun Mopidy.toResponse(): Music = Music(
+            key,
             this.isConnected,
             this.playbackState.convert(),
             this.currentTrack?.track?.name ?: "",

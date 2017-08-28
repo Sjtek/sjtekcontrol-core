@@ -5,14 +5,13 @@ import nl.sjtek.control.core.events.AudioEvent
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.SwitchEvent
 import nl.sjtek.control.core.response.ResponseCache
-import nl.sjtek.control.core.settings.Settings
 import nl.sjtek.control.data.response.Audio
 import nl.sjtek.control.data.response.Response
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.concurrent.schedule
 
-class Audio(key: String, settings: Settings) : Module(key, settings) {
+class Audio(key: String) : Module(key) {
 
     private val SWITCH_ID = 11
 
@@ -25,7 +24,7 @@ class Audio(key: String, settings: Settings) : Module(key, settings) {
             return false
         }
     override val response: Response
-        get() = Audio(enabled, modules)
+        get() = Audio(key, enabled, modules)
 
     init {
         Bus.subscribe(this)

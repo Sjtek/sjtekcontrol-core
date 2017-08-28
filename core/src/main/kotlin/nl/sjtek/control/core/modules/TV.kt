@@ -4,13 +4,13 @@ import nl.sjtek.control.core.Executor
 import nl.sjtek.control.core.events.AudioEvent
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.response.ResponseCache
-import nl.sjtek.control.core.settings.Settings
+import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.data.response.Response
 import nl.sjtek.control.data.response.TV
 import org.slf4j.LoggerFactory
 import java.io.IOException
 
-class TV(key: String, settings: Settings) : Module(key, settings) {
+class TV(key: String) : Module(key) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private var enabled: Boolean = false
         set(value) {
@@ -20,10 +20,10 @@ class TV(key: String, settings: Settings) : Module(key, settings) {
             ResponseCache.post(this, true)
         }
     override val response: Response
-        get() = TV(enabled)
+        get() = TV(key, enabled)
 
     init {
-        PingThread(settings.tv.ip).start()
+        PingThread(SettingsManager.settings.tv.ip).start()
     }
 
     override fun initSpark() {

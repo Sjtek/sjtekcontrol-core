@@ -16,12 +16,12 @@ object ModuleManager {
     private val settings = Settings()
     private val logger = LoggerFactory.getLogger(javaClass)
     private val modules: Map<String, Module> = mapOf(
-            "lights" to Lights("lights", settings),
-            "nightmode" to NightMode("nightmode", settings),
-            "tv" to TV("tv", settings),
-            "audio" to Audio("audio", settings),
-            "coffee" to Coffee("coffee", settings),
-            "music" to Music("music", settings)
+            "lights" to Lights("lights"),
+            "nightmode" to NightMode("nightmode"),
+            "tv" to TV("tv"),
+            "audio" to Audio("audio"),
+            "coffee" to Coffee("coffee"),
+            "music" to Music("music")
     )
 
     fun init() {

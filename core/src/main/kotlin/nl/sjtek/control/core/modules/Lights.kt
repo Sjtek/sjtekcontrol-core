@@ -6,7 +6,6 @@ import nl.sjtek.control.core.events.MotionSensorEvent
 import nl.sjtek.control.core.events.SwitchEvent
 import nl.sjtek.control.core.events.SwitchStateEvent
 import nl.sjtek.control.core.response.ResponseCache
-import nl.sjtek.control.core.settings.Settings
 import nl.sjtek.control.core.settings.User
 import nl.sjtek.control.core.settings.UserManager
 import nl.sjtek.control.data.response.Lights
@@ -18,7 +17,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 
-class Lights(key: String, settings: Settings) : Module(key, settings) {
+class Lights(key: String) : Module(key) {
     private val executor: ScheduledThreadPoolExecutor = ScheduledThreadPoolExecutor(1)
     private val lamps: Map<Int, Lamp> = mapOf(
             1 to Lamp("livingroom", 1, true, "livingroom"),
@@ -31,7 +30,7 @@ class Lights(key: String, settings: Settings) : Module(key, settings) {
             8 to Lamp("tijns room", 6, true, "tijn", owner = UserManager.get("tijn")))
     private val schedule: MutableMap<String, ScheduledFuture<*>> = mutableMapOf()
     override val response: Response
-        get() = Lights(lamps.entries.associate { e -> Pair(e.key, e.value.state) })
+        get() = Lights(key, lamps.entries.associate { e -> Pair(e.key, e.value.state) })
 
     init {
         Bus.subscribe(this)

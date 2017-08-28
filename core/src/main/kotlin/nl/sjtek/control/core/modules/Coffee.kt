@@ -2,7 +2,6 @@ package nl.sjtek.control.core.modules
 
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.SwitchEvent
-import nl.sjtek.control.core.settings.Settings
 import nl.sjtek.control.data.response.Coffee
 import nl.sjtek.control.data.response.Response
 import spark.Spark.get
@@ -10,13 +9,13 @@ import spark.Spark.path
 import java.util.*
 import kotlin.concurrent.schedule
 
-class Coffee(key: String, settings: Settings) : Module(key, settings) {
+class Coffee(key: String) : Module(key) {
     private val TIMEOUT: Long = 600000
     private val enabled: Boolean
         get() = System.currentTimeMillis() - lastTimeEnabled < TIMEOUT
     private var lastTimeEnabled: Long = 0
     override val response: Response
-        get() = Coffee(enabled, lastTimeEnabled)
+        get() = Coffee(key, enabled, lastTimeEnabled)
 
     override fun initSpark() {
         path("/coffee") {

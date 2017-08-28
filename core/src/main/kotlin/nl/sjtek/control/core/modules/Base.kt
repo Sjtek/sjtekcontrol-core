@@ -3,7 +3,6 @@ package nl.sjtek.control.core.modules
 import nl.sjtek.control.core.ModuleManager
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.ToggleEvent
-import nl.sjtek.control.core.settings.Settings
 import nl.sjtek.control.core.settings.UserManager
 import spark.Request
 import spark.Response
@@ -11,10 +10,10 @@ import spark.Spark.get
 import spark.kotlin.get
 import nl.sjtek.control.data.response.Base as BaseResponse
 
-class Base(key: String, settings: Settings) : Module(key, settings) {
+class Base(key: String) : Module(key) {
 
     override val response: BaseResponse
-        get() = BaseResponse(true)
+        get() = BaseResponse(key)
 
     override fun initSpark() {
         get("info") {}
