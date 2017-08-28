@@ -2,6 +2,7 @@ package nl.sjtek.control.core.modules
 
 import net.engio.mbassy.listener.Handler
 import nl.sjtek.control.core.events.Bus
+import nl.sjtek.control.core.events.MotionSensorEvent
 import nl.sjtek.control.core.events.SwitchEvent
 import nl.sjtek.control.core.events.SwitchStateEvent
 import nl.sjtek.control.core.response.ResponseCache
@@ -12,25 +13,27 @@ import nl.sjtek.control.data.response.Lights
 import nl.sjtek.control.data.response.Response
 import spark.QueryParamsMap
 import spark.Spark.*
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 
 class Lights(key: String, settings: Settings) : Module(key, settings) {
-    private val lamps: Map<Int, Lamp>
+    private val executor: ScheduledThreadPoolExecutor = ScheduledThreadPoolExecutor(1)
+    private val lamps: Map<Int, Lamp> = mapOf(
+            1 to Lamp("livingroom", 1, true, "livingroom"),
+            2 to Lamp("couch", 1, false, "livingroom"),
+            3 to Lamp("kitchen", 3, false, "livingroom"),
+            4 to Lamp("hallway", 5, true, "hallway", sensorId = 1),
+            5 to Lamp("stairs", 7, true, "stairs", sensorId = 2),
+            6 to Lamp("wouters desk light", 4, true, "wouter", owner = UserManager.get("wouter")),
+            7 to Lamp("wouters led strip", 3, true, "wouter", owner = UserManager.get("wouter")),
+            8 to Lamp("tijns room", 6, true, "tijn", owner = UserManager.get("tijn")))
+    private val schedule: MutableMap<String, ScheduledFuture<*>> = mutableMapOf()
     override val response: Response
         get() = Lights(lamps.entries.associate { e -> Pair(e.key, e.value.state) })
 
     init {
-        lamps = mapOf(
-                1 to Lamp("livingroom", 1, true, "livingroom"),
-                2 to Lamp("couch", 1, false, "livingroom"),
-                3 to Lamp("kitchen", 3, false, "livingroom"),
-                4 to Lamp("hallway", 5, true, "hallway"),
-                5 to Lamp("stairs", 7, true, "stairs"),
-                6 to Lamp("wouters desk light", 4, true, "wouter", owner = UserManager.get("wouter")),
-                7 to Lamp("wouters led strip", 3, true, "wouter"),
-                8 to Lamp("tijns room", 6, true, "tijn", owner = UserManager.get("tijn"))
-        )
-
         Bus.subscribe(this)
     }
 
@@ -52,6 +55,11 @@ class Lights(key: String, settings: Settings) : Module(key, settings) {
         val lamp = lamps.values.find { it.id == event.id } ?: return
         lamp.state = event.state
         ResponseCache.post(this, true)
+    }
+
+    fun onSensorEvent(event: MotionSensorEvent) {
+        val lamps = lamps.values.filter { it.sensorId == event.id }
+
     }
 
     override fun isEnabled(user: User?): Boolean {
@@ -134,7 +142,7 @@ class Lights(key: String, settings: Settings) : Module(key, settings) {
         }
     }
 
-    private data class Lamp(val name: String, val id: Int, val rgb: Boolean, val room: String, var state: Boolean = false, val owner: User? = null) {
+    private data class Lamp(val name: String, val id: Int, val rgb: Boolean, val room: String, var state: Boolean = false, val sensorId: Int = -1, val owner: User? = null) {
 
         fun turnOn(color: Color) = turnOn(color.r, color.g, color.b)
         fun turnOn(red: Int = -1, green: Int = -1, blue: Int = -1) {
@@ -158,5 +166,13 @@ class Lights(key: String, settings: Settings) : Module(key, settings) {
             if (it.state) isOn = true
         }
         if (isOn) this.turnOff() else turnOn(color)
+    }
+
+    private fun List<Lamp>.motion() {
+        this.forEach {
+            schedule[it.name]?.cancel(false)
+            schedule[it.name] = executor.schedule(it::turnOff, 10, TimeUnit.MINUTES)
+            it.turnOn()
+        }
     }
 }
