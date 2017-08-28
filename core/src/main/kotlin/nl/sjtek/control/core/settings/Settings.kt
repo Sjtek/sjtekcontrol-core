@@ -20,5 +20,6 @@ data class Settings(
             val password: String = "yolo")
 
     data class Music(
-            val url: String = "ws://127.0.0.1:6680/mopidy/ws")
+            val url: String = "ws://127.0.0.1:6680/mopidy/ws",
+            val volume: Int = 5)
 }

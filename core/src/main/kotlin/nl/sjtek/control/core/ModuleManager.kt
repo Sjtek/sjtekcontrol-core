@@ -20,7 +20,8 @@ object ModuleManager {
             "nightmode" to NightMode("nightmode", settings),
             "tv" to TV("tv", settings),
             "audio" to Audio("audio", settings),
-            "coffee" to Coffee("coffee", settings)
+            "coffee" to Coffee("coffee", settings),
+            "music" to Music("music", settings)
     )
 
     fun init() {

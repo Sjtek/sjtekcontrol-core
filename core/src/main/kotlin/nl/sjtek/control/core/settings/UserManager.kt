@@ -9,7 +9,11 @@ object UserManager {
             User("ilja", "Ilja", "Oosterbaan")
     )
 
-    fun get(name: String?): User? = users.find { it.firstName == name }
+    fun get(name: String?): User? {
+        if (name == null) return null
+        return users.find { it.firstName == name }
+    }
+
     fun get(request: spark.Request): User? {
         val userName = request.queryParams("user")
         return get(userName)
