@@ -8,6 +8,11 @@ import io.habets.mopidy.base.net.events.EventListener
 import io.habets.mopidy.base.net.events.PlaybackStateEvent
 import io.habets.mopidy.base.net.events.TrackPlaybackStateEvent
 import io.habets.mopidy.base.net.events.VolumeChangedEvent
+import net.engio.mbassy.listener.Handler
+import nl.sjtek.control.core.events.AudioEvent
+import nl.sjtek.control.core.events.Bus
+import nl.sjtek.control.core.events.NightModeEvent
+import nl.sjtek.control.core.events.ToggleEvent
 import nl.sjtek.control.core.net.MopidyWebSocket
 import nl.sjtek.control.core.response.ResponseCache
 import nl.sjtek.control.core.settings.SettingsManager
@@ -35,6 +40,7 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
         mopidy.addErrorListener(this)
         mopidy.addEventListener(this)
         mopidy.connect()
+        Bus.subscribe(this)
     }
 
     override fun isEnabled(user: User?): Boolean = mopidy.playbackState == PlaybackState.PLAYING
@@ -53,6 +59,13 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
             get("/volume", this::volume)
         }
     }
+
+    @Handler
+    fun onNightMode(event: NightModeEvent) = if (event.enabled) mopidy.pause() else Unit
+
+    @Handler
+    fun onToggle(event: ToggleEvent) = if (!event.enabled) mopidy.pause() else Unit
+
 
     fun startMusic(req: spark.Request, res: spark.Response) {
         val args = req.queryMap()
@@ -92,6 +105,7 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
 
     override fun onPlaybackState(event: PlaybackStateEvent) {
         ResponseCache.post(this, true)
+        sendAudioEvent()
     }
 
     override fun onError(e: Exception) {
@@ -102,11 +116,21 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
     override fun onConnected() {
         logger.info("Mopidy connected")
         ResponseCache.post(this, true)
+        sendAudioEvent()
     }
 
     override fun onDisconnected() {
         logger.info("Mopidy disconnected")
         ResponseCache.post(this, true)
+        sendAudioEvent()
+    }
+
+    private fun sendAudioEvent() {
+        when (mopidy.playbackState) {
+            PlaybackState.PLAYING -> Bus.post(AudioEvent(key, true))
+            PlaybackState.PAUSED, PlaybackState.STOPPED -> Bus.post(AudioEvent(key, false))
+            else -> Bus.post(AudioEvent(key, false))
+        }
     }
 
     private fun Mopidy.toResponse(): Music = Music(
