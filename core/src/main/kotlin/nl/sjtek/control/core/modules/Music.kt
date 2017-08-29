@@ -55,6 +55,7 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
             get("/shuffle") { _, _ -> mopidy.shuffle() }
             get("/start", this::startMusic)
             get("/volume", this::volume)
+            spark.Spark.get("/status", this::status)
         }
     }
 
@@ -91,6 +92,13 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
             lower -> mopidy.volume = mopidy.volume - 2
             else -> mopidy.volume = defaultVolume
         }
+    }
+
+    fun status(req: spark.Request, res: spark.Response): String = when (mopidy.playbackState) {
+        PlaybackState.PAUSED -> "0"
+        PlaybackState.PLAYING -> "1"
+        PlaybackState.STOPPED -> "1"
+        else -> "0"
     }
 
     override fun onVolumeChanged(event: VolumeChangedEvent) {

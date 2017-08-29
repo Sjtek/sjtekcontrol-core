@@ -11,7 +11,6 @@ import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.core.settings.User
 import nl.sjtek.control.data.response.Lights
 import nl.sjtek.control.data.response.Response
-import org.slf4j.LoggerFactory
 import spark.QueryParamsMap
 import spark.Spark.halt
 import spark.Spark.path
@@ -46,6 +45,8 @@ class Lights(key: String) : Module(key) {
             get("/:lamp/toggle", this::lampToggle)
             get("/:lamp/on", this::lampOn)
             get("/:lamp/off", this::lampOff)
+            spark.Spark.get("/:lamp/status", this::lampStatus)
+            spark.Spark.get("/:lamp/color", this::lampColor)
         }
         path("/room") {
             get("/:room/toggle", this::roomToggle)
@@ -118,6 +119,13 @@ class Lights(key: String) : Module(key) {
         ResponseCache.post(this, true)
     }
 
+    private fun lampStatus(req: spark.Request, res: spark.Response): String {
+        val lamp = getLamp(req) ?: throw halt(404, "Lamp not found")
+        return if (lamp.state) "1" else "0"
+    }
+
+    private fun lampColor(req: spark.Request, res: spark.Response): String = "000000"
+
     private fun getLamp(req: spark.Request): Lamp? {
         val input = req.params(":lamp")
         return try {
@@ -138,10 +146,23 @@ class Lights(key: String) : Module(key) {
     private data class Color(val r: Int = -1, val g: Int = -1, val b: Int = -1) {
         companion object {
             fun parseQuery(query: QueryParamsMap): Color {
-                val sR = query["r"].integerValue() ?: return Color()
-                val sG = query["g"].integerValue() ?: return Color()
-                val sB = query["b"].integerValue() ?: return Color()
-                return Color(sR, sG, sB)
+                if (query.hasKey("hex")) {
+                    val hexValue = query["hex"].value()
+                    return try {
+                        val r = hexValue.substring(0, 2).toInt(radix = 16)
+                        val g = hexValue.substring(2, 4).toInt(radix = 16)
+                        val b = hexValue.substring(4, 6).toInt(radix = 16)
+                        Color(r, g, b)
+                    } catch (e: Exception) {
+                        Color()
+                    }
+
+                } else {
+                    val sR = query["r"].integerValue() ?: return Color()
+                    val sG = query["g"].integerValue() ?: return Color()
+                    val sB = query["b"].integerValue() ?: return Color()
+                    return Color(sR, sG, sB)
+                }
             }
         }
     }
