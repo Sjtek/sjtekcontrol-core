@@ -26,7 +26,7 @@ object ResponseCache {
         Flowable.create({ e: FlowableEmitter<Module> ->
             emitter = e
         }, BackpressureStrategy.LATEST)
-                .debounce(1, TimeUnit.SECONDS)
+                .debounce(500, TimeUnit.MILLISECONDS)
                 .subscribe { module ->
                     if (json != previousJson) {
                         previousJson = json

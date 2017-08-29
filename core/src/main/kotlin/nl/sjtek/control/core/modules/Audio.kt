@@ -23,6 +23,7 @@ class Audio(key: String) : Module(key) {
             modules.values.forEach { if (it) return true }
             return false
         }
+    private var previousState: Boolean = false
     override val response: Response
         get() = Audio(key, enabled, modules)
 
@@ -42,12 +43,16 @@ class Audio(key: String) : Module(key) {
     }
 
     private fun audioEnable() {
+        if (previousState) return
+        previousState = true
         logger.info("Audio enabled")
         timer?.cancel()
         Bus.post(SwitchEvent(SWITCH_ID, true))
     }
 
     private fun audioDisable() {
+        if (!previousState) return
+        previousState = false
         logger.info("Scheduling disable")
         timer?.cancel()
         timer = Timer().schedule(30000) {
