@@ -64,7 +64,7 @@ object AMQP {
 
     @Handler
     fun onBroadcast(event: BroadcastEvent) {
-        channelUpdates.basicPublish(EXCHANGE_SWITCH, "", null, event.json.toByteArray())
+        channelUpdates.basicPublish(EXCHANGE_UPDATES, "", null, event.json.toByteArray())
     }
 
     private fun createExchange(connection: Connection, name: String, type: BuiltinExchangeType = BuiltinExchangeType.FANOUT): Channel {
