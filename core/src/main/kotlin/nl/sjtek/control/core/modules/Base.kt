@@ -20,6 +20,7 @@ class Base(key: String) : Module(key) {
         spark.Spark.get("/info", this::customResponse)
         get("/toggle", this::toggleAll)
         spark.Spark.get("/state", this::state)
+        spark.Spark.get("/users", this::users)
     }
 
     private fun customResponse(request: Request, response: Response): String {
@@ -43,5 +44,10 @@ class Base(key: String) : Module(key) {
         val enabled = ModuleManager.isEnabled(user)
         res.header("Content-Type", Transformer.contentType)
         return "{\"state\": $enabled}"
+    }
+
+    private fun users(req: Request, res: Response): String {
+        res.header("Content-Type", Transformer.contentType)
+        return UserManager.json
     }
 }
