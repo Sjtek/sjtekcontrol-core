@@ -11,6 +11,7 @@ import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.core.settings.User
 import nl.sjtek.control.data.response.Lights
 import nl.sjtek.control.data.response.Response
+import org.slf4j.LoggerFactory
 import spark.QueryParamsMap
 import spark.Spark.halt
 import spark.Spark.path
@@ -24,13 +25,14 @@ class Lights(key: String) : Module(key) {
     private val executor: ScheduledThreadPoolExecutor = ScheduledThreadPoolExecutor(1)
     private val lamps: Map<Int, Lamp> = mapOf(
             1 to Lamp("livingroom", 1, true, "livingroom"),
-            2 to Lamp("couch", 1, false, "livingroom"),
+            2 to Lamp("couch", 2, false, "livingroom"),
             3 to Lamp("kitchen", 3, false, "livingroom"),
-            4 to Lamp("hallway", 5, true, "hallway", sensorId = 1),
-            5 to Lamp("stairs", 7, true, "stairs", sensorId = 2),
-            6 to Lamp("wouters desk light", 4, true, "wouter", owner = SettingsManager.getUser("wouter")),
-            7 to Lamp("wouters led strip", 3, true, "wouter", owner = SettingsManager.getUser("wouter")),
-            8 to Lamp("tijns room", 6, true, "tijn", owner = SettingsManager.getUser("tijn")))
+            4 to Lamp("hallway", 4, true, "hallway", sensorId = 1),
+            5 to Lamp("dishwasher", 5, true, "hallway", sensorId = 1),
+            6 to Lamp("stairs", 6, true, "stairs", sensorId = 2),
+            7 to Lamp("wouters desk light", 7, true, "wouter", owner = SettingsManager.getUser("wouter")),
+            8 to Lamp("wouters led strip", 8, true, "wouter", owner = SettingsManager.getUser("wouter")),
+            9 to Lamp("tijns room", 9, true, "tijn", owner = SettingsManager.getUser("tijn")))
     private val schedule: MutableMap<String, ScheduledFuture<*>> = mutableMapOf()
     override val response: Response
         get() = Lights(key, lamps.entries.associate { e -> Pair(e.key, e.value.state) })
@@ -149,12 +151,10 @@ class Lights(key: String) : Module(key) {
         fun turnOn(color: Color) = turnOn(color.r, color.g, color.b)
         fun turnOn(red: Int = -1, green: Int = -1, blue: Int = -1) {
             Bus.post(SwitchEvent(id, true, red, green, blue))
-            state = true
         }
 
         fun turnOff() {
             Bus.post(SwitchEvent(id, false))
-            state = false
         }
 
         fun toggle(color: Color = Color()) = if (state) turnOff() else turnOn(color)
