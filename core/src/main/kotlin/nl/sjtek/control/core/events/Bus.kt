@@ -34,5 +34,6 @@ object Bus {
 
     private fun errorHandler(error: PublicationError) {
         logger.error("Bus error", error)
+        error.cause.printStackTrace()
     }
 }
