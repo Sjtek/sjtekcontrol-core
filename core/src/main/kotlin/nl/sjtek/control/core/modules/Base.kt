@@ -37,7 +37,7 @@ class Base(key: String) : Module(key) {
     private fun toggleAll(request: Request, response: Response) {
         val user = SettingsManager.getUser(request)
         val enabled = ModuleManager.isEnabled(user)
-        Bus.post(ToggleEvent(!enabled))
+        Bus.post(ToggleEvent(!enabled, user))
     }
 
     private fun state(req: Request, res: Response): String {

@@ -1,12 +1,13 @@
 package nl.sjtek.control.core.events
 
+import nl.sjtek.control.core.settings.User
 import nl.sjtek.control.data.amqp.SensorEvent
 import nl.sjtek.control.data.amqp.SwitchEvent as AMQPSwitch
 import nl.sjtek.control.data.amqp.SwitchStateEvent as AMQPSwitchState
 
 abstract class Event
 data class BroadcastEvent(val json: String) : Event()
-data class ToggleEvent(val enabled: Boolean) : Event()
+data class ToggleEvent(val enabled: Boolean, val user: User?) : Event()
 data class NightModeEvent(val enabled: Boolean) : Event()
 data class AudioEvent(val key: String, val state: Boolean) : Event()
 data class SwitchEvent(val id: Int, val state: Boolean, val red: Int = -1, val green: Int = -1, val blue: Int = -1) : Event() {

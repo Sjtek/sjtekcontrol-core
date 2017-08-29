@@ -1,10 +1,7 @@
 package nl.sjtek.control.core.modules
 
 import net.engio.mbassy.listener.Handler
-import nl.sjtek.control.core.events.Bus
-import nl.sjtek.control.core.events.MotionSensorEvent
-import nl.sjtek.control.core.events.SwitchEvent
-import nl.sjtek.control.core.events.SwitchStateEvent
+import nl.sjtek.control.core.events.*
 import nl.sjtek.control.core.get
 import nl.sjtek.control.core.response.ResponseCache
 import nl.sjtek.control.core.settings.SettingsManager
@@ -28,7 +25,7 @@ class Lights(key: String) : Module(key) {
             3 to Lamp("kitchen", 3, false, "livingroom"),
             4 to Lamp("hallway", 4, true, "hallway", sensorId = 1),
             5 to Lamp("dishwasher", 5, true, "hallway", sensorId = 1),
-            6 to Lamp("stairs", 6, true, "stairs", sensorId = 2),
+            6 to Lamp("stairs", 6, true, "stairs", sensorId = 2, onlyOff = true),
             7 to Lamp("wouters desk light", 7, true, "wouter", owner = SettingsManager.getUser("wouter")),
             8 to Lamp("wouters led strip", 8, true, "wouter", owner = SettingsManager.getUser("wouter")),
             9 to Lamp("tijns room", 9, true, "tijn", owner = SettingsManager.getUser("tijn")))
@@ -60,6 +57,17 @@ class Lights(key: String) : Module(key) {
         val lamp = lamps.values.find { it.id == event.id } ?: return
         lamp.state = event.state
         ResponseCache.post(this, true)
+    }
+
+    @Handler
+    fun onToggle(event: ToggleEvent) {
+        lamps.values.forEach {
+            if (it.owner == null || it.owner == event.user) {
+                if (event.enabled) {
+                    if (!it.onlyOff) it.turnOn()
+                } else it.turnOff()
+            }
+        }
     }
 
     fun onSensorEvent(event: MotionSensorEvent) {
@@ -167,7 +175,7 @@ class Lights(key: String) : Module(key) {
         }
     }
 
-    private data class Lamp(val name: String, val id: Int, val rgb: Boolean, val room: String, var state: Boolean = false, val sensorId: Int = -1, val owner: User? = null) {
+    private data class Lamp(val name: String, val id: Int, val rgb: Boolean, val room: String, var state: Boolean = false, val sensorId: Int = -1, val owner: User? = null, val onlyOff: Boolean = false) {
 
         fun turnOn(color: Color) = turnOn(color.r, color.g, color.b)
         fun turnOn(red: Int = -1, green: Int = -1, blue: Int = -1) {
