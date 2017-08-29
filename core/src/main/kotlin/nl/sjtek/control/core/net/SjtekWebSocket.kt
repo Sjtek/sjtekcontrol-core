@@ -7,11 +7,14 @@ import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect
 import org.eclipse.jetty.websocket.api.annotations.WebSocket
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
 @WebSocket
 class SjtekWebSocket {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     init {
         Bus.subscribe(this)
@@ -24,12 +27,18 @@ class SjtekWebSocket {
 
     @OnWebSocketClose
     fun disconnected(session: Session, statusCode: Int, reason: String?) {
-        sessions.add(session)
+        sessions.remove(session)
     }
 
     @Handler
     fun onBroadcast(event: BroadcastEvent) {
-        sessions.forEach { it.remote.sendString(event.json) }
+        sessions.forEach {
+            if (it.isOpen) {
+                it.remote.sendString(event.json)
+            } else {
+                logger.warn("WebSocket not properly removed from queue: ${it.remoteAddress}")
+            }
+        }
     }
 
     companion object {
