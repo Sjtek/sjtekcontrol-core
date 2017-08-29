@@ -18,7 +18,6 @@ import nl.sjtek.control.core.net.MopidyWebSocket
 import nl.sjtek.control.core.response.ResponseCache
 import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.core.settings.User
-import nl.sjtek.control.core.settings.UserManager
 import nl.sjtek.control.core.settings.getDefaultPlaylist
 import nl.sjtek.control.data.response.Music
 import nl.sjtek.control.data.response.Response
@@ -70,7 +69,7 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
         val args = req.queryMap()
         val shuffle = args.hasKey("shuffle")
         val clear = args.hasKey("clear")
-        val uri = args["uri"]?.value() ?: UserManager.get(req).getDefaultPlaylist()
+        val uri = args["uri"]?.value() ?: SettingsManager.getUser(req).getDefaultPlaylist()
         val resetVolume = args.hasKey("reset")
 
         if (clear) mopidy.clear()

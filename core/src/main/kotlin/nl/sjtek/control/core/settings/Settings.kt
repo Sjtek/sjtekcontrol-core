@@ -21,7 +21,8 @@ data class Settings(
 
     data class Music(
             val url: String = "ws://127.0.0.1:6680/mopidy/ws",
-            val volume: Int = 5)
+            val volume: Int = 5,
+            val defaultPlaylist: String = "spotify:user:1133212423:playlist:2A8r6F6GiLwpBCUQ0ImYKW")
 
     data class Temperature(
             val apiKey: String = "",

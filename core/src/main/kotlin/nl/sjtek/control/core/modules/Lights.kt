@@ -7,8 +7,8 @@ import nl.sjtek.control.core.events.SwitchEvent
 import nl.sjtek.control.core.events.SwitchStateEvent
 import nl.sjtek.control.core.get
 import nl.sjtek.control.core.response.ResponseCache
+import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.core.settings.User
-import nl.sjtek.control.core.settings.UserManager
 import nl.sjtek.control.data.response.Lights
 import nl.sjtek.control.data.response.Response
 import spark.QueryParamsMap
@@ -28,9 +28,9 @@ class Lights(key: String) : Module(key) {
             3 to Lamp("kitchen", 3, false, "livingroom"),
             4 to Lamp("hallway", 5, true, "hallway", sensorId = 1),
             5 to Lamp("stairs", 7, true, "stairs", sensorId = 2),
-            6 to Lamp("wouters desk light", 4, true, "wouter", owner = UserManager.get("wouter")),
-            7 to Lamp("wouters led strip", 3, true, "wouter", owner = UserManager.get("wouter")),
-            8 to Lamp("tijns room", 6, true, "tijn", owner = UserManager.get("tijn")))
+            6 to Lamp("wouters desk light", 4, true, "wouter", owner = SettingsManager.getUser("wouter")),
+            7 to Lamp("wouters led strip", 3, true, "wouter", owner = SettingsManager.getUser("wouter")),
+            8 to Lamp("tijns room", 6, true, "tijn", owner = SettingsManager.getUser("tijn")))
     private val schedule: MutableMap<String, ScheduledFuture<*>> = mutableMapOf()
     override val response: Response
         get() = Lights(key, lamps.entries.associate { e -> Pair(e.key, e.value.state) })

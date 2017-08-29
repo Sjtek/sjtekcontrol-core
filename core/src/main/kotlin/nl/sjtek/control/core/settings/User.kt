@@ -6,10 +6,12 @@ data class User(
         val lastName: String,
         val playlists: Map<String, String> = mapOf())
 
+data class UserHolder(val users: List<User> = listOf())
+
 fun User?.getDefaultPlaylist(): String {
     val values = this?.playlists?.values ?: listOf()
     return if (values.isEmpty()) {
-        "spotify:user:1133212423:playlist:2A8r6F6GiLwpBCUQ0ImYKW"
+        SettingsManager.settings.music.defaultPlaylist
     } else {
         values.first()
     }

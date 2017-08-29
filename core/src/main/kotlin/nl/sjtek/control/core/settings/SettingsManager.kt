@@ -1,40 +1,54 @@
 package nl.sjtek.control.core.settings
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.slf4j.LoggerFactory
 import java.io.File
 
 object SettingsManager {
+    private const val PATH_CONFIG = "/etc/sjtekcontrol-core/config.json"
+    private const val PATH_USERS = "/etc/sjtekcontrol-core/users.json"
+    private const val PATH_QUOTES = "/etc/sjtekcontrol-core/quotes.json"
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     val settings: Settings
+    val users: List<User>
+    val quotes: List<String>
+
+    val jsonUsers: String
+        get() = GsonBuilder().setPrettyPrinting().create().toJson(users)
+    val jsonQuotes: String
+        get() = GsonBuilder().setPrettyPrinting().create().toJson(quotes)
 
     init {
-        val logger = LoggerFactory.getLogger(javaClass)
-        logger.info("Loading settings")
-        val json: String = try {
-            File("/etc/sjtekcontrol-core/config.json").readText()
+        settings = load(PATH_CONFIG, Settings::class.java) ?: Settings()
+        users = load(PATH_USERS, UserHolder::class.java)?.users ?: listOf(User("wouter", "Wouter", "Habets", mapOf("test" to "asdf")))
+        quotes = load(PATH_QUOTES, QuotesHolder::class.java)?.quotes ?: listOf("asdf")
+    }
+
+    fun getUser(name: String?): User? {
+        if (name == null) return null
+        return users.find { it.firstName == name }
+    }
+
+    fun getUser(request: spark.Request): User? {
+        val userName = request.queryParams("user")
+        return getUser(userName)
+    }
+
+    private fun <T> load(path: String, clazz: Class<T>): T? {
+        val jsonString = try {
+            File(path).readText()
         } catch (e: Exception) {
-            ""
+            logger.error("Failed loading $path", e)
+            return null
         }
-        val gson = GsonBuilder().setPrettyPrinting().create()
-        if (!json.isBlank()) {
-            var parsed: Settings? = null
-            try {
-                parsed = gson.fromJson<Settings>(json, Settings::class.java)
-            } catch (e: Exception) {
-                logger.error("Error loading settings", e)
 
-            }
-
-            if (parsed == null) {
-                parsed = Settings()
-                println("Missing settings, printing default ones")
-                println(gson.toJson(parsed))
-            }
-            settings = parsed
-        } else {
-            settings = Settings()
-            println("Missing settings, printing default ones")
-            println(gson.toJson(settings))
+        return try {
+            Gson().fromJson<T>(jsonString, clazz)
+        } catch (e: Exception) {
+            logger.error("Failed parsing $path", e)
+            null
         }
     }
 }
