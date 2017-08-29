@@ -28,16 +28,16 @@ data class MotionSensorEvent(val id: Int, val state: Boolean) : Event() {
     fun toAMQP(): SensorEvent = SensorEvent(SensorEvent.Type.MOTION, id, if (state) 1f else 0f)
 }
 
-data class TemperatureEvent(val id: Int, val value: Float) : Event() {
-    fun toAMQP(): SensorEvent = SensorEvent(SensorEvent.Type.TEMPERATURE, id, value)
+data class TemperatureEvent(val id: Int, val temperature: Float, val humidity: Float) : Event() {
+    fun toAMQP(): SensorEvent = SensorEvent(SensorEvent.Type.TEMPERATURE, id, temperature, humidity)
 }
 
 data class LightSensorEvent(val id: Int, val value: Float) : Event() {
     fun toAMQP(): SensorEvent = SensorEvent(SensorEvent.Type.LIGHT, id, value)
 }
 
-fun SensorEvent.toInernalEvent(): Event = when (this.type) {
-    SensorEvent.Type.MOTION -> MotionSensorEvent(this.id, this.value == 1f)
-    SensorEvent.Type.TEMPERATURE -> TemperatureEvent(this.id, this.value)
-    SensorEvent.Type.LIGHT -> LightSensorEvent(this.id, this.value)
+fun SensorEvent.toInternalEvent(): Event = when (this.type) {
+    SensorEvent.Type.MOTION -> MotionSensorEvent(this.id, this.value1 == 1f)
+    SensorEvent.Type.TEMPERATURE -> TemperatureEvent(this.id, this.value1, this.value2)
+    SensorEvent.Type.LIGHT -> LightSensorEvent(this.id, this.value1)
 }

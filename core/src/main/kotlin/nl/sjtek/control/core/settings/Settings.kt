@@ -1,11 +1,11 @@
 package nl.sjtek.control.core.settings
 
-
 data class Settings(
         val spark: Boolean = true,
         val tv: TV = TV(),
         val amqp: AMQP = AMQP(),
-        val music: Music = Music()) {
+        val music: Music = Music(),
+        val temperature: Temperature = Temperature()) {
 
     data class TV(
             val ip: String = "10.10.0.20",
@@ -22,4 +22,9 @@ data class Settings(
     data class Music(
             val url: String = "ws://127.0.0.1:6680/mopidy/ws",
             val volume: Int = 5)
+
+    data class Temperature(
+            val apiKey: String = "",
+            val urlOutside: String = "https://api.darksky.net/forecast/%s/51.5121298,5.4924242",
+            val insideSensorId: Int = 1)
 }

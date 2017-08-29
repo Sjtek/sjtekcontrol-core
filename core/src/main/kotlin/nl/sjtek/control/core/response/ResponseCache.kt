@@ -32,8 +32,6 @@ object ResponseCache {
                         previousJson = json
                         logger.info("Broadcasting update (${module.key})")
                         Bus.post(BroadcastEvent(json))
-                    } else {
-                        logger.info("Not broadcasting, not updated (${module.key}")
                     }
                 }
     }

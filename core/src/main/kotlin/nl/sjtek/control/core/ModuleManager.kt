@@ -22,7 +22,8 @@ object ModuleManager {
             "tv" to TV("tv"),
             "audio" to Audio("audio"),
             "coffee" to Coffee("coffee"),
-            "music" to Music("music")
+            "music" to Music("music"),
+            "temperature" to Temperature("temperature")
     )
 
     fun init() {
