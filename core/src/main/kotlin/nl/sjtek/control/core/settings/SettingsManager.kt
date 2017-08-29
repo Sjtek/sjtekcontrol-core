@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 object SettingsManager {
-    private const val PATH_CONFIG = "/etc/sjtekcontrol-core/config.json"
-    private const val PATH_USERS = "/etc/sjtekcontrol-core/users.json"
-    private const val PATH_QUOTES = "/etc/sjtekcontrol-core/quotes.json"
+    private const val PATH_CONFIG = "/var/sjtekcontrol/config.json"
+    private const val PATH_USERS = "/var/sjtekcontrol/users.json"
+    private const val PATH_QUOTES = "/var/sjtekcontrol/quotes.json"
     private val logger = LoggerFactory.getLogger(javaClass)
 
     val settings: Settings
