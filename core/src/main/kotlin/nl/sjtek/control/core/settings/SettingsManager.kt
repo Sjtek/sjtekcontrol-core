@@ -28,7 +28,7 @@ object SettingsManager {
 
     fun getUser(name: String?): User? {
         if (name == null) return null
-        return users.find { it.firstName == name }
+        return users.find { it.username == name }
     }
 
     fun getUser(request: spark.Request): User? {

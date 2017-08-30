@@ -8,6 +8,7 @@ import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.core.settings.User
 import nl.sjtek.control.data.response.Lights
 import nl.sjtek.control.data.response.Response
+import org.slf4j.LoggerFactory
 import spark.QueryParamsMap
 import spark.Spark.halt
 import spark.Spark.path
@@ -18,14 +19,15 @@ import kotlin.collections.set
 
 
 class Lights(key: String) : Module(key) {
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val executor: ScheduledThreadPoolExecutor = ScheduledThreadPoolExecutor(1)
     private val lamps: Map<Int, Lamp> = mapOf(
             1 to Lamp("livingroom", 1, true, "livingroom"),
             2 to Lamp("couch", 2, false, "livingroom"),
             3 to Lamp("kitchen", 3, false, "livingroom"),
-            4 to Lamp("hallway", 4, true, "hallway", sensorId = 1),
-            5 to Lamp("dishwasher", 5, true, "hallway", sensorId = 1),
-            6 to Lamp("stairs", 6, true, "stairs", sensorId = 2, onlyOff = true),
+            4 to Lamp("hallway", 4, true, "hallway", sensorId = 2),
+            5 to Lamp("dishwasher", 5, true, "hallway", sensorId = 2),
+            6 to Lamp("stairs", 6, true, "stairs", sensorId = 1, onlyOff = true),
             7 to Lamp("wouters desk light", 7, true, "wouter", owner = SettingsManager.getUser("wouter")),
             8 to Lamp("wouters led strip", 8, true, "wouter", owner = SettingsManager.getUser("wouter")),
             9 to Lamp("tijns room", 9, true, "tijn", owner = SettingsManager.getUser("tijn")))
@@ -64,23 +66,33 @@ class Lights(key: String) : Module(key) {
         lamps.values.forEach {
             if (it.owner == null || it.owner == event.user) {
                 if (event.enabled) {
-                    if (!it.onlyOff) it.turnOn()
-                } else it.turnOff()
+                    if (it.onlyOff) {
+
+                    } else if (it.sensorId != -1) {
+                        it.motion()
+                    } else {
+                        it.turnOn()
+                    }
+                } else {
+                    it.turnOff()
+                }
             }
         }
     }
 
+    @Handler
     fun onSensorEvent(event: MotionSensorEvent) {
         val lamps = lamps.values.filter { it.sensorId == event.id }
-
+        logger.info("Sensor ${event.id} detected motion, ${lamps.size} paired")
+        lamps.motion()
     }
 
     override fun isEnabled(user: User?): Boolean {
         lamps.values.forEach {
-            if (it.owner == null) {
+            if (it.owner == null && it.sensorId == -1) {
                 if (it.state) return true
             } else {
-                if (it.owner == user) {
+                if (it.owner == user && it.sensorId == -1) {
                     if (it.state) return true
                 }
             }
@@ -199,11 +211,10 @@ class Lights(key: String) : Module(key) {
         if (isOn) this.turnOff() else turnOn(color)
     }
 
-    private fun List<Lamp>.motion() {
-        this.forEach {
-            schedule[it.name]?.cancel(false)
-            schedule[it.name] = executor.schedule(it::turnOff, 10, TimeUnit.MINUTES)
-            it.turnOn()
-        }
+    private fun List<Lamp>.motion() = this.forEach { it.motion() }
+    private fun Lamp.motion() {
+        schedule[this.name]?.cancel(false)
+        schedule[this.name] = executor.schedule(this::turnOff, 5, TimeUnit.SECONDS)
+        this.turnOn()
     }
 }

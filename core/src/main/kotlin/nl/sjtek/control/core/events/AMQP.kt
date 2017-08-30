@@ -22,6 +22,7 @@ object AMQP {
     private const val EXCHANGE_STATES = "lights_state"
     private const val EXCHANGE_SENSORS = "sensors"
     private const val EXCHANGE_ACTIONS = "actions"
+    private const val EXCHANGE_TOPIC = "topic"
 
     private val channelSwitch: Channel
     private val channelUpdates: Channel
@@ -50,6 +51,12 @@ object AMQP {
 
         channelActions = createExchange(connection, EXCHANGE_ACTIONS)
         addConsumer(EXCHANGE_ACTIONS, ConsumerActions(channelActions))
+
+        val channelTopic = connection.createChannel()
+        channelTopic.exchangeDeclare(EXCHANGE_TOPIC, BuiltinExchangeType.TOPIC, true)
+        channelTopic.exchangeBind(EXCHANGE_ACTIONS, EXCHANGE_TOPIC, EXCHANGE_ACTIONS)
+        channelTopic.exchangeBind(EXCHANGE_SENSORS, EXCHANGE_TOPIC, EXCHANGE_SENSORS)
+        channelTopic.close()
 
         logger.info("AMQP connected to ${settings.host}")
         Bus.subscribe(this)
