@@ -68,13 +68,13 @@ class Lights(key: String) : Module(key) {
                 if (event.enabled) {
                     if (it.onlyOff) {
 
-                    } else if (it.sensorId != -1) {
+                    } else if (it.hasSensor) {
                         it.motion()
                     } else {
                         it.turnOn()
                     }
                 } else {
-                    it.turnOff()
+                    if (!it.hasSensor) it.turnOff()
                 }
             }
         }
@@ -89,10 +89,10 @@ class Lights(key: String) : Module(key) {
 
     override fun isEnabled(user: User?): Boolean {
         lamps.values.forEach {
-            if (it.owner == null && it.sensorId == -1) {
+            if (it.owner == null && !it.hasSensor) {
                 if (it.state) return true
             } else {
-                if (it.owner == user && it.sensorId == -1) {
+                if (it.owner == user && !it.hasSensor) {
                     if (it.state) return true
                 }
             }
@@ -103,40 +103,34 @@ class Lights(key: String) : Module(key) {
     private fun lampToggle(req: spark.Request, res: spark.Response) {
         val lamp: Lamp = getLamp(req) ?: throw halt(404, "Lamp not found")
         lamp.toggle(Color.parseQuery(req.queryMap()))
-        ResponseCache.post(this, true)
     }
 
     private fun lampOn(req: spark.Request, res: spark.Response) {
         val lamp = getLamp(req) ?: throw halt(404, "Lamp not found")
         lamp.turnOn(Color.parseQuery(req.queryMap()))
-        ResponseCache.post(this, true)
     }
 
     private fun lampOff(req: spark.Request, res: spark.Response) {
         val lamp = getLamp(req) ?: throw halt(404, "Lamp not found")
         lamp.turnOff()
-        ResponseCache.post(this, true)
     }
 
     private fun roomToggle(req: spark.Request, res: spark.Response) {
         val room = getRoom(req)
         if (room.isEmpty()) throw halt(404, "Room not found")
         room.toggle(Color.parseQuery(req.queryMap()))
-        ResponseCache.post(this, true)
     }
 
     private fun roomOn(req: spark.Request, res: spark.Response) {
         val room = getRoom(req)
         if (room.isEmpty()) throw halt(404, "Room not found")
         room.turnOn(Color.parseQuery(req.queryMap()))
-        ResponseCache.post(this, true)
     }
 
     private fun roomOff(req: spark.Request, res: spark.Response) {
         val room = getRoom(req)
         if (room.isEmpty()) throw halt(404, "Room not found")
         room.turnOff()
-        ResponseCache.post(this, true)
     }
 
     private fun lampStatus(req: spark.Request, res: spark.Response): String {
@@ -189,6 +183,8 @@ class Lights(key: String) : Module(key) {
 
     private data class Lamp(val name: String, val id: Int, val rgb: Boolean, val room: String, var state: Boolean = false, val sensorId: Int = -1, val owner: User? = null, val onlyOff: Boolean = false) {
 
+        val hasSensor: Boolean = sensorId != -1
+
         fun turnOn(color: Color) = turnOn(color.r, color.g, color.b)
         fun turnOn(red: Int = -1, green: Int = -1, blue: Int = -1) {
             Bus.post(SwitchEvent(id, true, red, green, blue))
@@ -214,7 +210,7 @@ class Lights(key: String) : Module(key) {
     private fun List<Lamp>.motion() = this.forEach { it.motion() }
     private fun Lamp.motion() {
         schedule[this.name]?.cancel(false)
-        schedule[this.name] = executor.schedule(this::turnOff, 5, TimeUnit.SECONDS)
+        schedule[this.name] = executor.schedule(this::turnOff, 2, TimeUnit.MINUTES)
         this.turnOn()
     }
 }

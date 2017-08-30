@@ -30,7 +30,7 @@ object ResponseCache {
                 .subscribe { module ->
                     if (json != previousJson) {
                         previousJson = json
-                        logger.info("Broadcasting update (${module.key})")
+                        logger.debug("Broadcasting update (${module.key})")
                         Bus.post(BroadcastEvent(json))
                     }
                 }
