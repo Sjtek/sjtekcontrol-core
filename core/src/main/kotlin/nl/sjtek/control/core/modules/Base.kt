@@ -22,6 +22,7 @@ class Base(key: String) : Module(key) {
         spark.Spark.get("/state", this::state)
         spark.Spark.get("/users", this::users)
         spark.Spark.get("/quotes", this::quotes)
+        spark.Spark.get("/lamps", this::lamps)
     }
 
     private fun customResponse(request: Request, response: Response): String {
@@ -43,8 +44,7 @@ class Base(key: String) : Module(key) {
     private fun state(req: Request, res: Response): String {
         val user = SettingsManager.getUser(req)
         val enabled = ModuleManager.isEnabled(user)
-        res.header("Content-Type", Transformer.contentType)
-        return "{\"state\": $enabled}"
+        return if (enabled) "1" else "0"
     }
 
     private fun users(req: Request, res: Response): String {
@@ -55,5 +55,10 @@ class Base(key: String) : Module(key) {
     private fun quotes(req: Request, res: Response): String {
         res.header("Content-Type", Transformer.contentType)
         return SettingsManager.jsonQuotes
+    }
+
+    private fun lamps(req: Request, res: Response): String {
+        res.header("Content-Type", Transformer.contentType)
+        return SettingsManager.jsonLamps
     }
 }

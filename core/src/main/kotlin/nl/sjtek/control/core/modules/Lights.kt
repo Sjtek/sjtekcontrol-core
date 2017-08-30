@@ -1,15 +1,18 @@
 package nl.sjtek.control.core.modules
 
 import net.engio.mbassy.listener.Handler
-import nl.sjtek.control.core.events.*
+import nl.sjtek.control.core.events.Bus
+import nl.sjtek.control.core.events.MotionSensorEvent
+import nl.sjtek.control.core.events.SwitchStateEvent
+import nl.sjtek.control.core.events.ToggleEvent
 import nl.sjtek.control.core.get
 import nl.sjtek.control.core.response.ResponseCache
+import nl.sjtek.control.core.settings.Lamp
 import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.core.settings.User
 import nl.sjtek.control.data.response.Lights
 import nl.sjtek.control.data.response.Response
 import org.slf4j.LoggerFactory
-import spark.QueryParamsMap
 import spark.Spark.halt
 import spark.Spark.path
 import java.util.concurrent.ScheduledFuture
@@ -21,16 +24,7 @@ import kotlin.collections.set
 class Lights(key: String) : Module(key) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val executor: ScheduledThreadPoolExecutor = ScheduledThreadPoolExecutor(1)
-    private val lamps: Map<Int, Lamp> = mapOf(
-            1 to Lamp("livingroom", 1, true, "livingroom"),
-            2 to Lamp("couch", 2, false, "livingroom"),
-            3 to Lamp("kitchen", 3, false, "livingroom"),
-            4 to Lamp("hallway", 4, true, "hallway", sensorId = 2),
-            5 to Lamp("dishwasher", 5, true, "hallway", sensorId = 2),
-            6 to Lamp("stairs", 6, true, "stairs", sensorId = 1, onlyOff = true),
-            7 to Lamp("wouters desk light", 7, true, "wouter", owner = SettingsManager.getUser("wouter")),
-            8 to Lamp("wouters led strip", 8, true, "wouter", owner = SettingsManager.getUser("wouter")),
-            9 to Lamp("tijns room", 9, true, "tijn", owner = SettingsManager.getUser("tijn")))
+    private val lamps: Map<Int, Lamp> = SettingsManager.lamps
     private val schedule: MutableMap<String, ScheduledFuture<*>> = mutableMapOf()
     override val response: Response
         get() = Lights(key, lamps.entries.associate { e -> Pair(e.key, e.value.state) })
@@ -56,7 +50,7 @@ class Lights(key: String) : Module(key) {
 
     @Handler
     fun onStateChange(event: SwitchStateEvent) {
-        val lamp = lamps.values.find { it.id == event.id } ?: return
+        val lamp = lamps.values.find { it.internalId == event.id } ?: return
         lamp.state = event.state
         ResponseCache.post(this, true)
     }
@@ -64,7 +58,7 @@ class Lights(key: String) : Module(key) {
     @Handler
     fun onToggle(event: ToggleEvent) {
         lamps.values.forEach {
-            if (it.owner == null || it.owner == event.user) {
+            if (it.owner == null || it.owner == event.user?.username) {
                 if (event.enabled) {
                     if (it.onlyOff) {
 
@@ -92,7 +86,7 @@ class Lights(key: String) : Module(key) {
             if (it.owner == null && !it.hasSensor) {
                 if (it.state) return true
             } else {
-                if (it.owner == user && !it.hasSensor) {
+                if (it.owner == user?.username && !it.hasSensor) {
                     if (it.state) return true
                 }
             }
@@ -102,12 +96,12 @@ class Lights(key: String) : Module(key) {
 
     private fun lampToggle(req: spark.Request, res: spark.Response) {
         val lamp: Lamp = getLamp(req) ?: throw halt(404, "Lamp not found")
-        lamp.toggle(Color.parseQuery(req.queryMap()))
+        lamp.toggle(Lamp.Color.parseQuery(req.queryMap()))
     }
 
     private fun lampOn(req: spark.Request, res: spark.Response) {
         val lamp = getLamp(req) ?: throw halt(404, "Lamp not found")
-        lamp.turnOn(Color.parseQuery(req.queryMap()))
+        lamp.turnOn(Lamp.Color.parseQuery(req.queryMap()))
     }
 
     private fun lampOff(req: spark.Request, res: spark.Response) {
@@ -118,13 +112,13 @@ class Lights(key: String) : Module(key) {
     private fun roomToggle(req: spark.Request, res: spark.Response) {
         val room = getRoom(req)
         if (room.isEmpty()) throw halt(404, "Room not found")
-        room.toggle(Color.parseQuery(req.queryMap()))
+        room.toggle(Lamp.Color.parseQuery(req.queryMap()))
     }
 
     private fun roomOn(req: spark.Request, res: spark.Response) {
         val room = getRoom(req)
         if (room.isEmpty()) throw halt(404, "Room not found")
-        room.turnOn(Color.parseQuery(req.queryMap()))
+        room.turnOn(Lamp.Color.parseQuery(req.queryMap()))
     }
 
     private fun roomOff(req: spark.Request, res: spark.Response) {
@@ -157,49 +151,9 @@ class Lights(key: String) : Module(key) {
         return lamps.values.filter { it.room == input }
     }
 
-    private data class Color(val r: Int = -1, val g: Int = -1, val b: Int = -1) {
-        companion object {
-            fun parseQuery(query: QueryParamsMap): Color {
-                if (query.hasKey("hex")) {
-                    val hexValue = query["hex"].value()
-                    return try {
-                        val r = hexValue.substring(0, 2).toInt(radix = 16)
-                        val g = hexValue.substring(2, 4).toInt(radix = 16)
-                        val b = hexValue.substring(4, 6).toInt(radix = 16)
-                        Color(r, g, b)
-                    } catch (e: Exception) {
-                        Color()
-                    }
-
-                } else {
-                    val sR = query["r"].integerValue() ?: return Color()
-                    val sG = query["g"].integerValue() ?: return Color()
-                    val sB = query["b"].integerValue() ?: return Color()
-                    return Color(sR, sG, sB)
-                }
-            }
-        }
-    }
-
-    private data class Lamp(val name: String, val id: Int, val rgb: Boolean, val room: String, var state: Boolean = false, val sensorId: Int = -1, val owner: User? = null, val onlyOff: Boolean = false) {
-
-        val hasSensor: Boolean = sensorId != -1
-
-        fun turnOn(color: Color) = turnOn(color.r, color.g, color.b)
-        fun turnOn(red: Int = -1, green: Int = -1, blue: Int = -1) {
-            Bus.post(SwitchEvent(id, true, red, green, blue))
-        }
-
-        fun turnOff() {
-            Bus.post(SwitchEvent(id, false))
-        }
-
-        fun toggle(color: Color = Color()) = if (state) turnOff() else turnOn(color)
-    }
-
-    private fun List<Lamp>.turnOn(color: Color = Color()) = this.forEach { it.turnOn(color) }
+    private fun List<Lamp>.turnOn(color: Lamp.Color = Lamp.Color()) = this.forEach { it.turnOn(color) }
     private fun List<Lamp>.turnOff() = this.forEach { it.turnOff() }
-    private fun List<Lamp>.toggle(color: Color = Color()) {
+    private fun List<Lamp>.toggle(color: Lamp.Color = Lamp.Color()) {
         var isOn = false
         this.forEach {
             if (it.state) isOn = true
