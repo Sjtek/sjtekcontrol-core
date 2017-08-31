@@ -2,6 +2,11 @@ package nl.sjtek.control.core.settings
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import nl.sjtek.control.data.parsers.LampHolder
+import nl.sjtek.control.data.parsers.QuotesHolder
+import nl.sjtek.control.data.parsers.UserHolder
+import nl.sjtek.control.data.static.Lamp
+import nl.sjtek.control.data.static.User
 import org.slf4j.LoggerFactory
 import java.io.File
 

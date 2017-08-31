@@ -1,7 +1,8 @@
-package nl.sjtek.control.data.response
+package nl.sjtek.control.data.parsers
 
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
+import nl.sjtek.control.data.response.Response
 import java.lang.reflect.Type
 
 object ResponseParser {

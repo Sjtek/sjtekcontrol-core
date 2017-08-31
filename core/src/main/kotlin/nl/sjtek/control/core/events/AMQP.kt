@@ -22,7 +22,7 @@ object AMQP {
     private const val EXCHANGE_STATES = "lights_state"
     private const val EXCHANGE_SENSORS = "sensors"
     private const val EXCHANGE_ACTIONS = "actions"
-    private const val EXCHANGE_TOPIC = "topic"
+    private const val EXCHANGE_TOPIC = "amq.topic"
 
     private val channelSwitch: Channel
     private val channelUpdates: Channel

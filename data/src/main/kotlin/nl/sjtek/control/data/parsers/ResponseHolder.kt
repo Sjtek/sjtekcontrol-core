@@ -1,4 +1,6 @@
-package nl.sjtek.control.data.response
+package nl.sjtek.control.data.parsers
+
+import nl.sjtek.control.data.response.*
 
 @Suppress("MemberVisibilityCanPrivate")
 data class ResponseHolder(val map: Map<String, Response>) {

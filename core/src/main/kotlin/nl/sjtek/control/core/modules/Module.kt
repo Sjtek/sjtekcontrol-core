@@ -1,7 +1,7 @@
 package nl.sjtek.control.core.modules
 
-import nl.sjtek.control.core.settings.User
 import nl.sjtek.control.data.response.Response
+import nl.sjtek.control.data.static.User
 import org.slf4j.LoggerFactory
 
 

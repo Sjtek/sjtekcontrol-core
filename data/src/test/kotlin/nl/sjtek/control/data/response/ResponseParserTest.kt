@@ -1,5 +1,6 @@
 package nl.sjtek.control.data.response
 
+import nl.sjtek.control.data.parsers.ResponseParser
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 

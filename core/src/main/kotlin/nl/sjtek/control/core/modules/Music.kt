@@ -14,13 +14,13 @@ import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.NightModeEvent
 import nl.sjtek.control.core.events.ToggleEvent
 import nl.sjtek.control.core.get
+import nl.sjtek.control.core.getDefaultPlaylist
 import nl.sjtek.control.core.net.MopidyWebSocket
 import nl.sjtek.control.core.response.ResponseCache
 import nl.sjtek.control.core.settings.SettingsManager
-import nl.sjtek.control.core.settings.User
-import nl.sjtek.control.core.settings.getDefaultPlaylist
 import nl.sjtek.control.data.response.Music
 import nl.sjtek.control.data.response.Response
+import nl.sjtek.control.data.static.User
 import org.slf4j.LoggerFactory
 import spark.Spark.path
 import java.lang.Exception

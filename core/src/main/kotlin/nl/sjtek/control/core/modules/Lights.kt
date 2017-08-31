@@ -1,17 +1,17 @@
 package nl.sjtek.control.core.modules
 
 import net.engio.mbassy.listener.Handler
+import nl.sjtek.control.core.*
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.MotionSensorEvent
 import nl.sjtek.control.core.events.SwitchStateEvent
 import nl.sjtek.control.core.events.ToggleEvent
-import nl.sjtek.control.core.get
 import nl.sjtek.control.core.response.ResponseCache
-import nl.sjtek.control.core.settings.Lamp
 import nl.sjtek.control.core.settings.SettingsManager
-import nl.sjtek.control.core.settings.User
 import nl.sjtek.control.data.response.Lights
 import nl.sjtek.control.data.response.Response
+import nl.sjtek.control.data.static.Lamp
+import nl.sjtek.control.data.static.User
 import org.slf4j.LoggerFactory
 import spark.Spark.halt
 import spark.Spark.path
@@ -62,13 +62,13 @@ class Lights(key: String) : Module(key) {
                 if (event.enabled) {
                     if (it.onlyOff) {
 
-                    } else if (it.hasSensor) {
+                    } else if (it.hasSensor()) {
                         it.motion()
                     } else {
                         it.turnOn()
                     }
                 } else {
-                    if (!it.hasSensor) it.turnOff()
+                    if (!it.hasSensor()) it.turnOff()
                 }
             }
         }
@@ -83,10 +83,10 @@ class Lights(key: String) : Module(key) {
 
     override fun isEnabled(user: User?): Boolean {
         lamps.values.forEach {
-            if (it.owner == null && !it.hasSensor) {
+            if (it.owner == null && !it.hasSensor()) {
                 if (it.state) return true
             } else {
-                if (it.owner == user?.username && !it.hasSensor) {
+                if (it.owner == user?.username && !it.hasSensor()) {
                     if (it.state) return true
                 }
             }
@@ -96,12 +96,12 @@ class Lights(key: String) : Module(key) {
 
     private fun lampToggle(req: spark.Request, res: spark.Response) {
         val lamp: Lamp = getLamp(req) ?: throw halt(404, "Lamp not found")
-        lamp.toggle(Lamp.Color.parseQuery(req.queryMap()))
+        lamp.toggle(Color.parseQuery(req.queryMap()))
     }
 
     private fun lampOn(req: spark.Request, res: spark.Response) {
         val lamp = getLamp(req) ?: throw halt(404, "Lamp not found")
-        lamp.turnOn(Lamp.Color.parseQuery(req.queryMap()))
+        lamp.turnOn(Color.parseQuery(req.queryMap()))
     }
 
     private fun lampOff(req: spark.Request, res: spark.Response) {
@@ -112,13 +112,13 @@ class Lights(key: String) : Module(key) {
     private fun roomToggle(req: spark.Request, res: spark.Response) {
         val room = getRoom(req)
         if (room.isEmpty()) throw halt(404, "Room not found")
-        room.toggle(Lamp.Color.parseQuery(req.queryMap()))
+        room.toggle(Color.parseQuery(req.queryMap()))
     }
 
     private fun roomOn(req: spark.Request, res: spark.Response) {
         val room = getRoom(req)
         if (room.isEmpty()) throw halt(404, "Room not found")
-        room.turnOn(Lamp.Color.parseQuery(req.queryMap()))
+        room.turnOn(Color.parseQuery(req.queryMap()))
     }
 
     private fun roomOff(req: spark.Request, res: spark.Response) {
@@ -151,9 +151,9 @@ class Lights(key: String) : Module(key) {
         return lamps.values.filter { it.room == input }
     }
 
-    private fun List<Lamp>.turnOn(color: Lamp.Color = Lamp.Color()) = this.forEach { it.turnOn(color) }
+    private fun List<Lamp>.turnOn(color: Color = Color()) = this.forEach { it.turnOn(color) }
     private fun List<Lamp>.turnOff() = this.forEach { it.turnOff() }
-    private fun List<Lamp>.toggle(color: Lamp.Color = Lamp.Color()) {
+    private fun List<Lamp>.toggle(color: Color = Color()) {
         var isOn = false
         this.forEach {
             if (it.state) isOn = true
