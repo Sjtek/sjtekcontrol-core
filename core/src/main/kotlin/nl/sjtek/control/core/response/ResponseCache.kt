@@ -6,6 +6,7 @@ import io.reactivex.Flowable
 import io.reactivex.FlowableEmitter
 import nl.sjtek.control.core.events.BroadcastEvent
 import nl.sjtek.control.core.events.Bus
+import nl.sjtek.control.core.events.ModuleUpdate
 import nl.sjtek.control.core.modules.Module
 import nl.sjtek.control.data.response.Response
 import org.slf4j.LoggerFactory
@@ -46,6 +47,7 @@ object ResponseCache {
         responses.put(module.key, module.response)
         json = gson.toJson(responses)
 
+        Bus.post(ModuleUpdate(module.response))
         if (broadcast) emitter?.onNext(module)
     }
 }

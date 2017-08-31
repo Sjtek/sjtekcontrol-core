@@ -24,7 +24,8 @@ object ModuleManager {
             "audio" to Audio("audio"),
             "coffee" to Coffee("coffee"),
             "music" to Music("music"),
-            "temperature" to Temperature("temperature")
+            "temperature" to Temperature("temperature"),
+            "assistant" to Assistant("assistant")
     )
 
     fun init() {

@@ -1,6 +1,7 @@
 package nl.sjtek.control.core.events
 
 import nl.sjtek.control.data.amqp.SensorEvent
+import nl.sjtek.control.data.response.Response
 import nl.sjtek.control.data.static.User
 import nl.sjtek.control.data.amqp.SwitchEvent as AMQPSwitch
 import nl.sjtek.control.data.amqp.SwitchStateEvent as AMQPSwitchState
@@ -42,3 +43,5 @@ fun SensorEvent.toInternalEvent(): Event = when (this.type) {
     SensorEvent.Type.TEMPERATURE -> TemperatureEvent(this.id, this.value1, this.value2)
     SensorEvent.Type.LIGHT -> LightSensorEvent(this.id, this.value1)
 }
+
+data class ModuleUpdate(val response: Response) : Event()
