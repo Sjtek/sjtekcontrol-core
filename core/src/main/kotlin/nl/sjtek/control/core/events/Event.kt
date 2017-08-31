@@ -45,3 +45,4 @@ fun SensorEvent.toInternalEvent(): Event = when (this.type) {
 }
 
 data class ModuleUpdate(val response: Response) : Event()
+data class CoffeeEvent(val enable: Boolean = true) : Event()

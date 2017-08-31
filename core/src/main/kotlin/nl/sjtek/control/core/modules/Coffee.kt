@@ -1,6 +1,8 @@
 package nl.sjtek.control.core.modules
 
+import net.engio.mbassy.listener.Handler
 import nl.sjtek.control.core.events.Bus
+import nl.sjtek.control.core.events.CoffeeEvent
 import nl.sjtek.control.core.events.SwitchEvent
 import nl.sjtek.control.core.get
 import nl.sjtek.control.data.response.Coffee
@@ -17,14 +19,20 @@ class Coffee(key: String) : Module(key) {
     override val response: Response
         get() = Coffee(key, enabled, lastTimeEnabled)
 
+    init {
+        Bus.subscribe(this)
+    }
+
     override fun initSpark() {
         path("/coffee") {
             get("/enable", this::enable)
         }
     }
 
-    private fun enable(req: spark.Request, res: spark.Response) {
-        TODO("Fix me")
+    @Handler
+    fun onCoffeeEvent(event: CoffeeEvent) = enable()
+
+    private fun enable(req: spark.Request? = null, res: spark.Response? = null) {
         if (!enabled) {
             lastTimeEnabled = System.currentTimeMillis()
             Bus.post(SwitchEvent(10, false))

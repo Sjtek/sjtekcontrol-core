@@ -4,8 +4,10 @@ import com.google.gson.Gson
 import net.engio.mbassy.listener.Handler
 import nl.sjtek.control.core.assistant.AssistantRequest
 import nl.sjtek.control.core.assistant.AssistantResponse
+import nl.sjtek.control.core.assistant.CoffeeRequest
 import nl.sjtek.control.core.assistant.SensorRequest
 import nl.sjtek.control.core.events.Bus
+import nl.sjtek.control.core.events.CoffeeEvent
 import nl.sjtek.control.core.events.ModuleUpdate
 import nl.sjtek.control.data.response.Assistant
 import nl.sjtek.control.data.response.Response
@@ -48,6 +50,7 @@ class Assistant(key: String) : Module(key) {
         val request = AssistantRequest.fromJson(body)
         return when (request) {
             is SensorRequest -> getTemperature(request)
+            is CoffeeRequest -> getCoffee(request)
             else -> getError()
         }
     }
@@ -65,6 +68,11 @@ class Assistant(key: String) : Module(key) {
             }
         }
         return AssistantResponse("The $location $type is $value.")
+    }
+
+    private fun getCoffee(request: CoffeeRequest): AssistantResponse {
+        Bus.post(CoffeeEvent())
+        return AssistantResponse("Sure, the machine is warming up.")
     }
 
     private fun getError(): AssistantResponse = AssistantResponse("I don't know what you mean.")

@@ -15,6 +15,7 @@ abstract class AssistantRequest {
                 val intent = json["result"].asJsonObject["metadata"].asJsonObject["intentName"].asString
                 return when (intent) {
                     "Sensors" -> toSensor(json)
+                    "Coffee" -> toCoffee(json)
                     else -> null
                 }
             } catch (e: JsonParseException) {
@@ -37,5 +38,7 @@ abstract class AssistantRequest {
             }
             return SensorRequest(location, type)
         }
+
+        private fun toCoffee(json: JsonObject): CoffeeRequest? = CoffeeRequest()
     }
 }
