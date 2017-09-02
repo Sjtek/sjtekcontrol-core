@@ -3,7 +3,7 @@ package nl.sjtek.control.data.parsers
 import nl.sjtek.control.data.response.*
 
 @Suppress("MemberVisibilityCanPrivate")
-data class ResponseHolder(val map: Map<String, Response>) {
+data class ResponseHolder(val map: Map<String, Response> = mapOf(), @Transient val exception: Exception? = null) {
     val audio: Audio = map["audio"] as Audio
     val base: Base = map["base"] as Base
     val coffee: Coffee = map["coffee"] as Coffee

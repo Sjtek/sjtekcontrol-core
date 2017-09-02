@@ -7,12 +7,13 @@ import nl.sjtek.control.data.static.Lamp
 
 object LampParser {
 
-    fun parse(input: String?): Map<Int, Lamp>? {
+    fun parse(input: String?): LampHolder {
         val type = object : TypeToken<Map<Int, Lamp>>() {}.type
-        return try {
-            Gson().fromJson(input, type)
+        try {
+            val lamps: Map<Int, Lamp> = Gson().fromJson(input, type)
+            return LampHolder(lamps)
         } catch (e: JsonParseException) {
-            null
+            return LampHolder(exception = e)
         }
     }
 }

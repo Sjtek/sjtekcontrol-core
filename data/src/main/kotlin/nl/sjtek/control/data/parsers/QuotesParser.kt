@@ -6,12 +6,12 @@ import com.google.gson.reflect.TypeToken
 
 object QuotesParser {
 
-    fun parse(input: String?): List<String>? {
+    fun parse(input: String?): QuotesHolder {
         val type = object : TypeToken<List<String>>() {}.type
         return try {
-            Gson().fromJson(input, type)
+            QuotesHolder(Gson().fromJson(input, type))
         } catch (e: JsonParseException) {
-            null
+            QuotesHolder(exception = e)
         }
     }
 }

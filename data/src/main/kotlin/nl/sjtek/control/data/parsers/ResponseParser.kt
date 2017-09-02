@@ -6,7 +6,7 @@ import nl.sjtek.control.data.response.Response
 import java.lang.reflect.Type
 
 object ResponseParser {
-    fun parse(input: String?): ResponseHolder? {
+    fun parse(input: String?): ResponseHolder {
         val type = object : TypeToken<Map<String, Response>>() {}.type
         val gson = GsonBuilder().registerTypeAdapter(Response::class.java, ResponseAdapter()).create()
         return try {
@@ -14,7 +14,7 @@ object ResponseParser {
             holder.test()
             holder
         } catch (e: Exception) {
-            null
+            ResponseHolder(exception = e)
         }
     }
 

@@ -7,12 +7,12 @@ import nl.sjtek.control.data.static.User
 
 object UserParser {
 
-    fun parse(input: String?): Map<String, User>? {
+    fun parse(input: String?): UserHolder {
         val type = object : TypeToken<Map<String, User>>() {}.type
         return try {
-            Gson().fromJson(input, type)
+            UserHolder(Gson().fromJson(input, type))
         } catch (e: JsonParseException) {
-            null
+            UserHolder(exception = e)
         }
     }
 }
