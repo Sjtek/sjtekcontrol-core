@@ -5,7 +5,7 @@ import nl.sjtek.control.core.modules.*
 import nl.sjtek.control.core.net.SjtekWebSocket
 import nl.sjtek.control.core.response.ResponseCache
 import nl.sjtek.control.core.settings.SettingsManager
-import nl.sjtek.control.data.static.User
+import nl.sjtek.control.data.staticdata.User
 import org.slf4j.LoggerFactory
 import spark.Spark.path
 import spark.Spark.webSocket

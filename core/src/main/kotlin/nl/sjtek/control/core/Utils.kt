@@ -6,8 +6,8 @@ import nl.sjtek.control.core.events.SwitchEvent
 import nl.sjtek.control.core.net.HttpClient
 import nl.sjtek.control.core.response.Transformer
 import nl.sjtek.control.core.settings.SettingsManager
-import nl.sjtek.control.data.static.Lamp
-import nl.sjtek.control.data.static.User
+import nl.sjtek.control.data.staticdata.Lamp
+import nl.sjtek.control.data.staticdata.User
 import okhttp3.Request
 import okhttp3.Response
 import spark.QueryParamsMap

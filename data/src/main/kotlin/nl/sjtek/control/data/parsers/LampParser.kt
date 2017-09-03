@@ -3,7 +3,7 @@ package nl.sjtek.control.data.parsers
 import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import com.google.gson.reflect.TypeToken
-import nl.sjtek.control.data.static.Lamp
+import nl.sjtek.control.data.staticdata.Lamp
 
 object LampParser {
 

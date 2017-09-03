@@ -5,8 +5,8 @@ import com.google.gson.GsonBuilder
 import nl.sjtek.control.data.parsers.LampHolder
 import nl.sjtek.control.data.parsers.QuotesHolder
 import nl.sjtek.control.data.parsers.UserHolder
-import nl.sjtek.control.data.static.Lamp
-import nl.sjtek.control.data.static.User
+import nl.sjtek.control.data.staticdata.Lamp
+import nl.sjtek.control.data.staticdata.User
 import org.slf4j.LoggerFactory
 import java.io.File
 

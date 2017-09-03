@@ -1,4 +1,4 @@
-package nl.sjtek.control.data.static
+package nl.sjtek.control.data.staticdata
 
 data class Lamp(val name: String,
                 val visibleName: String,

@@ -20,7 +20,7 @@ import nl.sjtek.control.core.response.ResponseCache
 import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.data.response.Music
 import nl.sjtek.control.data.response.Response
-import nl.sjtek.control.data.static.User
+import nl.sjtek.control.data.staticdata.User
 import org.slf4j.LoggerFactory
 import spark.Spark.path
 import java.lang.Exception

@@ -2,7 +2,7 @@ package nl.sjtek.control.core.events
 
 import nl.sjtek.control.data.amqp.SensorEvent
 import nl.sjtek.control.data.response.Response
-import nl.sjtek.control.data.static.User
+import nl.sjtek.control.data.staticdata.User
 import nl.sjtek.control.data.amqp.SwitchEvent as AMQPSwitch
 import nl.sjtek.control.data.amqp.SwitchStateEvent as AMQPSwitchState
 
