@@ -6,7 +6,8 @@ data class Settings(
         val amqp: AMQP = AMQP(),
         val music: Music = Music(),
         val temperature: Temperature = Temperature(),
-        val assistant: Assistant = Assistant()) {
+        val assistant: Assistant = Assistant(),
+        val sunset: Sunset = Sunset()) {
 
     data class TV(
             val ip: String = "10.10.0.20",
@@ -31,4 +32,9 @@ data class Settings(
             val insideSensorId: Int = 1)
 
     data class Assistant(val code: String = "")
+
+    data class Sunset(
+            val latitude: String = "51.5126582",
+            val longitude: String = "5.4926548",
+            val timeZone: String = "Europe/Amsterdam")
 }

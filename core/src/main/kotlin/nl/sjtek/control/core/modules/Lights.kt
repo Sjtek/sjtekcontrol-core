@@ -77,8 +77,12 @@ class Lights(key: String) : Module(key) {
     @Handler
     fun onSensorEvent(event: MotionSensorEvent) {
         val lamps = lamps.values.filter { it.sensorId == event.id }
-        logger.info("Sensor ${event.id} detected motion, ${lamps.size} paired")
-        lamps.motion()
+        if (SunsetCalculator.night) {
+            logger.info("Sensor ${event.id} detected motion, ${lamps.size} paired")
+            lamps.motion()
+        } else {
+            logger.info("Sensor ${event.id} detected motion, but it's not night")
+        }
     }
 
     override fun isEnabled(user: User?): Boolean {
