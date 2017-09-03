@@ -3,14 +3,11 @@ package nl.sjtek.control.core.events
 import com.rabbitmq.client.*
 import com.rabbitmq.client.AMQP
 import com.sun.istack.internal.logging.Logger
-import io.reactivex.Observable
 import net.engio.mbassy.listener.Handler
-import nl.sjtek.control.core.getRequest
-import nl.sjtek.control.core.net.HttpClient
+import nl.sjtek.control.core.executeCommand
 import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.data.amqp.SensorEvent
 import nl.sjtek.control.data.amqp.SwitchStateEvent
-import okhttp3.Response
 import nl.sjtek.control.data.amqp.SwitchEvent as AMQPSwitch
 
 object AMQP {
@@ -111,17 +108,7 @@ object AMQP {
             val data = String(body)
             if (data == "ping") return
             logger.info("Received action: $data")
-            Observable.create<Response> { e ->
-                try {
-                    val response = HttpClient.client.newCall("http://127.0.0.1:4567/api/$data".getRequest()).execute()
-                    e.onNext(response)
-                } catch (ex: Exception) {
-
-                }
-            }.subscribe { r ->
-                r.body()?.close()
-                r.close()
-            }
+            data.executeCommand()
         }
     }
 }

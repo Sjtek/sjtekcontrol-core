@@ -1,12 +1,15 @@
 package nl.sjtek.control.core
 
+import io.reactivex.Observable
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.SwitchEvent
+import nl.sjtek.control.core.net.HttpClient
 import nl.sjtek.control.core.response.Transformer
 import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.data.static.Lamp
 import nl.sjtek.control.data.static.User
 import okhttp3.Request
+import okhttp3.Response
 import spark.QueryParamsMap
 import spark.Route
 
@@ -18,6 +21,20 @@ fun get(path: String, function: (req: spark.Request, res: spark.Response) -> Any
 }
 
 fun String.getRequest() = Request.Builder().url(this).build()
+
+fun String.executeCommand() {
+    Observable.create<Response> { e ->
+        try {
+            val response = HttpClient.client.newCall("http://127.0.0.1:4567/api/$this".getRequest()).execute()
+            e.onNext(response)
+        } catch (ex: Exception) {
+
+        }
+    }.subscribe { r ->
+        r.body()?.close()
+        r.close()
+    }
+}
 
 fun User?.getDefaultPlaylist(): String {
     val values = this?.playlists?.values ?: listOf()
