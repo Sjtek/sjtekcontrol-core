@@ -70,7 +70,8 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
         val args = req.queryMap()
         val shuffle = args.hasKey("shuffle")
         val clear = args.hasKey("clear")
-        val uri = args["uri"]?.value() ?: SettingsManager.getUser(req).getDefaultPlaylist()
+        val givenUri = args["uri"]?.value()
+        val uri = if (givenUri.isNullOrBlank()) SettingsManager.getUser(req).getDefaultPlaylist() else givenUri
         val resetVolume = args.hasKey("reset")
 
         if (clear) mopidy.clear()
