@@ -1,5 +1,7 @@
 package nl.sjtek.control.data.response
 
+import java.io.Serializable
+
 data class Music(
         override val key: String,
         val connected: Boolean,
@@ -11,8 +13,8 @@ data class Music(
         val albumArt: String,
         val artistArt: String,
         val volume: Int
-) : Response() {
+) : Response(), Serializable {
     override val type: String = javaClass.canonicalName
 
-    enum class State {PLAYING, PAUSED, STOPPED }
+    enum class State : Serializable {PLAYING, PAUSED, STOPPED }
 }

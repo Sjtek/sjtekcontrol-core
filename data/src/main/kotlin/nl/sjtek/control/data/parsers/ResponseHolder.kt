@@ -1,9 +1,10 @@
 package nl.sjtek.control.data.parsers
 
 import nl.sjtek.control.data.response.*
+import java.io.Serializable
 
 @Suppress("MemberVisibilityCanPrivate")
-data class ResponseHolder(val map: Map<String, Response> = mapOf(), @Transient val exception: Exception? = null) {
+data class ResponseHolder(val map: Map<String, Response> = mapOf(), @Transient val exception: Exception? = null) : Serializable {
     val audio: Audio = map["audio"] as Audio
     val base: Base = map["base"] as Base
     val coffee: Coffee = map["coffee"] as Coffee

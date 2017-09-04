@@ -6,6 +6,7 @@ object Actions {
     fun state(): String = "state"
     fun users(): String = "users"
     fun quotes(): String = "quotes"
+    fun lamps(): String = "lamps"
     val coffee: Coffee = Coffee
     val lights: Lights = Lights
     val music: Music = Music
@@ -36,12 +37,14 @@ object Actions {
     }
 
     object Music {
+        fun toggle(): String = "music/toggle"
         fun play(): String = "music/play"
         fun pause(): String = "music/pause"
         fun stop(): String = "music/stop"
         fun next(): String = "music/next"
         fun previous(): String = "music/previous"
         fun clear(): String = "music/clear"
+        fun shuffle(): String = "music/shuffle"
         fun volumeIncrease(): String = "music/volume?increase"
         fun volumeLower(): String = "music/volume?lower"
         fun volume(value: Int): String = "music/volume?value=$value"
@@ -63,9 +66,9 @@ object Actions {
     }
 
     private fun String.appendQuery(value: String): String = if (this.isBlank()) {
-        "&$value"
-    } else {
         value
+    } else {
+        "&$value"
     }
 }
 
