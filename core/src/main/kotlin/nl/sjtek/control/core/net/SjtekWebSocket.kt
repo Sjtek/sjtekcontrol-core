@@ -1,6 +1,7 @@
 package nl.sjtek.control.core.net
 
 import net.engio.mbassy.listener.Handler
+import net.engio.mbassy.listener.Invoke
 import nl.sjtek.control.core.events.BroadcastEvent
 import nl.sjtek.control.core.events.Bus
 import org.eclipse.jetty.websocket.api.Session
@@ -30,7 +31,7 @@ class SjtekWebSocket {
         sessions.remove(session)
     }
 
-    @Handler
+    @Handler(delivery = Invoke.Asynchronously)
     fun onBroadcast(event: BroadcastEvent) {
         sessions.forEach {
             if (it.isOpen) {
