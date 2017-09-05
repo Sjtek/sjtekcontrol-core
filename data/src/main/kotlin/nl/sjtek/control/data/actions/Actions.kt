@@ -11,6 +11,7 @@ object Actions {
     val lights: Lights = Lights
     val music: Music = Music
     val nightMode: NightMode = NightMode
+    val tv: TV = TV
 
     object Coffee {
         fun enable(): String = "coffee/enable"
@@ -63,6 +64,10 @@ object Actions {
         fun enable(): String = "nightmode/enable"
         fun disable(): String = "nightmode/disable"
         fun toggle(): String = "nightmode/toggle"
+    }
+
+    object TV {
+        fun turnOff(): String = "tv/turnoff"
     }
 
     private fun String.appendQuery(value: String): String = if (this.isBlank()) {

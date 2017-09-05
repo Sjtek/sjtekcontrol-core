@@ -4,16 +4,15 @@ import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import com.google.gson.JsonParser
 import net.engio.mbassy.listener.Handler
-import nl.sjtek.control.core.assistant.AssistantRequest
-import nl.sjtek.control.core.assistant.AssistantResponse
-import nl.sjtek.control.core.assistant.CoffeeRequest
-import nl.sjtek.control.core.assistant.SensorRequest
+import nl.sjtek.control.core.assistant.*
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.CoffeeEvent
 import nl.sjtek.control.core.events.ModuleUpdate
 import nl.sjtek.control.core.executeCommand
 import nl.sjtek.control.core.settings.SettingsManager
+import nl.sjtek.control.data.actions.Actions
 import nl.sjtek.control.data.response.Assistant
+import nl.sjtek.control.data.response.NightMode
 import nl.sjtek.control.data.response.Response
 import nl.sjtek.control.data.response.Temperature
 import org.slf4j.LoggerFactory
@@ -34,6 +33,7 @@ class Assistant(key: String) : Module(key) {
     private var outsideTemp = 0
     private var insideHumidity = 0
     private var insideTemp = 0
+    private var nightMode = false
 
     init {
         Bus.subscribe(this)
@@ -52,6 +52,8 @@ class Assistant(key: String) : Module(key) {
             outsideTemp = response.outsideTemperature.toInt()
             insideHumidity = response.insideHumidity.toInt()
             insideTemp = response.insideTemperature.toInt()
+        } else if (response is NightMode) {
+            nightMode = response.enabled
         }
     }
 
@@ -82,6 +84,8 @@ class Assistant(key: String) : Module(key) {
         return when (request) {
             is SensorRequest -> getTemperature(request)
             is CoffeeRequest -> getCoffee(request)
+            is NightModeRequest -> setNightMode(request)
+            is TVRequest -> setTV(request)
             else -> getError()
         }
     }
@@ -104,6 +108,21 @@ class Assistant(key: String) : Module(key) {
     private fun getCoffee(request: CoffeeRequest): AssistantResponse {
         Bus.post(CoffeeEvent())
         return AssistantResponse("Sure, the machine is warming up.")
+    }
+
+    private fun setNightMode(request: NightModeRequest): AssistantResponse {
+        if (request.enabled) {
+            Actions.nightMode.enable().executeCommand()
+            return AssistantResponse("Good night sir")
+        } else {
+            Actions.nightMode.disable().executeCommand()
+            return AssistantResponse("Good morning sir")
+        }
+    }
+
+    private fun setTV(request: TVRequest): AssistantResponse {
+        Actions.tv.turnOff().executeCommand()
+        return AssistantResponse("Turning the tv off")
     }
 
     private fun getError(): AssistantResponse = AssistantResponse("I don't know what you mean.")

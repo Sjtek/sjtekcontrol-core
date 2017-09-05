@@ -16,6 +16,8 @@ abstract class AssistantRequest {
                 return when (intent) {
                     "Sensors" -> toSensor(json)
                     "Coffee" -> toCoffee(json)
+                    "NightMode" -> toNightMode(json)
+                    "TV" -> toTV(json)
                     else -> null
                 }
             } catch (e: JsonParseException) {
@@ -40,5 +42,16 @@ abstract class AssistantRequest {
         }
 
         private fun toCoffee(json: JsonObject): CoffeeRequest? = CoffeeRequest()
+
+        private fun toNightMode(json: JsonObject): NightModeRequest? {
+            val params = json["result"].asJsonObject["parameters"].asJsonObject
+            return when (params["nightmode-state"].asString) {
+                "enable" -> NightModeRequest(true)
+                "disable" -> NightModeRequest(false)
+                else -> null
+            }
+        }
+
+        private fun toTV(json: JsonObject): TVRequest? = TVRequest()
     }
 }
