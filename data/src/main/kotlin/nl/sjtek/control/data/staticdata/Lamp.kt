@@ -4,6 +4,7 @@ import java.io.Serializable
 
 data class Lamp(val name: String,
                 val visibleName: String,
+                val id: Int,
                 val internalId: Int,
                 val rgb: Boolean,
                 val room: String,
