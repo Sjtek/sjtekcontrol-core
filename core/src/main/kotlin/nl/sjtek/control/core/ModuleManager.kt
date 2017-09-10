@@ -25,7 +25,8 @@ object ModuleManager {
             "coffee" to Coffee("coffee"),
             "music" to Music("music"),
             "temperature" to Temperature("temperature"),
-            "assistant" to Assistant("assistant")
+            "assistant" to Assistant("assistant"),
+            "color" to ColorSwitcher("color")
     )
 
     fun init() {

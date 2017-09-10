@@ -38,6 +38,8 @@ class ArtFetcher(private val callback: (result: Result) -> Unit) {
         }
     }
 
+    //TODO Store color separate
+    //TODO Use Spotify api instead of Last.FM
     inner class Fetcher(private val uri: String, private val artist: String, private val album: String) : Runnable {
         override fun run() {
             if (cache[uri] != null) return
