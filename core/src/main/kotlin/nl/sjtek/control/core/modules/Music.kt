@@ -150,7 +150,7 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
         val album = this.currentTrack?.track?.album?.name ?: ""
         val artist = this.currentTrack?.track?.artistNames ?: ""
 
-        val (_, albumArt, artistArt) = artFetcher.get(uri, artist, album)
+        val (_, albumArt, artistArt, r, g, b) = artFetcher.get(uri, artist, album)
 
         return Music(
                 key,
@@ -160,7 +160,8 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
                 artist, album,
                 uri,
                 albumArt, artistArt,
-                this.volume)
+                this.volume,
+                r, g, b)
     }
 
     private fun PlaybackState?.convert(): Music.State = when (this) {

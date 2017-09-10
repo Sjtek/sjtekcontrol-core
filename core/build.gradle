@@ -16,7 +16,8 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:3.8.1"
     implementation "com.squareup.okio:okio:1.13.0"
     implementation "com.github.Whhoesj:java-mopidy:6f37ff4c84"
-    implementation 'com.github.Whhoesj:lastfmfetcher:master-SNAPSHOT'
+    implementation "com.github.Whhoesj:lastfmfetcher:master-SNAPSHOT"
+    implementation "com.github.soualid:java-colorthief:master"
     implementation "com.luckycatlabs:SunriseSunsetCalculator:1.2"
 }
 

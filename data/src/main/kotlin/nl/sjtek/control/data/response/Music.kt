@@ -12,7 +12,8 @@ data class Music(
         val uri: String,
         val albumArt: String,
         val artistArt: String,
-        val volume: Int
+        val volume: Int,
+        val red: Int, val green: Int, val blue: Int
 ) : Response(), Serializable {
     override val type: String = javaClass.canonicalName
 

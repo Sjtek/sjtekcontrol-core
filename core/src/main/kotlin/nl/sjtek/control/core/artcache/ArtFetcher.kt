@@ -4,9 +4,8 @@ import io.habets.lastfmfetcher.LastFM
 import nl.sjtek.control.core.getRequest
 import nl.sjtek.control.core.net.HttpClient
 import nl.sjtek.control.core.settings.SettingsManager
-import okio.Okio
-import okio.Source
 import org.slf4j.LoggerFactory
+import org.soualid.colorthief.MMCQ
 import java.io.File
 import java.io.IOException
 import java.net.URLEncoder
@@ -14,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import javax.imageio.ImageIO
 
 class ArtFetcher(private val callback: (result: Result) -> Unit) {
 
@@ -52,10 +52,11 @@ class ArtFetcher(private val callback: (result: Result) -> Unit) {
                 return
             }
 
+            var colorArtist: Color? = null
             if (!File(basePath.format(FOLDER_ARTIST, artistKey)).exists()) {
                 try {
                     logger.info("Downloading $artist")
-                    fetch(artistUrl, basePath.format(FOLDER_ARTIST, artistKey))
+                    colorArtist = fetch(artistUrl, basePath.format(FOLDER_ARTIST, artistKey))
                 } catch (e: Exception) {
                     logger.error("Failed downloading artist art for $artist", e)
                     return
@@ -64,10 +65,11 @@ class ArtFetcher(private val callback: (result: Result) -> Unit) {
                 logger.info("Artist $artist already exists")
             }
 
+            var colorAlbum: Color? = null
             if (!File(basePath.format(FOLDER_ALBUM, albumKey)).exists()) {
                 try {
                     logger.info("Downloading $album")
-                    fetch(albumUrl, basePath.format(FOLDER_ALBUM, albumKey))
+                    colorAlbum = fetch(albumUrl, basePath.format(FOLDER_ALBUM, albumKey))
                 } catch (e: Exception) {
                     logger.error("Failed downloading artist art for $artist", e)
                     return
@@ -76,33 +78,42 @@ class ArtFetcher(private val callback: (result: Result) -> Unit) {
                 logger.info("Album $album already exists")
             }
 
-            Thread.sleep(1000)
-            val result = Result(uri, baseUrl.format(FOLDER_ALBUM, albumKey), baseUrl.format(FOLDER_ARTIST, artistKey))
+            val color = when {
+                colorAlbum != null -> colorAlbum
+                colorArtist != null -> colorArtist
+                else -> null
+            }
+
+            val result = Result(uri, baseUrl.format(FOLDER_ALBUM, albumKey), baseUrl.format(FOLDER_ARTIST, artistKey), color)
             logger.info("Completed $result")
             cache.put(uri, result)
             callback(result)
         }
 
-        private fun fetch(url: String, path: String) {
+        private fun fetch(url: String, path: String): Color {
             val response = HttpClient.client.newCall(url.getRequest()).execute()
             response.use {
                 if (response.isSuccessful) {
-                    val stream = response.body()!!.source()
-                    writeImage(path, stream)
+                    response.body()!!.use { b ->
+                        val image = ImageIO.read(b.byteStream())
+                        ImageIO.write(image, "png", File(path))
+                        val colors = MMCQ.compute(image, 2)
+                        return Color(colors.first())
+                    }
                 } else {
                     throw IOException("Download failed (result ${response.code()})")
                 }
             }
         }
-
-        private fun writeImage(path: String, source: Source) {
-            Okio.buffer(Okio.sink(File(path))).use { sink ->
-                sink.writeAll(source)
-            }
-        }
     }
 
-    data class Result(val uri: String = "", val albumArt: String = "", val artistArt: String = "")
+    data class Result(val uri: String = "", val albumArt: String = "", val artistArt: String = "", val r: Int = 0, val g: Int = 0, val b: Int = 0) {
+        constructor(uri: String, albumArt: String, artistArt: String, color: Color?) : this(uri, albumArt, artistArt, color?.r ?: 0, color?.g ?: 0, color?.b ?: 0)
+    }
+
+    data class Color(val r: Int, val g: Int, val b: Int) {
+        constructor(color: IntArray) : this(color[0], color[1], color[2])
+    }
 
     companion object {
         private const val FOLDER_ALBUM = "album"
