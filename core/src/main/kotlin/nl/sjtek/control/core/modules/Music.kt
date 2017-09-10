@@ -9,6 +9,7 @@ import io.habets.mopidy.base.net.events.PlaybackStateEvent
 import io.habets.mopidy.base.net.events.TrackPlaybackStateEvent
 import io.habets.mopidy.base.net.events.VolumeChangedEvent
 import net.engio.mbassy.listener.Handler
+import nl.sjtek.control.core.artcache.ArtFetcher
 import nl.sjtek.control.core.events.AudioEvent
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.NightModeEvent
@@ -30,6 +31,10 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
     private val logger = LoggerFactory.getLogger(javaClass)
     private val defaultVolume = SettingsManager.settings.music.volume
     private val mopidy: Mopidy = Mopidy(MopidyWebSocket(SettingsManager.settings.music.url))
+    private val artFetcher = ArtFetcher {
+        ResponseCache.post(this@Music, true)
+    }
+
     override val response: Response
         get() = mopidy.toResponse()
 
@@ -66,7 +71,7 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
     fun onToggle(event: ToggleEvent) = if (!event.enabled) mopidy.pause() else Unit
 
 
-    fun startMusic(req: spark.Request, res: spark.Response) {
+    private fun startMusic(req: spark.Request, res: spark.Response) {
         val args = req.queryMap()
         val shuffle = args.hasKey("shuffle")
         val clear = args.hasKey("clear")
@@ -81,7 +86,7 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
         mopidy.play()
     }
 
-    fun volume(req: spark.Request, res: spark.Response) {
+    private fun volume(req: spark.Request, res: spark.Response) {
         val args = req.queryMap()
         val increase = args.hasKey("increase")
         val lower = args.hasKey("lower")
@@ -95,7 +100,7 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
         }
     }
 
-    fun status(req: spark.Request, res: spark.Response): String = when (mopidy.playbackState) {
+    private fun status(req: spark.Request, res: spark.Response): String = when (mopidy.playbackState) {
         PlaybackState.PAUSED -> "0"
         PlaybackState.PLAYING -> "1"
         PlaybackState.STOPPED -> "1"
@@ -140,16 +145,23 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
         }
     }
 
-    private fun Mopidy.toResponse(): Music = Music(
-            key,
-            this.isConnected,
-            this.playbackState.convert(),
-            this.currentTrack?.track?.name ?: "",
-            this.currentTrack?.track?.artistNames ?: "",
-            this.currentTrack?.track?.album?.name ?: "",
-            this.currentTrack?.track?.uri ?: "",
-            "", "",
-            this.volume)
+    private fun Mopidy.toResponse(): Music {
+        val uri = this.currentTrack?.track?.uri ?: ""
+        val album = this.currentTrack?.track?.album?.name ?: ""
+        val artist = this.currentTrack?.track?.artistNames ?: ""
+
+        val (_, albumArt, artistArt) = artFetcher.get(uri, artist, album)
+
+        return Music(
+                key,
+                this.isConnected,
+                this.playbackState.convert(),
+                this.currentTrack?.track?.name ?: "",
+                artist, album,
+                uri,
+                albumArt, artistArt,
+                this.volume)
+    }
 
     private fun PlaybackState?.convert(): Music.State = when (this) {
         PlaybackState.PAUSED -> Music.State.PAUSED

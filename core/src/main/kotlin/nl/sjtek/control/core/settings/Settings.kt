@@ -7,7 +7,8 @@ data class Settings(
         val music: Music = Music(),
         val temperature: Temperature = Temperature(),
         val assistant: Assistant = Assistant(),
-        val sunset: Sunset = Sunset()) {
+        val sunset: Sunset = Sunset(),
+        val artFetcher: ArtFetcher = ArtFetcher()) {
 
     data class TV(
             val ip: String = "10.10.0.20",
@@ -37,4 +38,11 @@ data class Settings(
             val latitude: String = "51.5126582",
             val longitude: String = "5.4926548",
             val timeZone: String = "Europe/Amsterdam")
+
+    data class ArtFetcher(
+            val apiKey: String = "",
+            val cachePathArtists: String = "/var/sjtekcontrol/artists.dat",
+            val cachePathAlbums: String = "/var/sjtekcontrol/albums.dat",
+            val basePath: String = "/var/sjtekcontrol/artcache",
+            val baseUrl: String = "https://sjtek.nl/cache")
 }
