@@ -31,9 +31,9 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
     private val logger = LoggerFactory.getLogger(javaClass)
     private val defaultVolume = SettingsManager.settings.music.volume
     private val mopidy: Mopidy = Mopidy(MopidyWebSocket(SettingsManager.settings.music.url))
-    private val artFetcher = ArtFetcher {
-        ResponseCache.post(this@Music, true)
-    }
+//    private val artFetcher = ArtFetcher {
+//        ResponseCache.post(this@Music, true)
+//    }
 
     override val response: Response
         get() = mopidy.toResponse()
