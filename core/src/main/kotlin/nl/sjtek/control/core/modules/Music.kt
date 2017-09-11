@@ -150,7 +150,9 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
         val album = this.currentTrack?.track?.album?.name ?: ""
         val artist = this.currentTrack?.track?.artistNames ?: ""
 
-        val (_, albumArt, artistArt, r, g, b) = artFetcher.get(uri, artist, album)
+//        val (_, albumArt, artistArt, r, g, b) = artFetcher.get(uri, artist, album)
+        val (_, albumArt, artistArt, r, g, b) = ArtFetcher.Result()
+
 
         return Music(
                 key,
