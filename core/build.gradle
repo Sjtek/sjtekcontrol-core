@@ -18,6 +18,7 @@ dependencies {
     implementation "com.github.Whhoesj:java-mopidy:6f37ff4c84"
     implementation "com.github.Whhoesj:lastfmfetcher:master-SNAPSHOT"
     implementation "com.github.soualid:java-colorthief:master"
+    implementation "com.github.Whhoesj:kotlin-spotify-artfetcher:f43c8a3b64"
     implementation "com.luckycatlabs:SunriseSunsetCalculator:1.2"
 }
 

@@ -1,5 +1,6 @@
 package nl.sjtek.control.core.modules
 
+import io.habets.artparser.ArtParser
 import io.habets.mopidy.base.models.PlaybackState
 import io.habets.mopidy.base.net.client.ConnectionChangedListener
 import io.habets.mopidy.base.net.client.ErrorListener
@@ -9,13 +10,13 @@ import io.habets.mopidy.base.net.events.PlaybackStateEvent
 import io.habets.mopidy.base.net.events.TrackPlaybackStateEvent
 import io.habets.mopidy.base.net.events.VolumeChangedEvent
 import net.engio.mbassy.listener.Handler
-import nl.sjtek.control.core.artcache.ArtFetcher
 import nl.sjtek.control.core.events.AudioEvent
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.NightModeEvent
 import nl.sjtek.control.core.events.ToggleEvent
 import nl.sjtek.control.core.get
 import nl.sjtek.control.core.getDefaultPlaylist
+import nl.sjtek.control.core.net.HttpClient
 import nl.sjtek.control.core.net.MopidyWebSocket
 import nl.sjtek.control.core.response.ResponseCache
 import nl.sjtek.control.core.settings.SettingsManager
@@ -31,9 +32,13 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
     private val logger = LoggerFactory.getLogger(javaClass)
     private val defaultVolume = SettingsManager.settings.music.volume
     private val mopidy: Mopidy = Mopidy(MopidyWebSocket(SettingsManager.settings.music.url))
-//    private val artFetcher = ArtFetcher {
-//        ResponseCache.post(this@Music, true)
-//    }
+    private val artParser = ArtParser(
+            clientId = SettingsManager.settings.artParser.clientId,
+            clientSecret = SettingsManager.settings.artParser.clientSecret,
+            redirectUri = "",
+            httpClient = HttpClient.client,
+            path = SettingsManager.settings.artParser.path,
+            baseUrl = SettingsManager.settings.artParser.baseUrl)
 
     override val response: Response
         get() = mopidy.toResponse()
@@ -150,9 +155,12 @@ class Music(key: String) : Module(key), ConnectionChangedListener, ErrorListener
         val album = this.currentTrack?.track?.album?.name ?: ""
         val artist = this.currentTrack?.track?.artistNames ?: ""
 
-//        val (_, albumArt, artistArt, r, g, b) = artFetcher.get(uri, artist, album)
-        val (_, albumArt, artistArt, r, g, b) = ArtFetcher.Result()
-
+        val result = artParser.get(uri)
+        val albumArt = result?.image ?: ""
+        val artistArt = result?.secondImage ?: ""
+        val r = result?.color?.red ?: -1
+        val g = result?.color?.green ?: -1
+        val b = result?.color?.blue ?: -1
 
         return Music(
                 key,
