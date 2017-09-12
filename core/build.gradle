@@ -15,10 +15,9 @@ dependencies {
     implementation "net.engio:mbassador:1.3.1"
     implementation "com.squareup.okhttp3:okhttp:3.8.1"
     implementation "com.squareup.okio:okio:1.13.0"
-    implementation "com.github.Whhoesj:java-mopidy:6f37ff4c84"
-    implementation "com.github.Whhoesj:lastfmfetcher:master-SNAPSHOT"
+    implementation "com.github.Whhoesj:java-mopidy:0.3"
     implementation "com.github.soualid:java-colorthief:master"
-    implementation "com.github.Whhoesj:kotlin-spotify-artfetcher:f43c8a3b64"
+    implementation "com.github.Whhoesj:spotify-artfetcher:0.1"
     implementation "com.luckycatlabs:SunriseSunsetCalculator:1.2"
 }
 
