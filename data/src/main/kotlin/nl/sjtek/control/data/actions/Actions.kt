@@ -12,6 +12,7 @@ object Actions {
     val music: Music = Music
     val nightMode: NightMode = NightMode
     val tv: TV = TV
+    val color: Color = Color
 
     object Coffee {
         fun enable(): String = "coffee/enable"
@@ -68,6 +69,11 @@ object Actions {
 
     object TV {
         fun turnOff(): String = "tv/turnoff"
+    }
+
+    object Color {
+        fun disable(): String = "color/disable"
+        fun enable(vararg lamps: Int): String = "/color/enable?lamps=${lamps.joinToString(separator = ",")}"
     }
 
     private fun String.appendQuery(value: String): String = if (this.isBlank()) {
