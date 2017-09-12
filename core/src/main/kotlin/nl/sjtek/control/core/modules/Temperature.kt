@@ -1,5 +1,6 @@
 package nl.sjtek.control.core.modules
 
+import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import com.google.gson.JsonParser
 import net.engio.mbassy.listener.Handler
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit
 
 class Temperature(key: String) : Module(key) {
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val gson = Gson()
     private val executor = ScheduledThreadPoolExecutor(1)
     override val response: Response
         get() = Temperature(key, insideTemp, insideHumidity, outsideTemp, outsideHumidity)
@@ -35,7 +37,13 @@ class Temperature(key: String) : Module(key) {
     }
 
     override fun initSpark() {
+        spark.Spark.path("/temperature") {
+            spark.Spark.get("/data", this::getData)
+        }
+    }
 
+    private fun getData(req: spark.Request, res: spark.Response): String {
+        return gson.toJson(JsonData(insideTemp.toInt(), outsideTemp.toInt()))
     }
 
     @Handler
@@ -90,4 +98,6 @@ class Temperature(key: String) : Module(key) {
         val URL_OUTSIDE = SettingsManager.settings.temperature.urlOutside.format(SettingsManager.settings.temperature.apiKey)
         const val UPDATE_TIMEOUT = 3000000 // 50 minutes
     }
+
+    private class JsonData(val inside: Int, val outside: Int)
 }
