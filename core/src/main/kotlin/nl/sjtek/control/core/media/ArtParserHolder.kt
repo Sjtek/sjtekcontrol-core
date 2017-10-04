@@ -6,7 +6,7 @@ import nl.sjtek.control.core.net.HttpClient
 import nl.sjtek.control.core.settings.SettingsManager
 
 object ArtParserHolder {
-    private val artParser = ArtParser(
+    val artParser = ArtParser(
             clientId = SettingsManager.settings.artParser.clientId,
             clientSecret = SettingsManager.settings.artParser.clientSecret,
             redirectUri = "",
