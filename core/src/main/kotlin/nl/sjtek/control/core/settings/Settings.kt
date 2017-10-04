@@ -23,7 +23,8 @@ data class Settings(
             val password: String = "yolo")
 
     data class Music(
-            val url: String = "ws://127.0.0.1:6680/mopidy/ws",
+            val mopidy: String = "ws://127.0.0.1:6680/mopidy/ws",
+            val chromecast: String = "10.10.0.13",
             val volume: Int = 5,
             val defaultPlaylist: String = "spotify:user:1133212423:playlist:2A8r6F6GiLwpBCUQ0ImYKW")
 

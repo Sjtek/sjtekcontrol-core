@@ -10,14 +10,15 @@ dependencies {
     implementation "com.rabbitmq:amqp-client:4.2.0"
     implementation "io.reactivex.rxjava2:rxkotlin:2.1.0"
     implementation "com.google.code.gson:gson:2.8.1"
-    implementation "org.slf4j:slf4j-simple:1.7.25"
+    implementation "org.slf4j:slf4j-simple:1.8.0-alpha2"
     implementation "io.github.microutils:kotlin-logging:1.4.6"
     implementation "net.engio:mbassador:1.3.1"
     implementation "com.squareup.okhttp3:okhttp:3.8.1"
     implementation "com.squareup.okio:okio:1.13.0"
     implementation "com.github.Whhoesj:java-mopidy:0.3"
     implementation "com.github.soualid:java-colorthief:master"
-    implementation "com.github.Whhoesj:spotify-artfetcher:0.1"
+    implementation "com.github.Whhoesj:spotify-artfetcher:development-SNAPSHOT"
+    implementation "com.github.Whhoesj.chromecast-scrobbler:listener:1.0"
     implementation "com.luckycatlabs:SunriseSunsetCalculator:1.2"
 }
 
