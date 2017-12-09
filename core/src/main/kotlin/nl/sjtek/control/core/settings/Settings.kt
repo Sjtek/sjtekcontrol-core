@@ -2,6 +2,7 @@ package nl.sjtek.control.core.settings
 
 data class Settings(
         val spark: Boolean = true,
+        val debounce: Long = 750,
         val tv: TV = TV(),
         val amqp: AMQP = AMQP(),
         val music: Music = Music(),

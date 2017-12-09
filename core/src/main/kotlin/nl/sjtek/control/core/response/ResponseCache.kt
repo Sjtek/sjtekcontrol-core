@@ -8,6 +8,7 @@ import nl.sjtek.control.core.events.BroadcastEvent
 import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.ModuleUpdate
 import nl.sjtek.control.core.modules.Module
+import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.data.response.Response
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
@@ -27,7 +28,7 @@ object ResponseCache {
         Flowable.create({ e: FlowableEmitter<Module> ->
             emitter = e
         }, BackpressureStrategy.LATEST)
-                .debounce(750, TimeUnit.MILLISECONDS)
+                .debounce(SettingsManager.settings.debounce, TimeUnit.MILLISECONDS)
                 .subscribe { module ->
                     if (json != previousJson) {
                         previousJson = json
@@ -43,11 +44,15 @@ object ResponseCache {
     }
 
     @Synchronized
-    fun post(module: Module, broadcast: Boolean = false) {
+    fun post(module: Module, broadcast: Boolean = false, force: Boolean = false) {
         responses.put(module.key, module.response)
         json = gson.toJson(responses)
 
         Bus.post(ModuleUpdate(module.response))
-        if (broadcast) emitter?.onNext(module)
+        if (force) {
+            Bus.post(BroadcastEvent(json))
+        } else if (broadcast) {
+            emitter?.onNext(module)
+        }
     }
 }
