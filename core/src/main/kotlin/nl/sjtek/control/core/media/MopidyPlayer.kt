@@ -46,14 +46,20 @@ class MopidyPlayer(name: String, url: String, update: (name: String) -> Unit) : 
         }
 
     override val track: Track
-        get() = Track(
-                getState(),
-                mopidy.currentTrack?.track?.uri ?: "",
-                mopidy.volume,
-                mopidy.currentTrack?.track?.name ?: "",
-                mopidy.currentTrack?.track?.artistNames ?: "",
-                mopidy.currentTrack?.track?.album?.name ?: ""
-        )
+        get() {
+            val state = getState()
+            if (state == State.PLAYING || state == State.PAUSED) {
+                return Track(state,
+                        mopidy.currentTrack?.track?.uri ?: "",
+                        mopidy.volume,
+                        mopidy.currentTrack?.track?.name ?: "",
+                        mopidy.currentTrack?.track?.artistNames ?: "",
+                        mopidy.currentTrack?.track?.album?.name ?: ""
+                )
+            } else {
+                return Track(state, "", mopidy.volume)
+            }
+        }
 
     override fun close() {
         mopidy.disconnect()

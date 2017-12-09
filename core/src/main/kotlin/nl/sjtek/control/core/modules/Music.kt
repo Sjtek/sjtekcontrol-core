@@ -93,7 +93,6 @@ class Music(key: String) : Module(key) {
     }
 
     private fun onUpdate(name: String) {
-        logger.info("Update")
         ResponseCache.post(this, true)
         sendAudioEvent()
     }

@@ -37,8 +37,16 @@ class ChromeCastPlayer(name: String, ip: String, update: (name: String) -> Unit)
         set(value) {
             chromeCast.volume = volume.toFloat()
         }
+
     override val track: Track
-        get() = Track(getState(), lastEvent.uri)
+        get() {
+            val state = getState()
+            if (state == State.PLAYING || state == State.PAUSED) {
+                return Track(getState(), lastEvent.uri)
+            } else {
+                return Track(getState(), "")
+            }
+        }
 
     override fun close() {
         chromeCast.close()
