@@ -5,6 +5,7 @@ import nl.sjtek.control.core.events.Bus
 import nl.sjtek.control.core.events.CoffeeEvent
 import nl.sjtek.control.core.events.SwitchEvent
 import nl.sjtek.control.core.get
+import nl.sjtek.control.core.response.ResponseCache
 import nl.sjtek.control.data.response.Coffee
 import nl.sjtek.control.data.response.Response
 import spark.Spark.path
@@ -38,6 +39,7 @@ class Coffee(key: String) : Module(key) {
             Bus.post(SwitchEvent(10, false))
             Timer().schedule(2000) {
                 Bus.post(SwitchEvent(10, true))
+                ResponseCache.post(this@Coffee, true)
             }
         }
     }
