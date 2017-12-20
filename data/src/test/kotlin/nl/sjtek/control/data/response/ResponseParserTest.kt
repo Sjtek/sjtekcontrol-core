@@ -13,28 +13,39 @@ internal class ResponseParserTest {
 
     companion object {
         const val example = """
-            {
-  "audio": {
-    "type": "nl.sjtek.control.data.response.Audio",
-    "key": "audio",
-    "enabled": false,
-    "modules": {
-      "tv": false,
-      "music": false
-    }
-  },
+{
   "temperature": {
     "type": "nl.sjtek.control.data.response.Temperature",
     "key": "temperature",
-    "insideTemperature": 26.75,
+    "insideTemperature": 20.5,
     "insideHumidity": 0.0,
-    "outsideTemperature": 22.455555,
-    "outsideHumidity": 0.65
+    "outsideTemperature": 7.288888,
+    "outsideHumidity": 0.99
   },
-  "tv": {
-    "type": "nl.sjtek.control.data.response.TV",
-    "key": "tv",
-    "enabled": false
+  "music": {
+    "type": "nl.sjtek.control.data.response.Music",
+    "key": "music",
+    "connected": true,
+    "state": "PAUSED",
+    "name": "Life In The Fast Lane - Remastered",
+    "artist": "Eagles",
+    "album": "Hotel California (Remastered)",
+    "uri": "spotify:track:6gXrEUzibufX9xYPk3HD5p",
+    "albumArt": "https://sjtek.nl/cache/albums/2widuo17g5CEC66IbzveRu.jpg",
+    "artistArt": "https://sjtek.nl/cache/artists/0ECwFtbIWEVNwjlrfc6xoL.jpg",
+    "volume": 61,
+    "red": 33,
+    "green": 24,
+    "blue": 29
+  },
+  "audio": {
+    "type": "nl.sjtek.control.data.response.Audio",
+    "key": "audio",
+    "enabled": true,
+    "modules": {
+      "music": false,
+      "tv": true
+    }
   },
   "base": {
     "type": "nl.sjtek.control.data.response.Base",
@@ -44,15 +55,15 @@ internal class ResponseParserTest {
     "type": "nl.sjtek.control.data.response.Lights",
     "key": "lights",
     "state": {
-      "1": true,
-      "2": true,
-      "3": true,
+      "1": false,
+      "2": false,
+      "3": false,
       "4": false,
       "5": false,
       "6": false,
-      "7": true,
-      "8": true,
-      "9": true
+      "7": false,
+      "8": false,
+      "9": false
     }
   },
   "nightmode": {
@@ -60,24 +71,37 @@ internal class ResponseParserTest {
     "key": "nightmode",
     "enabled": false
   },
+  "tv": {
+    "type": "nl.sjtek.control.data.response.TV",
+    "key": "tv",
+    "enabled": true
+  },
   "coffee": {
     "type": "nl.sjtek.control.data.response.Coffee",
     "key": "coffee",
     "enabled": false,
     "lastTimeEnabled": 0
   },
-  "music": {
-    "type": "nl.sjtek.control.data.response.Music",
-    "key": "music",
-    "connected": true,
-    "state": "STOPPED",
-    "name": "",
-    "artist": "",
-    "album": "",
-    "uri": "",
-    "albumArt": "",
-    "artistArt": "",
-    "volume": -1
+  "assistant": {
+    "type": "nl.sjtek.control.data.response.Assistant",
+    "key": "assistant"
+  },
+  "color": {
+    "type": "nl.sjtek.control.data.response.Color",
+    "key": "color",
+    "lamps": []
+  },
+  "art": {
+    "type": "nl.sjtek.control.data.response.Art",
+    "key": "art",
+    "tracks": 143,
+    "artists": 97,
+    "albums": 113
+  },
+  "screen": {
+    "type": "nl.sjtek.control.data.response.Screen",
+    "key": "screen",
+    "video": false
   }
 }
             """
