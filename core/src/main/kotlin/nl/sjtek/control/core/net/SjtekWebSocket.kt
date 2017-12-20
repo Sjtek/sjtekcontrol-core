@@ -4,6 +4,7 @@ import net.engio.mbassy.listener.Handler
 import net.engio.mbassy.listener.Invoke
 import nl.sjtek.control.core.events.BroadcastEvent
 import nl.sjtek.control.core.events.Bus
+import nl.sjtek.control.core.response.ResponseCache
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect
@@ -24,6 +25,7 @@ class SjtekWebSocket {
     @OnWebSocketConnect
     fun connected(session: Session) {
         sessions.add(session)
+        session.remote.sendString(ResponseCache.json)
     }
 
     @OnWebSocketClose

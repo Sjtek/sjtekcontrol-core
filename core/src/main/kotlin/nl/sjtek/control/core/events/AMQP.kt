@@ -2,17 +2,17 @@ package nl.sjtek.control.core.events
 
 import com.rabbitmq.client.*
 import com.rabbitmq.client.AMQP
-import com.sun.istack.internal.logging.Logger
 import net.engio.mbassy.listener.Handler
 import nl.sjtek.control.core.executeCommand
 import nl.sjtek.control.core.settings.SettingsManager
 import nl.sjtek.control.data.amqp.SensorEvent
 import nl.sjtek.control.data.amqp.SwitchStateEvent
+import org.slf4j.LoggerFactory
 import nl.sjtek.control.data.amqp.SwitchEvent as AMQPSwitch
 
 object AMQP {
 
-    private val logger = Logger.getLogger(javaClass)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private const val EXCHANGE_SWITCH = "lights"
     private const val EXCHANGE_UPDATES = "updates"
@@ -88,7 +88,7 @@ object AMQP {
         override fun handleDelivery(consumerTag: String?, envelope: Envelope?, properties: AMQP.BasicProperties?, body: ByteArray?) {
             if (body == null) return
             val data = String(body)
-            val event = SwitchStateEvent.parseMessage(data) ?: return logger.warning("Invalid message $data")
+            val event = SwitchStateEvent.parseMessage(data) ?: return logger.warn("Invalid message $data")
             Bus.post(event.toInternalEvent())
         }
     }
@@ -97,7 +97,7 @@ object AMQP {
         override fun handleDelivery(consumerTag: String?, envelope: Envelope?, properties: AMQP.BasicProperties?, body: ByteArray?) {
             if (body == null) return
             val data = String(body)
-            val event = SensorEvent.fromMessage(data) ?: return logger.warning("Invalid message $data")
+            val event = SensorEvent.fromMessage(data) ?: return logger.warn("Invalid message $data")
             Bus.post(event.toInternalEvent())
         }
     }

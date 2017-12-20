@@ -19,6 +19,7 @@ class Base(key: String) : Module(key) {
     override fun initSpark() {
         spark.Spark.get("/info", this::customResponse)
         get("/toggle", this::toggleAll)
+        get("/broadcast", this::broadcast)
         spark.Spark.get("/state", this::state)
         spark.Spark.get("/users", this::users)
         spark.Spark.get("/quotes", this::quotes)
@@ -39,6 +40,10 @@ class Base(key: String) : Module(key) {
         val user = SettingsManager.getUser(request)
         val enabled = ModuleManager.isEnabled(user)
         Bus.post(ToggleEvent(!enabled, user))
+    }
+
+    private fun broadcast(request: Request, response: Response) {
+        ResponseCache.post(this, true, force = true)
     }
 
     private fun state(req: Request, res: Response): String {
